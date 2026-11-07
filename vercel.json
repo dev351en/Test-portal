@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "name": "d3v3ndra-online-test",
+  "routes": [
+    { "src": "/(.*)", "dest": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": {
+        "X-Frame-Options": "DENY",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "no-referrer",
+        "Content-Security-Policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;"
+      }
+    }
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
+}
