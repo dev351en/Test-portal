@@ -352,6 +352,36 @@ a{color:var(--blue);text-decoration:none}
 .footer-spacer{flex:1}
 .exam-footer .btn{min-height:43px;padding:0 16px;font-size:.84rem}
 
+/* ---------- exam lockdown ---------- */
+#viewExam,#viewExam *{
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
+}
+#viewExam ::selection{background:transparent}
+body.exam-locked{overflow:hidden}
+body.exam-locked #viewExam{filter:blur(14px);pointer-events:none}
+.exam-lock{
+  position:fixed;inset:0;z-index:300;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;background:rgba(7,20,42,.94);
+  backdrop-filter:blur(10px);
+}
+.exam-lock-card{
+  width:min(460px,100%);padding:38px 34px 32px;border-radius:20px;
+  background:#fff;box-shadow:0 30px 80px rgba(2,10,26,.5);text-align:center;
+}
+.exam-lock-icon{
+  width:68px;height:68px;margin:0 auto 18px;border-radius:20px;
+  display:grid;place-items:center;color:var(--blue);
+  background:var(--blue-soft);border:1px solid var(--blue-line);
+}
+.exam-lock-card h2{font-size:1.35rem;letter-spacing:-.02em;color:var(--ink);margin-bottom:10px}
+.exam-lock-card p{font-size:.88rem;line-height:1.6;color:var(--muted)}
+.exam-lock-card .btn{width:100%;margin-top:24px;min-height:48px}
+
 /* ---------- feedback ---------- */
 .feedback-grid{display:grid;grid-template-columns:.88fr 1.12fr;gap:24px;align-items:stretch}
 .success-card{padding:38px 32px 32px;text-align:center;display:flex;flex-direction:column;justify-content:center}
@@ -485,7 +515,7 @@ sup{font-size:.68em;line-height:0}
 
 /* ---------- toast ---------- */
 .toast{
-  position:fixed;left:50%;bottom:26px;z-index:200;
+  position:fixed;left:50%;bottom:26px;z-index:400;
   transform:translate(-50%,16px);
   display:flex;align-items:center;gap:9px;
   background:#0d2a5e;color:#fff;

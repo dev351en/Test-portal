@@ -160,6 +160,8 @@
             <li>Use the question palette to move between questions.</li>
             <li>Use Mark for Review to flag a question and revisit it.</li>
             <li>You may change an answer until you submit the test.</li>
+            <li>The test opens in full screen. Leaving full screen locks the paper until you return.</li>
+            <li>Copying, selecting text, and right-click are disabled during the test.</li>
             <li>The test auto-submits when the timer reaches 00:00.</li>
             <li>Keep this tab open. Refreshing or closing it will lose your answers.</li>
             <li>Do all rough work on paper. Calculators are not permitted.</li>
@@ -179,7 +181,7 @@
 
       <p class="integrity-note">
         <span data-icon="shield" data-icon-size="15"></span>
-        <span><b>Honesty note:</b> This is a browser-based test and cannot prevent outside help or note-sharing. Please attempt it honestly under your teacher's guidance.</span>
+        <span><b>Honesty note:</b> This test enforces full screen and blocks copying, but a browser cannot prevent outside help, screenshots, or a second device. Please attempt it honestly under your teacher's guidance.</span>
       </p>
     </section>
   </div>
@@ -319,6 +321,14 @@
 </main>
 
 <div id="modalRoot" hidden></div>
+<div class="exam-lock" id="examLock" hidden>
+  <div class="exam-lock-card" role="alertdialog" aria-modal="true" aria-labelledby="examLockTitle">
+    <span class="exam-lock-icon" data-icon="lock" data-icon-size="38"></span>
+    <h2 id="examLockTitle">Full screen required</h2>
+    <p id="examLockText">The test is locked to full screen. Return to full screen to continue.</p>
+    <button type="button" class="btn btn-primary" id="examLockBtn">Return to full screen <span data-icon="fullscreen" data-icon-size="18"></span></button>
+  </div>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="test_questions.js"></script>

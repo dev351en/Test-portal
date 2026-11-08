@@ -62,7 +62,12 @@
     submittedAt: 0,
     timerId: null,
     running: false,
+    starting: false,
     submitted: false,
+    lockVisible: false,
+    lockEnabled: true,
+    focusWarning: false,
+    focusLosses: 0,
     feedback: null,
     result: null
   };
@@ -126,7 +131,7 @@
   function setHeader(mode) {
     const modes = {
       instructions: { title: 'Fractions Test Series', pill: 'Chapter Test', sep: false, timer: false, fs: false, student: true, logout: true },
-      exam: { title: 'Fractions Test Series', pill: 'Working with Fractions', sep: true, timer: true, fs: true, student: false, logout: true },
+      exam: { title: 'Fractions Test Series', pill: 'Working with Fractions', sep: true, timer: true, fs: false, student: false, logout: true },
       feedback: { title: 'Test Review & Feedback', pill: 'Feedback', sep: false, timer: false, fs: false, student: true, logout: false },
       result: { title: 'Test Result', pill: 'Fractions', sep: false, timer: false, fs: false, student: true, logout: false }
     };
@@ -233,6 +238,10 @@
     stopTimer();
     removeUnloadGuard();
     closeModal();
+    state.running = false;
+    state.submitted = true;
+    hideExamLock();
+    exitFullscreen();
     const relayFrame = document.getElementById('submissionRelay');
     if (relayFrame) relayFrame.remove();
     state.studentId = '';
@@ -247,7 +256,12 @@
     state.startedAt = 0;
     state.submittedAt = 0;
     state.running = false;
+    state.starting = false;
     state.submitted = false;
+    state.lockVisible = false;
+    state.lockEnabled = true;
+    state.focusWarning = false;
+    state.focusLosses = 0;
     state.feedback = null;
     state.result = null;
 
@@ -269,27 +283,115 @@
     $('#loginId').focus();
   }
 
+  function getFullscreenElement() {
+    return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
+  }
+
+  function fullscreenSupported() {
+    const element = document.documentElement;
+    return !!(element.requestFullscreen || element.webkitRequestFullscreen || element.msRequestFullscreen);
+  }
+
+  function enterFullscreen() {
+    const element = document.documentElement;
+    const request = element.requestFullscreen || element.webkitRequestFullscreen || element.msRequestFullscreen;
+    if (!request) return Promise.resolve(false);
+    if (getFullscreenElement()) return Promise.resolve(true);
+    let attempt;
+    try {
+      const result = request.call(element);
+      attempt = result && typeof result.then === 'function'
+        ? result.then(() => true).catch(() => false)
+        : Promise.resolve(true);
+    } catch (error) {
+      return Promise.resolve(false);
+    }
+    const timeout = new Promise(resolve => {
+      window.setTimeout(() => resolve(!!getFullscreenElement()), 2500);
+    });
+    return Promise.race([attempt, timeout]);
+  }
+
+  function exitFullscreen() {
+    const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+    if (!getFullscreenElement() || !exit) return;
+    try {
+      const result = exit.call(document);
+      if (result && typeof result.then === 'function') result.catch(() => {});
+    } catch (error) { /* ignore */ }
+  }
+
+  function updateFullscreenButton() {
+    const fullscreen = !!getFullscreenElement();
+    const button = $('#fsBtn');
+    if (!button) return;
+    button.innerHTML = icon(fullscreen ? 'fullscreenExit' : 'fullscreen', 19);
+    button.setAttribute('aria-label', fullscreen ? 'Exit full screen' : 'Enter full screen');
+  }
+
+  function showExamLock(message) {
+    if (state.submitted || !state.lockEnabled) return;
+    const lock = $('#examLock');
+    if (!lock) return;
+    closeModal();
+    if (message) $('#examLockText').textContent = message;
+    lock.hidden = false;
+    state.lockVisible = true;
+    document.body.classList.add('exam-locked');
+    $('#appHeader').setAttribute('inert', '');
+    $('#viewExam').setAttribute('inert', '');
+    $('#examLockBtn').focus();
+  }
+
+  function hideExamLock() {
+    const lock = $('#examLock');
+    state.lockVisible = false;
+    document.body.classList.remove('exam-locked');
+    $('#appHeader').removeAttribute('inert');
+    $('#viewExam').removeAttribute('inert');
+    if (lock) lock.hidden = true;
+  }
+
+  function handleFullscreenChange() {
+    updateFullscreenButton();
+    if (!state.running || state.submitted || !state.lockEnabled) {
+      hideExamLock();
+      return;
+    }
+    if (getFullscreenElement()) {
+      hideExamLock();
+      return;
+    }
+    showExamLock('You left full screen. The test is locked until you return to full screen.');
+  }
+
   function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-      const request = document.documentElement.requestFullscreen;
-      if (!request) {
-        toast('Full screen is not available in this browser.', 'error');
-        return;
-      }
-      Promise.resolve(request.call(document.documentElement)).catch(() => {
-        toast('The browser blocked full screen. You can continue normally.', 'error');
+    if (!getFullscreenElement()) {
+      enterFullscreen().then(entered => {
+        if (!entered) toast('Full screen is not available in this browser.', 'error');
       });
     } else {
-      document.exitFullscreen().catch(() => {});
+      exitFullscreen();
     }
   }
 
   function initHeader() {
     $('#logoutBtn').addEventListener('click', requestLogout);
     $('#fsBtn').addEventListener('click', toggleFullscreen);
-    document.addEventListener('fullscreenchange', () => {
-      $('#fsBtn').innerHTML = icon(document.fullscreenElement ? 'fullscreenExit' : 'fullscreen', 19);
-      $('#fsBtn').setAttribute('aria-label', document.fullscreenElement ? 'Exit full screen' : 'Enter full screen');
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    updateFullscreenButton();
+  }
+
+  function initExamLock() {
+    $('#examLockBtn').addEventListener('click', () => {
+      enterFullscreen().then(entered => {
+        if (entered) {
+          hideExamLock();
+        } else {
+          toast('Full screen was blocked. Please allow full screen and try again.', 'error');
+        }
+      });
     });
   }
 
@@ -358,6 +460,8 @@
   }
 
   function startTest() {
+    if (state.running || state.starting) return;
+
     const paper = buildPaper(state.studentId);
     if (paper.length !== 50) {
       openModal({
@@ -368,7 +472,42 @@
       return;
     }
 
+    if (!fullscreenSupported()) {
+      openModal({
+        title: 'Full screen not supported',
+        body: '<p>This browser cannot lock the test to full screen. For a locked attempt, use Chrome, Edge, or Firefox on a laptop or desktop.</p><div class="modal-note warn">You can continue without the lock, but switching windows cannot be prevented.</div>',
+        actions: [
+          { label: 'Cancel', variant: 'ghost' },
+          { label: 'Continue without lock', variant: 'primary', onClick: () => beginTest(paper, false) }
+        ]
+      });
+      return;
+    }
+
+    state.starting = true;
+    const startButton = $('#startBtn');
+    if (startButton) startButton.disabled = true;
+
+    enterFullscreen().then(entered => {
+      if (!entered) {
+        openModal({
+          title: 'Full screen is required',
+          body: '<p>The test opens in full screen so the paper stays locked. Click Try again and allow full screen if your browser asks.</p><div class="modal-note warn">If full screen keeps failing, use Chrome, Edge, or Firefox.</div>',
+          actions: [{ label: 'Try again', variant: 'primary', onClick: startTest }]
+        });
+        return;
+      }
+      beginTest(paper, true);
+    }).finally(() => {
+      state.starting = false;
+      if (startButton) startButton.disabled = false;
+    });
+  }
+
+  function beginTest(paper, lockEnabled) {
+    if (state.running) return;
     state.paper = paper;
+    state.lockEnabled = lockEnabled !== false;
     state.answers.clear();
     state.marked.clear();
     state.visited.clear();
@@ -379,10 +518,14 @@
     state.submittedAt = 0;
     state.running = true;
     state.submitted = false;
+    state.lockVisible = false;
+    state.focusWarning = false;
+    state.focusLosses = 0;
     state.feedback = null;
     state.result = null;
     state.visited.add(state.paper[0].id);
 
+    hideExamLock();
     $('#feedbackForm').reset();
     $('#feedbackError').hidden = true;
     $('#feedbackText').value = '';
@@ -708,6 +851,8 @@
     stopTimer();
     removeUnloadGuard();
     closeModal();
+    hideExamLock();
+    exitFullscreen();
 
     const total = state.paper.length;
     const answered = state.answers.size;
@@ -805,6 +950,7 @@
       total: result.total,
       timeUsed: result.timeUsed,
       marked: state.marked.size,
+      focusLosses: state.focusLosses,
       site: window.location.origin,
       answers: result.details.map(item => ({
         no: item.index + 1,
@@ -995,12 +1141,82 @@
     toastTimer = window.setTimeout(() => element.classList.remove('is-visible'), 2800);
   }
 
+  function noteFocusLoss() {
+    if (!state.running || state.submitted) return;
+    state.focusLosses += 1;
+    state.focusWarning = true;
+  }
+
+  function showFocusWarning() {
+    if (!state.running || state.submitted || !state.focusWarning) return;
+    state.focusWarning = false;
+    if (state.lockVisible) return;
+    if (state.lockEnabled && !getFullscreenElement()) return;
+    if (!$('#modalRoot').hidden) return;
+    openModal({
+      title: 'Test window left',
+      body: '<p>You switched away from the test window. The timer kept running.</p><div class="modal-note warn">Stay in full screen until you submit the test.</div>',
+      actions: [{ label: 'Continue test', variant: 'primary' }]
+    });
+  }
+
+  function blockExamClipboard(event) {
+    if (!state.running || state.submitted) return;
+    event.preventDefault();
+  }
+
+  function initIntegrityGuard() {
+    document.addEventListener('visibilitychange', () => {
+      if (!state.running || state.submitted) return;
+      if (document.hidden) {
+        noteFocusLoss();
+        return;
+      }
+      if (state.lockEnabled && !getFullscreenElement()) {
+        showExamLock('You left the test window. Return to full screen to continue.');
+      } else {
+        showFocusWarning();
+      }
+    });
+
+    window.addEventListener('blur', () => {
+      if (!state.running || state.submitted || state.lockVisible || document.hidden) return;
+      noteFocusLoss();
+    });
+
+    window.addEventListener('focus', () => {
+      if (!state.running || state.submitted || state.lockVisible) return;
+      showFocusWarning();
+    });
+
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.addEventListener('copy', blockExamClipboard);
+    document.addEventListener('cut', blockExamClipboard);
+    document.addEventListener('dragstart', blockExamClipboard);
+    document.addEventListener('selectstart', blockExamClipboard);
+
+    document.addEventListener('keydown', event => {
+      if (!state.running || state.submitted) return;
+      const key = String(event.key || '').toLowerCase();
+      const ctrl = event.ctrlKey || event.metaKey;
+      const blocked = event.key === 'F12'
+        || (ctrl && event.shiftKey && ['i', 'j', 'c', 's'].includes(key))
+        || (ctrl && ['a', 'c', 'x', 'u', 's', 'p'].includes(key));
+      if (blocked) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }, true);
+  }
+
   function init() {
     hydrateIcons();
     initHeader();
     initLogin();
     initInstructions();
     initExam();
+    initExamLock();
+    initIntegrityGuard();
     initFeedback();
     initResult();
     showView('Login');

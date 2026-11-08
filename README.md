@@ -9,6 +9,7 @@ A browser-based chapter test for **Working with Fractions** (NCERT Class 7, `geg
 - **Student login** with name/roll number, a show/hide password control, and optional "Remember me"
 - **Instructions screen** with a visible honesty note
 - **50 multiple-choice questions**, 4 options each
+- **Full-screen exam lockdown** with copy, selection, and right-click blocking
 - **60-minute timer** with automatic submission at `00:00`
 - **100 marks** — 2 marks per correct answer, no negative marking
 - **Free navigation** — Previous, Next, Save & Next, and a question palette
@@ -35,6 +36,17 @@ Question order **and answer-option order** are shuffled per student and date, so
 | Auto-submit | Yes, at `00:00` |
 
 The answer key is in `test_questions.js`. Difficulty tags (10 Easy, 25 Medium, 15 Tough) are metadata only and are not shown to students.
+
+## Full-screen exam lockdown
+
+Pressing **Start Test** requests full screen before the paper opens. While the exam is active:
+
+- Leaving full screen, minimizing, or switching windows triggers a blocking **Full screen required** screen. The timer keeps running, and the paper stays locked until the student returns to full screen.
+- Copy, cut, text selection, dragging, and right-click are disabled.
+- Common copy, save, print, and developer-tools shortcuts are blocked, including `Ctrl+C`, `Ctrl+X`, `Ctrl+A`, `Ctrl+P`, `Ctrl+S`, `Ctrl+U`, `F12`, and `Ctrl+Shift+I/J/C`.
+- Window and full-screen exits are counted in the submission payload as `focusLosses`.
+
+A browser cannot prevent OS-level screenshots, a second device, or a determined user with developer tools. Some mobile browsers do not support full screen; in that case the portal shows a warning and allows the student to continue without the lock. Use Chrome, Edge, or Firefox on a laptop or desktop for a locked attempt.
 
 ## Student credentials
 
@@ -229,6 +241,7 @@ This is a **static client-side app**, not a secure exam server:
 - The site itself does not save submissions to a database. Google processes the relayed report and emails it to the teacher.
 - The "Download result" button still creates a local text file as a student-side backup.
 - Browser controls can discourage accidental navigation, but they cannot prevent a determined student from using another device, notes, or outside help.
+- Full-screen, copy, and right-click restrictions are browser-level deterrents. They do not stop OS screenshots, screen recording, developer tools, or a second device.
 - Results reset when the page is refreshed, and anyone with the link can start an attempt.
 
 For high-stakes assessment, add server-side authentication, server-held answer keys, attempt logging, and submission storage. The current version is suitable for guided classroom practice and revision.
