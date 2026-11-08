@@ -11,7 +11,7 @@
     storageKey: 'd3v3ndra.student',
     // Paste the Google Apps Script Web app URL here to email each submission.
     // Leave blank to keep the test working without email delivery.
-    submissionEndpoint: '',
+    submissionEndpoint: 'https://script.google.com/macros/s/AKfycbx34sgTQkHhjKlCE4XEma-7XLNA9N3Wc8iB2LMXsObVuQ_a49whuGv8XDKAbR31Kzuoiw/exec',
     // Must match SUBMIT_TOKEN in scripts/google-apps-script-submission-email.gs.
     submissionToken: 'd3v3ndra-fractions-2026'
   };
