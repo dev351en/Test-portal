@@ -1,5 +1,5 @@
-/* D3V3NDRA Classes — Fractions Test Series
-   Browser-based chapter test. No backend: answers and credentials are in the page source. */
+/* D3V3NDRA Classes — IMO Test Series (Chapter 8: Working with Fractions)
+   Browser-based Olympiad test. No backend: answers and credentials are in the page source. */
 (() => {
   'use strict';
 
@@ -9,11 +9,20 @@
     totalMinutes: 60,
     marksPerQ: 2,
     storageKey: 'd3v3ndra.student',
+    attemptsKey: 'd3v3ndra.attempts',
     // Paste the Google Apps Script Web app URL here to email each submission.
     // Leave blank to keep the test working without email delivery.
     submissionEndpoint: 'https://script.google.com/macros/s/AKfycbwnmrJZYaKlKUejgXkVLKzPEqwSIATQgAJgH-zA-Jjmp36mtAaXrjswp9GARXe5M8ehAQ/exec',
     // Must match SUBMIT_TOKEN in scripts/google-apps-script-submission-email.gs.
-    submissionToken: 'd3v3ndra-fractions-2026'
+    submissionToken: 'd3v3ndra-fractions-2026',
+    // Test window: 9 November 2026, 10:00 AM to 5:00 PM IST (UTC+05:30).
+    testWindow: {
+      start: '2026-11-09T04:30:00.000Z',
+      end: '2026-11-09T11:30:00.000Z'
+    },
+    // Teacher-only preview bypass for the time gate: open the site with
+    // ?preview=teacher-imo-2026 to check the portal before/after the window.
+    previewKey: 'teacher-imo-2026'
   };
 
   const ICONS = {
@@ -24,6 +33,7 @@
     arrowRight: '<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>',
     sigma: '<path d="M18 5H7l6 7-6 7h11"/>',
     clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/>',
     barChart: '<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/>',
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/>',
     clipboard: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 9h6M9 13h6M9 17h4"/>',
@@ -51,6 +61,7 @@
   const state = {
     studentId: '',
     studentName: '',
+    signature: '',
     paper: [],
     answers: new Map(),
     marked: new Set(),
@@ -160,6 +171,146 @@
     } catch (error) { /* storage can be unavailable */ }
   }
 
+  function normalizeName(value) {
+    return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  }
+
+  function readAttempts() {
+    try {
+      const stored = safeStorageGet(CONFIG.attemptsKey);
+      const parsed = stored ? JSON.parse(stored) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function hasAttemptedLocally(name) {
+    const normalized = normalizeName(name);
+    return readAttempts().some(entry => normalizeName(entry) === normalized);
+  }
+
+  function rememberAttempt(name) {
+    const cleaned = String(name || '').trim();
+    if (!cleaned) return;
+    const attempts = readAttempts();
+    if (attempts.some(entry => normalizeName(entry) === normalizeName(cleaned))) return;
+    attempts.push(cleaned);
+    safeStorageSet(CONFIG.attemptsKey, JSON.stringify(attempts));
+  }
+
+  function showSignatureError(message) {
+    const error = $('#signatureError');
+    if (!error) return;
+    error.textContent = message;
+    error.hidden = false;
+    const input = $('#signatureInput');
+    if (input) input.focus();
+  }
+
+  function hideSignatureError() {
+    const error = $('#signatureError');
+    if (error) error.hidden = true;
+  }
+
+  function validateSignature() {
+    const input = $('#signatureInput');
+    const value = input ? input.value.trim() : '';
+    if (!value) {
+      showSignatureError('Type your full name as your signature before starting the test.');
+      return '';
+    }
+    if (normalizeName(value) !== normalizeName(state.studentName)) {
+      showSignatureError('The signature must match the full name you entered at login.');
+      return '';
+    }
+    if (hasAttemptedLocally(value)) {
+      showSignatureError('This name has already attempted this paper on this device. Contact your teacher.');
+      return '';
+    }
+    hideSignatureError();
+    return value;
+  }
+
+  function claimAttempt(name) {
+    const endpoint = String(CONFIG.submissionEndpoint || '').trim();
+    if (!endpoint) return Promise.resolve({ ok: true, checked: false });
+    let url;
+    try {
+      url = new URL(endpoint, window.location.href);
+    } catch (error) {
+      return Promise.resolve({ ok: true, checked: false });
+    }
+    url.searchParams.set('action', 'claim');
+    url.searchParams.set('name', String(name || '').trim());
+    url.searchParams.set('token', CONFIG.submissionToken);
+    const request = fetch(url.toString(), { method: 'GET', redirect: 'follow' })
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.claimed === true) return { ok: !data.taken, checked: true, taken: !!data.taken };
+        return { ok: true, checked: false };
+      })
+      .catch(() => ({ ok: true, checked: false }));
+    const timeout = new Promise(resolve => {
+      window.setTimeout(() => resolve({ ok: true, checked: false, timedOut: true }), 6000);
+    });
+    return Promise.race([request, timeout]);
+  }
+
+  function isPreviewMode() {
+    try {
+      return new URLSearchParams(window.location.search).get('preview') === CONFIG.previewKey;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function withinTestWindow(now) {
+    const stamp = now || Date.now();
+    return stamp >= Date.parse(CONFIG.testWindow.start) && stamp <= Date.parse(CONFIG.testWindow.end);
+  }
+
+  function showTimeGate(mode) {
+    const gate = $('#timeGate');
+    if (!gate) return;
+    const expired = mode === 'after';
+    $('#gateCode').textContent = expired ? '404' : '403';
+    $('#gateTitle').textContent = expired ? 'Test window closed' : 'Test not open yet';
+    $('#gateMessage').textContent = expired
+      ? 'Sorry, the test time has run out. Contact the teacher.'
+      : 'The test has not started yet. It opens at 10:00 AM IST on 9 November 2026 and closes at 5:00 PM IST.';
+    gate.hidden = false;
+    $('#appHeader').hidden = true;
+    $$('.view').forEach(view => view.classList.remove('is-active'));
+  }
+
+  function hideTimeGate() {
+    const gate = $('#timeGate');
+    if (gate) gate.hidden = true;
+  }
+
+  function enforceTestWindow() {
+    if (isPreviewMode()) {
+      hideTimeGate();
+      return;
+    }
+    const now = Date.now();
+    const start = Date.parse(CONFIG.testWindow.start);
+    const end = Date.parse(CONFIG.testWindow.end);
+    if (now < start) {
+      showTimeGate('before');
+      return;
+    }
+    if (now > end) {
+      if (state.running && !state.submitted) submitTest(true, 'window');
+      showTimeGate('after');
+      return;
+    }
+    hideTimeGate();
+    const hasActiveView = $$('.view').some(view => view.classList.contains('is-active'));
+    if (!hasActiveView) showView('Login');
+  }
+
   function showLoginError(message) {
     const error = $('#loginError');
     const form = $('#loginForm');
@@ -248,6 +399,7 @@
     if (relayFrame) relayFrame.remove();
     state.studentId = '';
     state.studentName = '';
+    state.signature = '';
     state.paper = [];
     state.answers.clear();
     state.marked.clear();
@@ -274,6 +426,8 @@
     $('#feedbackText').value = '';
     $('#examShell').classList.remove('palette-open');
     $('#studentNameInput').value = '';
+    $('#signatureInput').value = '';
+    hideSignatureError();
     $('#loginPass').value = '';
     $('#loginPass').type = 'password';
     $('#togglePass').innerHTML = icon('eye', 18);
@@ -419,6 +573,7 @@
 
   function initInstructions() {
     $('#startBtn').addEventListener('click', startTest);
+    $('#signatureInput').addEventListener('input', hideSignatureError);
   }
 
   function hashString(value) {
@@ -469,6 +624,14 @@
 
   function startTest() {
     if (state.running || state.starting) return;
+    if (!withinTestWindow() && !isPreviewMode()) {
+      enforceTestWindow();
+      return;
+    }
+
+    const signature = validateSignature();
+    if (!signature) return;
+    state.signature = signature;
 
     const paper = buildPaper(state.studentId);
     if (paper.length !== 50) {
@@ -486,7 +649,7 @@
         body: '<p>This browser cannot lock the test to full screen. For a locked attempt, use Chrome, Edge, or Firefox on a laptop or desktop.</p><div class="modal-note warn">You can continue without the lock, but switching windows cannot be prevented.</div>',
         actions: [
           { label: 'Cancel', variant: 'ghost' },
-          { label: 'Continue without lock', variant: 'primary', onClick: () => beginTest(paper, false) }
+          { label: 'Continue without lock', variant: 'primary', onClick: () => verifyAndBegin(paper, false) }
         ]
       });
       return;
@@ -505,10 +668,22 @@
         });
         return;
       }
-      beginTest(paper, true);
+      return verifyAndBegin(paper, true);
     }).finally(() => {
       state.starting = false;
       if (startButton) startButton.disabled = false;
+    });
+  }
+
+  function verifyAndBegin(paper, lockEnabled) {
+    return claimAttempt(state.signature).then(result => {
+      if (!result.ok) {
+        if (lockEnabled) exitFullscreen();
+        showSignatureError('This name has already been used to attempt this paper. Contact the teacher.');
+        return;
+      }
+      rememberAttempt(state.signature);
+      beginTest(paper, lockEnabled);
     });
   }
 
@@ -887,6 +1062,8 @@
     const emailed = sendSubmissionEmail(result);
     if (reason === 'leaving') {
       toast('You left the test window twice. Your paper was submitted automatically.', 'error');
+    } else if (reason === 'window') {
+      toast('The test window has closed. Your paper was submitted automatically.', 'error');
     } else if (auto) {
       toast(emailed
         ? 'Time is up. Test auto-submitted and emailed to your teacher.'
@@ -954,6 +1131,7 @@
       token: CONFIG.submissionToken,
       studentId: state.studentId,
       studentName: state.studentName,
+      signature: state.signature,
       submittedAt: new Date(state.submittedAt).toISOString(),
       startedAt: new Date(state.startedAt).toISOString(),
       score: result.score,
@@ -1256,6 +1434,8 @@
     initFeedback();
     initResult();
     showView('Login');
+    enforceTestWindow();
+    window.setInterval(enforceTestWindow, 30000);
   }
 
   document.addEventListener('DOMContentLoaded', init);

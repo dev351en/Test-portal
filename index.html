@@ -150,23 +150,59 @@
             <span>Marking</span>
             <b>: +2 per correct<br><small>0 for unattempted / wrong</small></b>
           </div>
+          <div class="fact fact-window">
+            <span class="fact-icon" data-icon="calendar" data-icon-size="18"></span>
+            <span>Test Window</span>
+            <b>: 9 Nov 2026<br><small>10:00 AM &ndash; 5:00 PM IST</small></b>
+          </div>
         </div>
 
         <div class="key-instructions">
           <h3><span data-icon="flag" data-icon-size="18"></span>Key Instructions</h3>
           <ul>
-            <li>Read each question carefully before answering.</li>
-            <li>All questions are compulsory. Each has one correct option.</li>
-            <li>Use the question palette to move between questions.</li>
-            <li>Use Mark for Review to flag a question and revisit it.</li>
+            <li>Read each question carefully before answering. All questions are compulsory and each has exactly one correct option.</li>
+            <li>Use the question palette to move between questions. Use <b>Mark for Review</b> to flag a question and revisit it later.</li>
             <li>You may change an answer until you submit the test.</li>
-            <li>The test opens in full screen. Leaving full screen locks the paper until you return.</li>
-            <li>Minimizing or leaving the test window twice submits your paper automatically.</li>
-            <li>Copying, selecting text, and right-click are disabled during the test.</li>
-            <li>The test auto-submits when the timer reaches 00:00.</li>
+            <li>The test runs in <b>full screen</b>. <b>Exiting full screen is not allowed</b> &mdash; the paper locks until you return to full screen.</li>
+            <li><b>Closing the test screen, minimizing the tab, or leaving the browser window is strictly not allowed.</b> The first leave records a warning. The <b>second leave ends the test immediately and auto-submits your paper</b>.</li>
+            <li><b>Copying and right-click are disabled.</b> Text cannot be selected, and shortcuts such as Ctrl+C, Ctrl+A, Ctrl+P, Ctrl+S, Ctrl+U and F12 are blocked during the test.</li>
+            <li>The test auto-submits when the timer reaches 00:00, and also when the test window closes at 5:00 PM IST.</li>
             <li>Keep this tab open. Refreshing or closing it will lose your answers.</li>
-            <li>Do all rough work on paper. Calculators are not permitted.</li>
+            <li>Do all rough work on paper. Calculators, phones, and outside help are not permitted.</li>
           </ul>
+        </div>
+      </div>
+
+      <div class="exam-warning">
+        <span class="warning-icon" data-icon="alert" data-icon-size="22"></span>
+        <div>
+          <b>Strict invigilation notice</b>
+          <p>Every full-screen exit, window leave, and blocked action is recorded with a strike count. If any anomaly, rule violation, or attempt to bypass the security measures is found, the attempt will be <b>immediately reported to your parents/guardians and the higher authorities</b>. Please attempt the paper honestly and stay on this screen until you submit.</p>
+        </div>
+      </div>
+
+      <div class="legend-card">
+        <h3><span data-icon="grid" data-icon-size="18"></span>Question Palette Colours</h3>
+        <p>Use these colours on the question board to know exactly where you stand:</p>
+        <div class="legend legend-wide">
+          <span class="legend-item"><i class="legend-swatch current"></i><b>Blue</b> &mdash; Current question you are reading</span>
+          <span class="legend-item"><i class="legend-swatch answered"></i><b>Green</b> &mdash; Answered / done</span>
+          <span class="legend-item"><i class="legend-swatch marked"></i><b>Purple</b> &mdash; Marked for review</span>
+          <span class="legend-item"><i class="legend-swatch visited"></i><b>Amber</b> &mdash; Seen, but not answered yet</span>
+          <span class="legend-item"><i class="legend-swatch plain"></i><b>White</b> &mdash; Not visited yet</span>
+        </div>
+      </div>
+
+      <div class="signature-card">
+        <h3><span data-icon="clipboard" data-icon-size="18"></span>Signature</h3>
+        <p>Type your full name below as your signature. It must match the name you entered at login. <b>The same name cannot attempt this paper twice.</b></p>
+        <div class="field">
+          <label for="signatureInput">Student signature (full name)</label>
+          <div class="input-wrap">
+            <span class="input-icon" data-icon="user" data-icon-size="18"></span>
+            <input id="signatureInput" type="text" autocomplete="off" placeholder="Type your full name exactly as at login" spellcheck="false">
+          </div>
+          <p class="field-error" id="signatureError" hidden></p>
         </div>
       </div>
 
@@ -224,6 +260,7 @@
         <button type="button" class="btn btn-ghost" id="prevBtn"><span data-icon="chevronLeft" data-icon-size="17"></span>Previous</button>
         <button type="button" class="btn btn-ghost" id="nextBtn">Next<span data-icon="chevronRight" data-icon-size="17"></span></button>
         <span class="footer-spacer"></span>
+        <span class="footer-divider" aria-hidden="true"></span>
         <button type="button" class="btn btn-mark" id="markBtn"><span data-icon="flag" data-icon-size="16"></span>Mark for Review</button>
         <button type="button" class="btn btn-clear" id="clearBtn"><span data-icon="eraser" data-icon-size="16"></span>Clear</button>
         <button type="button" class="btn btn-primary" id="saveNextBtn">Save &amp; Next<span data-icon="chevronRight" data-icon-size="17"></span></button>
@@ -321,6 +358,14 @@
   </div>
 </main>
 
+<div class="time-gate" id="timeGate" hidden>
+  <div class="time-gate-card">
+    <span class="time-gate-code" id="gateCode">404</span>
+    <h2 id="gateTitle">Test window closed</h2>
+    <p id="gateMessage">Sorry, the test time has run out. Contact the teacher.</p>
+    <p class="time-gate-note" id="gateNote">D3V3NDRA Classes &middot; IMO Test Series</p>
+  </div>
+</div>
 <div id="modalRoot" hidden></div>
 <div class="exam-lock" id="examLock" hidden>
   <div class="exam-lock-card" role="alertdialog" aria-modal="true" aria-labelledby="examLockTitle">

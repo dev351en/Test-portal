@@ -11,6 +11,9 @@ A browser-based **International Math Olympiad (IMO)** test for **Working with Fr
 - **50 multiple-choice questions**, 4 options each
 - **Full-screen exam lockdown** with copy, selection, and right-click blocking
 - **Two-strike window rule** — leaving or minimizing the test window twice auto-submits the paper
+- **Scheduled test window** — the hosted page only opens on 9 November 2026, 10:00 AM to 5:00 PM IST
+- **Signature and unique-name check** — a name can attempt the paper only once
+- **Colour-coded question palette** with a matching legend on the instructions page
 - **60-minute timer** with automatic submission at `00:00`
 - **100 marks** — 2 marks per correct answer, no negative marking
 - **Free navigation** — Previous, Next, Save & Next, and a question palette
@@ -38,12 +41,31 @@ Question order **and answer-option order** are shuffled per student and date, so
 
 The answer key is in `test_questions.js`. Difficulty tags (10 Easy, 25 Medium, 15 Tough) are metadata only and are not shown to students.
 
+## Test window and hosting gate
+
+The hosted site is gated by `middleware.js` (Vercel Edge Middleware) and by a client-side check in `js/app.js`:
+
+- **9 November 2026, 10:00 AM – 5:00 PM IST** — the portal opens normally.
+- **Before 10:00 AM IST** — visitors see a **403 / Test not open yet** screen.
+- **After 5:00 PM IST** — visitors see a **404 / Test window closed** screen with “Sorry, the test time has run out. Contact the teacher.”
+- If a paper is in progress when the window closes, it is auto-submitted immediately.
+- Teacher preview: add `?preview=teacher-imo-2026` to the URL to open the portal outside the window. The key lives in `CONFIG.previewKey` in `js/app.js` and in `middleware.js`.
+
+## Signature and unique attempts
+
+The instructions page includes a **Signature** field. The student must type their full name, and it must match the name entered at login. The same name cannot attempt the paper twice:
+
+- Locally, completed sign-in names are stored in `localStorage` (`d3v3ndra.attempts`) and blocked from a second attempt on the same browser.
+- Globally, the portal claims the name through the Apps Script endpoint (`?action=claim`). The script keeps the name registry in its Script Properties. If the name is already claimed anywhere, the student is stopped before the paper opens.
+- If the Apps Script does not yet support `claim`, the portal falls back to the local check and still records the signature in the report.
+
 ## Full-screen exam lockdown
 
 Pressing **Start Test** requests full screen before the paper opens. While the exam is active:
 
 - Leaving full screen, minimizing, or switching windows triggers a blocking **Full screen required** screen. The timer keeps running, and the paper stays locked until the student returns to full screen.
 - The first leave is a warning. **On the second leave, the paper is submitted automatically** and the email is sent immediately, even if the window is still minimized.
+- The instructions page carries a strict invigilation notice: any anomaly, rule violation, or attempt to bypass the security measures is reported to parents/guardians and the higher authorities.
 - Copy, cut, text selection, dragging, and right-click are disabled.
 - Common copy, save, print, and developer-tools shortcuts are blocked, including `Ctrl+C`, `Ctrl+X`, `Ctrl+A`, `Ctrl+P`, `Ctrl+S`, `Ctrl+U`, `F12`, and `Ctrl+Shift+I/J/C`.
 - Leave events are counted in the submission payload as `focusLosses`, and the email report shows the count and whether the paper was auto-submitted for leaving.

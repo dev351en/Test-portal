@@ -22,13 +22,69 @@ const TEACHER_EMAIL = ''; // e.g. 'teacher@example.com'. Blank = the deploying a
 const SUBMIT_TOKEN = 'd3v3ndra-fractions-2026';
 const SUBJECT_PREFIX = 'IMO Fractions test submitted';
 const TIME_ZONE = 'Asia/Kolkata';
+const ATTEMPT_KEY = 'imo_attempt_names';
 
-function doGet() {
+function doGet(e) {
+  const params = (e && e.parameter) || {};
+  if (params.action === 'claim') return handleClaim_(params);
   return json_({
     ok: true,
     service: 'D3V3NDRA submission email',
     message: 'Endpoint is running. The test portal sends submissions by POST.'
   });
+}
+
+function handleClaim_(params) {
+  if (SUBMIT_TOKEN && params.token !== SUBMIT_TOKEN) {
+    return json_({ ok: false, claimed: true, error: 'Invalid submission token.' });
+  }
+  const name = normalizeName_(params.name);
+  if (!name) return json_({ ok: false, claimed: true, error: 'Missing name.' });
+
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+  } catch (error) {
+    return json_({ ok: false, claimed: true, error: 'Could not check the name. Please try again.' });
+  }
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const registry = readRegistry_(props);
+    if (registry.some(entry => entry.name === name)) {
+      return json_({ ok: true, claimed: true, taken: true });
+    }
+    registry.push({ name: name, at: new Date().toISOString() });
+    props.setProperty(ATTEMPT_KEY, JSON.stringify(registry.slice(-300)));
+    return json_({ ok: true, claimed: true, taken: false });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function registerAttempt_(name) {
+  const normalized = normalizeName_(name);
+  if (!normalized) return;
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const registry = readRegistry_(props);
+    if (registry.some(entry => entry.name === normalized)) return;
+    registry.push({ name: normalized, at: new Date().toISOString() });
+    props.setProperty(ATTEMPT_KEY, JSON.stringify(registry.slice(-300)));
+  } catch (error) { /* storage failure must not block the email */ }
+}
+
+function normalizeName_(value) {
+  return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function readRegistry_(props) {
+  try {
+    const raw = props.getProperty(ATTEMPT_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
 }
 
 function doPost(e) {
@@ -57,6 +113,8 @@ function doPost(e) {
       htmlBody: report.html,
       name: 'D3V3NDRA Classes'
     });
+
+    registerAttempt_(String(data.signature || data.studentName || ''));
 
     return json_({ ok: true, emailedTo: recipient });
   } catch (error) {
@@ -87,6 +145,7 @@ function getRecipient_() {
 function buildReport_(data) {
   const studentId = String(data.studentId || 'Unknown student');
   const studentName = String(data.studentName || '').trim();
+  const signature = String(data.signature || '').trim();
   const answers = Array.isArray(data.answers) ? data.answers : [];
   const totals = {
     score: number_(data.score),
@@ -151,7 +210,7 @@ function buildReport_(data) {
       <p>${escapeHtml_(identity)} · ${escapeHtml_(submittedAt)}</p>
     </div>
     <div class="card">
-      ${summaryHtml_(studentName, studentId, totals, submittedAt, timeUsed)}
+      ${summaryHtml_(studentName, studentId, signature, totals, submittedAt, timeUsed)}
       <div class="legend">
         <b>How to read this report:</b> every option is listed in the order the student saw it.
         <span class="green">Green</span> marks the correct option.
@@ -172,7 +231,7 @@ function buildReport_(data) {
   };
 }
 
-function summaryHtml_(studentName, studentId, totals, submittedAt, timeUsed) {
+function summaryHtml_(studentName, studentId, signature, totals, submittedAt, timeUsed) {
   const row = (label, value, className) => `<tr>
     <td>${escapeHtml_(label)}</td>
     <td class="value${className ? ` ${className}` : ''}">${escapeHtml_(value)}</td>
@@ -180,6 +239,7 @@ function summaryHtml_(studentName, studentId, totals, submittedAt, timeUsed) {
 
   return `<table role="presentation" class="summary">
     ${studentName ? row('Student name', studentName) : ''}
+    ${signature ? row('Signature', signature) : ''}
     ${row('Student ID', studentId)}
     ${row('Submitted', submittedAt)}
     ${row('Score', `${totals.score} / ${totals.totalMarks} (${totals.percent}%)`, 'score')}
@@ -244,11 +304,13 @@ function badgeHtml_(text, className) {
 function buildTextReport_(data, totals, submittedAt, timeUsed) {
   const studentId = String(data.studentId || 'Unknown student');
   const studentName = String(data.studentName || '').trim();
+  const signature = String(data.signature || '').trim();
   const answers = Array.isArray(data.answers) ? data.answers : [];
   const lines = [
-    'D3V3NDRA CLASSES — FRACTIONS TEST SUBMISSION',
-    '============================================',
+    'D3V3NDRA CLASSES — IMO FRACTIONS TEST SUBMISSION',
+    '================================================',
     `Student name : ${studentName || 'Not provided'}`,
+    `Signature    : ${signature || 'Not provided'}`,
     `Student ID   : ${studentId}`,
     `Submitted    : ${submittedAt}`,
     `Score        : ${totals.score} / ${totals.totalMarks} (${totals.percent}%)`,
