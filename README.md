@@ -6,7 +6,7 @@ A browser-based chapter test for **Working with Fractions** (NCERT Class 7, `geg
 
 ## What is included
 
-- **Student login** with a show/hide password control and optional "Remember me"
+- **Student login** with name/roll number, a show/hide password control, and optional "Remember me"
 - **Instructions screen** with a visible honesty note
 - **50 multiple-choice questions**, 4 options each
 - **60-minute timer** with automatic submission at `00:00`
@@ -42,8 +42,9 @@ The current demo credentials are:
 
 - **Student ID:** `DSMG7@012`
 - **Password:** `12345678`
+- **Full Name / Roll No.:** entered by each student on the login screen
 
-They are defined in the `CONFIG` object near the top of `js/app.js`:
+The name/roll number is the student's identity on the emailed report. The shared login ID and password are defined in the `CONFIG` object near the top of `js/app.js`:
 
 ```js
 const CONFIG = {
@@ -204,13 +205,11 @@ The app and the Apps Script must use the same `SUBMIT_TOKEN`. The default is `d3
 
 The report is sent as soon as the paper is submitted, before the optional feedback form.
 
-- Student ID, submission time, score, percentage, correct/attempted counts, time used, and marked count
+- Student name/roll number, student ID, submission time, score, percentage, correct/attempted counts, time used, and marked count
 - All 50 questions in the order the student saw them
 - All four options for each question, with the student's choice and the correct answer clearly marked
 - Correct options highlighted green; wrong selections highlighted red
 - A plain-text version of the same report for email clients that do not render HTML
-
-If the Apps Script is bound to a Google Sheet, it also appends a summary row to a **Submissions** tab. A standalone script still emails normally and skips the sheet log.
 
 ### Important notes
 
@@ -225,8 +224,9 @@ If the Apps Script is bound to a Google Sheet, it also appends a summary row to 
 This is a **static client-side app**, not a secure exam server:
 
 - The login ID, password, and full answer key are visible in the page source.
+- The name/roll number is self-reported at login. The app cannot verify that a student entered their real identity.
 - If `CONFIG.submissionEndpoint` is configured, the student ID, score, and full answer sheet are sent through Google Apps Script and emailed to the teacher. Otherwise they stay in the browser.
-- The site itself does not save submissions to a database. Google processes the relayed report, and the optional bound-Sheet log is controlled by the teacher.
+- The site itself does not save submissions to a database. Google processes the relayed report and emails it to the teacher.
 - The "Download result" button still creates a local text file as a student-side backup.
 - Browser controls can discourage accidental navigation, but they cannot prevent a determined student from using another device, notes, or outside help.
 - Results reset when the page is refreshed, and anyone with the link can start an attempt.

@@ -16,15 +16,11 @@
  * 6. Open js/app.js, put that URL in CONFIG.submissionEndpoint, and redeploy the site.
  *
  * The app and this script must share the same SUBMIT_TOKEN.
- * If this script is bound to a Google Sheet, each submission is also logged
- * to a "Submissions" tab. A standalone script still emails normally and skips
- * the optional sheet log.
  */
 
 const TEACHER_EMAIL = ''; // e.g. 'teacher@example.com'. Blank = the deploying account's email.
 const SUBMIT_TOKEN = 'd3v3ndra-fractions-2026';
 const SUBJECT_PREFIX = 'Fractions test submitted';
-const LOG_TO_BOUND_SHEET = true;
 const TIME_ZONE = 'Asia/Kolkata';
 
 function doGet() {
@@ -62,8 +58,6 @@ function doPost(e) {
       name: 'D3V3NDRA Classes'
     });
 
-    if (LOG_TO_BOUND_SHEET) logSubmission_(data);
-
     return json_({ ok: true, emailedTo: recipient });
   } catch (error) {
     console.error(error);
@@ -92,6 +86,7 @@ function getRecipient_() {
 
 function buildReport_(data) {
   const studentId = String(data.studentId || 'Unknown student');
+  const studentName = String(data.studentName || '').trim();
   const answers = Array.isArray(data.answers) ? data.answers : [];
   const totals = {
     score: number_(data.score),
@@ -104,7 +99,8 @@ function buildReport_(data) {
   };
   const submittedAt = formatDate_(data.submittedAt);
   const timeUsed = formatDuration_(data.timeUsed);
-  const subject = `${SUBJECT_PREFIX} — ${studentId} — ${totals.score}/${totals.totalMarks} (${totals.percent}%)`;
+  const identity = studentName ? `${studentName} — ${studentId}` : studentId;
+  const subject = `${SUBJECT_PREFIX} — ${identity} — ${totals.score}/${totals.totalMarks} (${totals.percent}%)`;
   const questionBlocks = answers.map((answer, index) => buildQuestionHtml_(answer, index)).join('');
 
   const html = `<!DOCTYPE html>
@@ -150,10 +146,10 @@ function buildReport_(data) {
     <div class="hero">
       <p class="eyebrow">D3V3NDRA Classes</p>
       <h1>Fractions test submission</h1>
-      <p>${escapeHtml_(studentId)} · ${escapeHtml_(submittedAt)}</p>
+      <p>${escapeHtml_(identity)} · ${escapeHtml_(submittedAt)}</p>
     </div>
     <div class="card">
-      ${summaryHtml_(studentId, totals, submittedAt, timeUsed)}
+      ${summaryHtml_(studentName, studentId, totals, submittedAt, timeUsed)}
       <div class="legend">
         <b>How to read this report:</b> every option is listed in the order the student saw it.
         <span class="green">Green</span> marks the correct option.
@@ -174,13 +170,14 @@ function buildReport_(data) {
   };
 }
 
-function summaryHtml_(studentId, totals, submittedAt, timeUsed) {
+function summaryHtml_(studentName, studentId, totals, submittedAt, timeUsed) {
   const row = (label, value, className) => `<tr>
     <td>${escapeHtml_(label)}</td>
     <td class="value${className ? ` ${className}` : ''}">${escapeHtml_(value)}</td>
   </tr>`;
 
   return `<table role="presentation" class="summary">
+    ${studentName ? row('Student name', studentName) : ''}
     ${row('Student ID', studentId)}
     ${row('Submitted', submittedAt)}
     ${row('Score', `${totals.score} / ${totals.totalMarks} (${totals.percent}%)`, 'score')}
@@ -242,10 +239,12 @@ function badgeHtml_(text, className) {
 
 function buildTextReport_(data, totals, submittedAt, timeUsed) {
   const studentId = String(data.studentId || 'Unknown student');
+  const studentName = String(data.studentName || '').trim();
   const answers = Array.isArray(data.answers) ? data.answers : [];
   const lines = [
     'D3V3NDRA CLASSES — FRACTIONS TEST SUBMISSION',
     '============================================',
+    `Student name : ${studentName || 'Not provided'}`,
     `Student ID   : ${studentId}`,
     `Submitted    : ${submittedAt}`,
     `Score        : ${totals.score} / ${totals.totalMarks} (${totals.percent}%)`,
@@ -280,54 +279,6 @@ function buildTextReport_(data, totals, submittedAt, timeUsed) {
 
   lines.push('Generated automatically by the D3V3NDRA Fractions test portal.');
   return lines.join('\n');
-}
-
-function logSubmission_(data) {
-  let spreadsheet;
-  try {
-    spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  } catch (error) {
-    return;
-  }
-  if (!spreadsheet) return;
-
-  const headers = [
-    'Submitted At', 'Student ID', 'Score', 'Total Marks', 'Percent',
-    'Correct', 'Attempted', 'Total Questions', 'Time Used (sec)', 'Marked', 'Answers JSON'
-  ];
-  let sheet = spreadsheet.getSheetByName('Submissions');
-  if (!sheet) sheet = spreadsheet.insertSheet('Submissions');
-
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow(headers);
-    sheet.getRange(1, 1, 1, headers.length)
-      .setFontWeight('bold')
-      .setBackground('#1d4ed8')
-      .setFontColor('#ffffff');
-    sheet.setFrozenRows(1);
-  }
-
-  sheet.appendRow([
-    formatDate_(data.submittedAt),
-    String(data.studentId || ''),
-    number_(data.score),
-    number_(data.totalMarks),
-    number_(data.percent),
-    number_(data.correct),
-    number_(data.attempted),
-    number_(data.total),
-    number_(data.timeUsed),
-    number_(data.marked),
-    JSON.stringify(data.answers || [])
-  ]);
-
-  const lastRow = sheet.getLastRow();
-  if (lastRow === 2) {
-    sheet.setColumnWidth(1, 150);
-    sheet.setColumnWidth(2, 140);
-    sheet.setColumnWidth(11, 320);
-  }
-  sheet.getRange(lastRow, 11).setWrap(true).setVerticalAlignment('top');
 }
 
 function validIndex_(value, length) {

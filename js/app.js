@@ -50,6 +50,7 @@
 
   const state = {
     studentId: '',
+    studentName: '',
     paper: [],
     answers: new Map(),
     marked: new Set(),
@@ -138,7 +139,7 @@
     $('#fsBtn').hidden = !config.fs;
     $('#studentChip').hidden = !config.student;
     $('#logoutBtn').hidden = !config.logout;
-    $('#studentName').textContent = state.studentId;
+    $('#studentName').textContent = state.studentName || state.studentId;
   }
 
   function safeStorageGet(key) {
@@ -170,11 +171,12 @@
   function handleLogin(event) {
     event.preventDefault();
     const id = $('#loginId').value.trim();
+    const name = $('#studentNameInput').value.trim();
     const password = $('#loginPass').value;
 
-    if (!id || !password) {
-      showLoginError('Enter your student ID and password to continue.');
-      (!id ? $('#loginId') : $('#loginPass')).focus();
+    if (!id || !name || !password) {
+      showLoginError('Enter your name, student ID, and password to continue.');
+      (!id ? $('#loginId') : !name ? $('#studentNameInput') : $('#loginPass')).focus();
       return;
     }
 
@@ -186,8 +188,9 @@
 
     hideLoginError();
     state.studentId = id;
+    state.studentName = name;
     safeStorageSet(CONFIG.storageKey, $('#rememberMe').checked ? id : '');
-    $('#studentName').textContent = id;
+    $('#studentName').textContent = name;
     setHeader('instructions');
     showView('Instructions');
     $('#startBtn').focus();
@@ -233,6 +236,7 @@
     const relayFrame = document.getElementById('submissionRelay');
     if (relayFrame) relayFrame.remove();
     state.studentId = '';
+    state.studentName = '';
     state.paper = [];
     state.answers.clear();
     state.marked.clear();
@@ -251,6 +255,7 @@
     $('#feedbackError').hidden = true;
     $('#feedbackText').value = '';
     $('#examShell').classList.remove('palette-open');
+    $('#studentNameInput').value = '';
     $('#loginPass').value = '';
     $('#loginPass').type = 'password';
     $('#togglePass').innerHTML = icon('eye', 18);
@@ -789,6 +794,7 @@
     return {
       token: CONFIG.submissionToken,
       studentId: state.studentId,
+      studentName: state.studentName,
       submittedAt: new Date(state.submittedAt).toISOString(),
       startedAt: new Date(state.startedAt).toISOString(),
       score: result.score,
@@ -879,7 +885,8 @@
     const grading = gradeFor(result.percent);
     const date = new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 
-    $('#resultStudent').textContent = `${state.studentId} · ${date}`;
+    const identity = state.studentName ? `${state.studentName} · ${state.studentId}` : state.studentId;
+    $('#resultStudent').textContent = `${identity} · ${date}`;
     $('#resultPct').textContent = `${result.percent}%`;
     $('#resultScore').textContent = `${result.score} / ${result.totalMarks}`;
     $('#scoreRing').style.setProperty('--pct', String(result.percent));
@@ -937,6 +944,7 @@
       'D3V3NDRA CLASSES — FRACTIONS TEST SERIES',
       'Result report',
       '========================================',
+      `Student name : ${state.studentName || 'Not provided'}`,
       `Student ID   : ${state.studentId}`,
       `Submitted    : ${date}`,
       `Score        : ${result.score} / ${result.totalMarks} (${result.percent}%)`,
