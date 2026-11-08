@@ -8,7 +8,12 @@
     password: '12345678',
     totalMinutes: 60,
     marksPerQ: 2,
-    storageKey: 'd3v3ndra.student'
+    storageKey: 'd3v3ndra.student',
+    // Paste the Google Apps Script Web app URL here to email each submission.
+    // Leave blank to keep the test working without email delivery.
+    submissionEndpoint: '',
+    // Must match SUBMIT_TOKEN in scripts/google-apps-script-submission-email.gs.
+    submissionToken: 'd3v3ndra-fractions-2026'
   };
 
   const ICONS = {
@@ -225,6 +230,8 @@
     stopTimer();
     removeUnloadGuard();
     closeModal();
+    const relayFrame = document.getElementById('submissionRelay');
+    if (relayFrame) relayFrame.remove();
     state.studentId = '';
     state.paper = [];
     state.answers.clear();
@@ -709,9 +716,22 @@
     state.feedback = null;
     state.result = null;
 
+    const result = computeResult();
+    state.result = result;
+
     setHeader('feedback');
     showView('Feedback');
-    toast(auto ? 'Time is up. Your test was submitted automatically.' : 'Test submitted successfully.');
+
+    const emailed = sendSubmissionEmail(result);
+    if (auto) {
+      toast(emailed
+        ? 'Time is up. Test auto-submitted and emailed to your teacher.'
+        : 'Time is up. Your test was submitted automatically.');
+    } else {
+      toast(emailed
+        ? 'Test submitted. Your answers have been emailed to your teacher.'
+        : 'Test submitted successfully.');
+    }
   }
 
   function initFeedback() {
@@ -763,6 +783,86 @@
       Math.round((state.submittedAt - state.startedAt) / 1000)
     ));
     return { details, correct, attempted, total: state.paper.length, totalMarks, score, percent, timeUsed };
+  }
+
+  function buildSubmissionPayload(result) {
+    return {
+      token: CONFIG.submissionToken,
+      studentId: state.studentId,
+      submittedAt: new Date(state.submittedAt).toISOString(),
+      startedAt: new Date(state.startedAt).toISOString(),
+      score: result.score,
+      totalMarks: result.totalMarks,
+      percent: result.percent,
+      correct: result.correct,
+      attempted: result.attempted,
+      total: result.total,
+      timeUsed: result.timeUsed,
+      marked: state.marked.size,
+      site: window.location.origin,
+      answers: result.details.map(item => ({
+        no: item.index + 1,
+        q: item.question.q,
+        options: item.question.opts.slice(),
+        selected: item.your === undefined ? null : item.your,
+        correct: item.question.ans,
+        ok: item.ok
+      }))
+    };
+  }
+
+  function sendSubmissionEmail(result) {
+    const endpoint = String(CONFIG.submissionEndpoint || '').trim();
+    if (!endpoint) {
+      console.info('D3V3NDRA: submission email endpoint is not configured.');
+      return false;
+    }
+
+    let action;
+    try {
+      action = new URL(endpoint, window.location.href).href;
+    } catch (error) {
+      console.error('D3V3NDRA: the submission email endpoint is not a valid URL.', error);
+      return false;
+    }
+
+    let frame = document.getElementById('submissionRelay');
+    if (!frame) {
+      frame = document.createElement('iframe');
+      frame.id = 'submissionRelay';
+      frame.name = 'submissionRelay';
+      frame.hidden = true;
+      frame.style.display = 'none';
+      frame.setAttribute('aria-hidden', 'true');
+      frame.tabIndex = -1;
+      document.body.appendChild(frame);
+    }
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = action;
+    form.target = frame.name;
+    form.acceptCharset = 'UTF-8';
+    form.hidden = true;
+    form.style.display = 'none';
+
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'payload';
+    input.value = JSON.stringify(buildSubmissionPayload(result));
+    form.appendChild(input);
+    document.body.appendChild(form);
+
+    try {
+      form.submit();
+    } catch (error) {
+      console.error('D3V3NDRA: could not send the submission email.', error);
+      form.remove();
+      return false;
+    }
+
+    window.setTimeout(() => form.remove(), 60000);
+    return true;
   }
 
   function gradeFor(percent) {

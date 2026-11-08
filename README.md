@@ -19,6 +19,7 @@ A browser-based chapter test for **Working with Fractions** (NCERT Class 7, `geg
 - **Result screen** with score, percentage, time used, and grade
 - **Answer review** with the student's answer and the correct answer for every question
 - **Downloadable text report** that a student can share with the teacher
+- **Optional instant email report** to the teacher with every option and the student's choice marked
 
 Question order **and answer-option order** are shuffled per student and date, so the paper is not identical for every attempt.
 
@@ -66,7 +67,8 @@ Change these values before sharing the site with a new group.
 │   └── app.js              # Login, timer, exam, palette, scoring, feedback, review
 ├── test_questions.js       # 50-question source bank with answers
 ├── scripts/
-│   └── export-question-sheet.js  # Builds CSV, JSON, and Google Apps Script exports
+│   ├── export-question-sheet.js  # Builds CSV, JSON, and Google Apps Script exports
+│   └── google-apps-script-submission-email.gs  # Emails each submitted answer sheet
 ├── exports/                # Generated spreadsheet files (created by npm run export:sheet)
 ├── assets/
 │   ├── logo-mark.png       # D3V3NDRA emblem
@@ -174,13 +176,58 @@ npm run export:sheet:shuffled -- --seed=my-paper
 
 The generated Google Sheet and CSV then agree with each other, and with any attempt that uses the same seed. Regenerating with the same seed produces the same order.
 
+## Email each submission to the teacher
+
+The portal can email you a complete answer sheet the moment a student submits. The report lists every question, every option, the student's chosen option, and the correct option, with a score summary at the top.
+
+This uses a small Google Apps Script Web App as the relay. There is no paid backend, and the email is sent from your own Google account. This is a separate script from the question-bank sheet exporter.
+
+### One-time setup
+
+1. Open https://script.google.com and create a new project.
+2. Replace the contents of `Code.gs` with `scripts/google-apps-script-submission-email.gs`.
+3. Optional: set `TEACHER_EMAIL` at the top of the script. If it is blank, the report is emailed to the Google account that deploys the script.
+4. Click **Deploy → New deployment → Web app**.
+5. Set **Execute as** to **Me** and **Who has access** to **Anyone**.
+6. Authorize the script and copy the **Web app URL**.
+7. Open `js/app.js` and paste that URL into `CONFIG.submissionEndpoint`:
+
+```js
+submissionEndpoint: 'https://script.google.com/macros/s/PASTE-YOUR-DEPLOYMENT-ID/exec',
+```
+
+8. Redeploy the site. Submit one test attempt to confirm the email arrives.
+
+The app and the Apps Script must use the same `SUBMIT_TOKEN`. The default is `d3v3ndra-fractions-2026` in both files. Change it in both places if you want a different value.
+
+### What the email contains
+
+The report is sent as soon as the paper is submitted, before the optional feedback form.
+
+- Student ID, submission time, score, percentage, correct/attempted counts, time used, and marked count
+- All 50 questions in the order the student saw them
+- All four options for each question, with the student's choice and the correct answer clearly marked
+- Correct options highlighted green; wrong selections highlighted red
+- A plain-text version of the same report for email clients that do not render HTML
+
+If the Apps Script is bound to a Google Sheet, it also appends a summary row to a **Submissions** tab. A standalone script still emails normally and skips the sheet log.
+
+### Important notes
+
+- The Apps Script must be deployed with access set to **Anyone**; otherwise a student's browser cannot reach it without a Google sign-in.
+- The web app URL and `SUBMIT_TOKEN` are visible in the page source, so the endpoint is not a secure server. The token only reduces accidental or casual spam.
+- Consumer Gmail accounts can send about 100 emails per day through Apps Script. For larger classes, use a Google Workspace account or split the test across days.
+- If you change the Apps Script later, deploy a new version and keep the same Web app URL if possible.
+- `vercel.json` allows form posts and frames only to `script.google.com` and Google's user-content domain. If you use a different relay service, update the Content Security Policy as well.
+
 ## Security and honest limitations
 
 This is a **static client-side app**, not a secure exam server:
 
 - The login ID, password, and full answer key are visible in the page source.
-- Answers, results, and feedback stay in the browser. They are **not transmitted to a teacher or saved to a database**.
-- The "Download result" button creates a local text file; students must share it themselves.
+- If `CONFIG.submissionEndpoint` is configured, the student ID, score, and full answer sheet are sent through Google Apps Script and emailed to the teacher. Otherwise they stay in the browser.
+- The site itself does not save submissions to a database. Google processes the relayed report, and the optional bound-Sheet log is controlled by the teacher.
+- The "Download result" button still creates a local text file as a student-side backup.
 - Browser controls can discourage accidental navigation, but they cannot prevent a determined student from using another device, notes, or outside help.
 - Results reset when the page is refreshed, and anyone with the link can start an attempt.
 
