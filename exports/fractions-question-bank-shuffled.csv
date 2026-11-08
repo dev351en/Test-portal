@@ -1,0 +1,51 @@
+﻿No.,ID,Question,Option A,Option B,Option C,Option D,Correct Option,Correct Answer,Difficulty,Category
+1,1,What is the product of a whole number and a fraction equal to?,Ratio,Difference,Sum of both,Repeated addition of the fraction,D,Repeated addition of the fraction,Easy,Multiplication
+2,2,Aaron walks 3 km in 1 hour. How far does he walk in 5 hours?,15 km,12 km,18 km,8 km,A,15 km,Easy,Multiplication
+3,3,A tortoise walks 1/4 km in 1 hour. How far does it walk in 3 hours?,1 km,1/2 km,3/4 km,1/4 km,C,3/4 km,Easy,Multiplication
+4,4,Which operation is used to find total distance when speed per hour is a fraction?,Addition,Division,Multiplication,Subtraction,C,Multiplication,Easy,Multiplication
+5,5,A farmer had 5 grandchildren and gave 2/3 acre of land to each. How much land in all?,5/3 acre,10 acre,10/3 acre,7/3 acre,C,10/3 acre,Easy,Multiplication
+6,6,1 hour of internet costs ₹8. How much for 1 1/4 hours?,₹16,₹12,₹10,₹8,C,₹10,Easy,Multiplication
+7,7,Tenzin drinks 1/2 glass of milk every day. How many glasses in a week (7 days)?,3 1/2 glasses,7 glasses,4 glasses,3 glasses,A,3 1/2 glasses,Easy,Multiplication
+8,8,What is 1/5 × 3 equal to?,15,3/5,5/3,1/15,B,3/5,Easy,Multiplication
+9,9,What is 2/5 × 3 equal to?,15/6,3/10,6/5,6/15,C,6/5,Easy,Multiplication
+10,10,5 × 2/3 = ?,15/2,5/6,10/3,7/3,C,10/3,Easy,Multiplication
+11,11,What is 1/2 × 1/4 equal to?,1/2,1/4,1/6,1/8,D,1/8,Medium,Multiplication
+12,12,"If a tortoise covers 2/5 km in 1 hour, how far does it cover in 3/4 of an hour?",8/15 km,3/20 km,3/10 km,3/5 km,C,3/10 km,Medium,Multiplication
+13,13,Multiply 7 × 3/5 and choose the mixed fraction.,4 2/5,5 1/5,14/5,4 1/5,D,4 1/5,Medium,Multiplication
+14,14,Multiply 4 × 1/3 and choose the mixed fraction.,3/4,5/3,1 2/3,1 1/3,D,1 1/3,Medium,Multiplication
+15,15,9/7 × 6 = ?,8 1/7,7 5/7,54/49,7 3/7,B,7 5/7,Medium,Multiplication
+16,16,13/11 × 6 = ?,7 1/11,7 4/11,8 1/11,78/66,A,7 1/11,Medium,Multiplication
+17,17,A team makes 1 km of canal in 8 days. How much does it make in one day?,8 km,1/4 km,1 km,1/8 km,D,1/8 km,Medium,Division
+18,18,"If the team works 5 days a week, how much canal does it make in a week?",1/8 km,5 km,1/5 km,5/8 km,D,5/8 km,Medium,Division
+19,19,Manju and two neighbours buy 5 litres of oil and share it equally among 3 families. How much does each family get for the week?,5/3 litre,5/6 litre,3/5 litre,15 litre,A,5/3 litre,Medium,Division
+20,20,How much oil will one family get in 4 weeks at the same rate?,5/12 litre,5/3 litre,20 litre,20/3 litre,D,20/3 litre,Medium,Division
+21,21,What is 1/2 ÷ 2 equal to?,1/2,1/4,1,4,B,1/4,Medium,Division
+22,22,What is 5 ÷ 1/2 equal to?,10,5/2,1/10,2/5,A,10,Medium,Division
+23,23,"The reciprocal of a fraction a/b (a ≠ 0, b ≠ 0) is:",a/b,1/a,b/a,1/b,C,b/a,Medium,Division
+24,24,"When a non-zero fraction is multiplied by its reciprocal, the result is:",undefined,0,1,the fraction itself,C,1,Medium,Division
+25,25,The first step in dividing fractions is to find the ___ of the divisor.,reciprocal,product,sum,square,A,reciprocal,Medium,Division
+26,26,Leena made 5 cups of tea and used 1/3 cup of milk per cup. How much milk did she use in all?,5 cup,15 cup,5/3 cup,3/5 cup,C,5/3 cup,Tough,Word problem
+27,27,Safia saw the Moon set at 10 pm. The Moon sets 5/6 hour later each day. How many hours after 10 pm will it set on Thursday (4 days later)?,4 hour,10 hour,5/6 hour,10/3 hour,D,10/3 hour,Tough,Word problem
+28,28,A cake is cut into 8 equal slices. Mariam takes one slice. What fraction of the whole cake does she take?,1/8,1/4,1/2,1/7,A,1/8,Tough,Word problem
+29,29,A rectangle has length 3/4 m and breadth 2/5 m. What is its area?,8/9 m²,3/5 m²,3/10 m²,5/9 m²,C,3/10 m²,Tough,Word problem
+30,30,A ribbon 5/6 m long is cut into 5 equal pieces. What is the length of each piece?,25/6 m,5 m,1/6 m,1/5 m,C,1/6 m,Tough,Division
+31,31,Simplify: (2/3 × 9/4) ÷ (3/2),2,1,9/8,3/2,B,1,Tough,Operations
+32,32,Simplify: (5/6 × 3/10) ÷ (1/4),2,1,3/5,10/3,B,1,Tough,Operations
+33,33,"If x = 3/4 and y = 2/5, what is x ÷ y?",3/10,8/15,5/6,15/8,D,15/8,Tough,Operations
+34,34,Which is greater: 2/3 × 4/5 or 2/3 ÷ 4/5?,2/3 × 4/5,Cannot be compared,2/3 ÷ 4/5,They are equal,C,2/3 ÷ 4/5,Tough,Operations
+35,35,A car covers 4/5 km in 1/4 hour. What is its speed in km per hour?,5/16 km/h,1/5 km/h,4/20 km/h,16/5 km/h,D,16/5 km/h,Tough,Word problem
+36,36,"To calculate 2/5 × 3, we can first divide 3 by 5 and then multiply by 2. Which calculation shows this?",3 ÷ 2 × 5,3 ÷ 5 × 2,5 ÷ 3 × 2,2 ÷ 5 × 3,B,3 ÷ 5 × 2,Medium,Multiplication
+37,37,The whole is divided into 5 rows and 4 columns. How many equal parts are created?,5,9,20,4,C,20,Medium,Multiplication
+38,38,How many 1/4-hour intervals are there in 1/2 hour?,1,2,4,8,B,2,Medium,Multiplication
+39,39,The mixed fraction 1 1/4 converted to an improper fraction is:,1/4,4/5,5/4,5,C,5/4,Medium,Multiplication
+40,40,"If 1/5 ÷ 3 = x, what is x?",5/3,1/15,3/5,15,B,1/15,Medium,Division
+41,41,A tank holds 3/4 litre. It is filled by pouring 1/8 litre at a time. How many pours are needed to fill it?,8,6,3,4,B,6,Tough,Division
+42,42,Simplify: 7/8 × 4/21,1/6,1/8,3/7,2/7,A,1/6,Tough,Multiplication
+43,43,"If 5/7 of a number is 25, what is the number?",25,7/5,35,5/7,C,35,Tough,Word problem
+44,44,A recipe needs 3/4 cup of sugar for one cake. How much sugar is needed for 6 cakes?,3/2 cup,4/3 cup,9/2 cup,9 cup,C,9/2 cup,Medium,Multiplication
+45,45,Which fraction equals its own reciprocal?,1,2,0,1/2,A,1,Tough,Division
+46,46,0 divided by any non-zero fraction equals:,0,1,undefined,the fraction,A,0,Medium,Division
+47,47,Any non-zero fraction divided by itself equals:,undefined,1,0,itself,B,1,Medium,Division
+48,48,Simplify: (3/5 ÷ 2/7) × (4/9),7/15,14/15,12/35,21/20,B,14/15,Tough,Operations
+49,49,John reads 2/3 of a book in 1 hour. How much does he read in 1 1/2 hours?,1,3/4,2/3,4/3,A,1,Medium,Multiplication
+50,50,A wire 10/3 m long is cut into 4 equal parts. What is the length of each part?,2/3 m,5/6 m,4/3 m,5/3 m,B,5/6 m,Medium,Division

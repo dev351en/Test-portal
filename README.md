@@ -65,6 +65,9 @@ Change these values before sharing the site with a new group.
 ├── js/
 │   └── app.js              # Login, timer, exam, palette, scoring, feedback, review
 ├── test_questions.js       # 50-question source bank with answers
+├── scripts/
+│   └── export-question-sheet.js  # Builds CSV, JSON, and Google Apps Script exports
+├── exports/                # Generated spreadsheet files (created by npm run export:sheet)
 ├── assets/
 │   ├── logo-mark.png       # D3V3NDRA emblem
 │   ├── logo-wordmark.png   # D3V3NDRA wordmark
@@ -115,6 +118,61 @@ For a fresh project:
 - **Timer and marks:** edit `totalMinutes` and `marksPerQ` in `js/app.js`.
 - **Colors and layout:** edit `css/styles.css`.
 - **Login credentials:** edit `CONFIG.loginId` and `CONFIG.password` in `js/app.js`.
+
+## Export the question bank to a spreadsheet
+
+`scripts/export-question-sheet.js` reads `test_questions.js` and writes spreadsheet-ready files into `exports/`. It uses only Node's built-in modules, so there is nothing to install.
+
+```bash
+npm run export:sheet
+```
+
+This creates:
+
+| File | Purpose |
+|------|---------|
+| `exports/fractions-question-bank.csv` | All 50 questions with Options A–D and the correct answer |
+| `exports/fractions-question-bank-answer-key.csv` | Compact answer key |
+| `exports/fractions-question-bank.json` | Structured data for other tools |
+| `exports/google-sheet-fractions-question-bank.gs` | Apps Script that fills and formats a Google Sheet |
+
+### Google Sheets (automatic, one-time setup)
+
+The `.gs` file is a complete Apps Script for Google Sheets:
+
+1. Create a new Google Sheet.
+2. Open **Extensions → Apps Script**.
+3. Delete the placeholder code in `Code.gs` and paste the entire contents of `exports/google-sheet-fractions-question-bank.gs`.
+4. Save, then reload the Google Sheet.
+5. Use the **D3V3NDRA** menu → **Fill everything**.
+
+The script creates three tabs:
+
+- **Question Bank** — every question with Options A–D, plus the correct option and correct answer. The correct option cell is highlighted green, and the header row is frozen with filters enabled.
+- **Answer Key** — a compact list of correct options and answers.
+- **Read Me** — usage notes and the shuffle seed, if one was used.
+
+Re-run **D3V3NDRA → Fill everything** whenever you change the source bank and paste in a freshly generated `.gs` file.
+
+### Excel or another spreadsheet app
+
+Import `exports/fractions-question-bank.csv` with UTF-8 encoding. The file starts with a byte-order mark, so Excel detects UTF-8 and displays symbols such as `₹` correctly. Use **Data → From Text/CSV** and choose comma as the delimiter.
+
+### Fixed shuffled paper
+
+The live test shuffles questions and answer-option order for each attempt, so a sheet built from source order will not match every student's on-screen option letters. To generate one fixed shuffled paper:
+
+```bash
+npm run export:sheet:shuffled
+```
+
+That writes `fractions-question-bank-shuffled.*`, `fractions-question-bank-shuffled-answer-key.csv`, and `google-sheet-fractions-question-bank-shuffled.gs`, using the seed `demo`. To use a different seed:
+
+```bash
+npm run export:sheet:shuffled -- --seed=my-paper
+```
+
+The generated Google Sheet and CSV then agree with each other, and with any attempt that uses the same seed. Regenerating with the same seed produces the same order.
 
 ## Security and honest limitations
 
