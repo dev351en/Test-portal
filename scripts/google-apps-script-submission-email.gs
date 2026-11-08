@@ -1,7 +1,7 @@
 /**
  * D3V3NDRA Classes — instant submission email endpoint
  *
- * This Google Apps Script receives a finished Fractions test from the portal and
+ * This Google Apps Script receives a finished IMO Fractions test from the portal and
  * emails the teacher a formatted report with every option marked.
  *
  * ONE-TIME SETUP
@@ -20,7 +20,7 @@
 
 const TEACHER_EMAIL = ''; // e.g. 'teacher@example.com'. Blank = the deploying account's email.
 const SUBMIT_TOKEN = 'd3v3ndra-fractions-2026';
-const SUBJECT_PREFIX = 'Fractions test submitted';
+const SUBJECT_PREFIX = 'IMO Fractions test submitted';
 const TIME_ZONE = 'Asia/Kolkata';
 
 function doGet() {
@@ -95,7 +95,9 @@ function buildReport_(data) {
     correct: number_(data.correct),
     attempted: number_(data.attempted),
     total: number_(data.total) || answers.length,
-    marked: number_(data.marked)
+    marked: number_(data.marked),
+    leaves: number_(data.focusLosses),
+    reason: String(data.submitReason || '')
   };
   const submittedAt = formatDate_(data.submittedAt);
   const timeUsed = formatDuration_(data.timeUsed);
@@ -145,7 +147,7 @@ function buildReport_(data) {
   <div class="wrap">
     <div class="hero">
       <p class="eyebrow">D3V3NDRA Classes</p>
-      <h1>Fractions test submission</h1>
+      <h1>IMO Fractions test submission</h1>
       <p>${escapeHtml_(identity)} · ${escapeHtml_(submittedAt)}</p>
     </div>
     <div class="card">
@@ -157,7 +159,7 @@ function buildReport_(data) {
         A green <b>&ldquo;Student answer · Correct&rdquo;</b> badge means the student chose the right option.
       </div>
       ${questionBlocks}
-      <p class="footer">This report was generated automatically by the D3V3NDRA Fractions test portal when the paper was submitted.</p>
+      <p class="footer">This report was generated automatically by the D3V3NDRA IMO test portal when the paper was submitted.</p>
     </div>
   </div>
 </body>
@@ -185,6 +187,8 @@ function summaryHtml_(studentName, studentId, totals, submittedAt, timeUsed) {
     ${row('Attempted', `${totals.attempted} / ${totals.total}`)}
     ${row('Time used', timeUsed)}
     ${row('Marked for review', String(totals.marked))}
+    ${row('Window left', `${totals.leaves} time${totals.leaves === 1 ? '' : 's'}`)}
+    ${totals.reason === 'leaving' ? row('Auto-submitted', 'Left the test window twice') : ''}
   </table>`;
 }
 
@@ -252,6 +256,8 @@ function buildTextReport_(data, totals, submittedAt, timeUsed) {
     `Attempted    : ${totals.attempted} / ${totals.total}`,
     `Time used    : ${timeUsed}`,
     `Marked       : ${totals.marked}`,
+    `Window left  : ${totals.leaves} time(s)`,
+    ...(totals.reason === 'leaving' ? ['Auto-submit  : Left the test window twice'] : []),
     '',
     'OPTIONS: [STUDENT ANSWER] = chosen by the student; [CORRECT ANSWER] = right option.',
     ''
@@ -277,7 +283,7 @@ function buildTextReport_(data, totals, submittedAt, timeUsed) {
     lines.push('');
   });
 
-  lines.push('Generated automatically by the D3V3NDRA Fractions test portal.');
+  lines.push('Generated automatically by the D3V3NDRA IMO test portal.');
   return lines.join('\n');
 }
 

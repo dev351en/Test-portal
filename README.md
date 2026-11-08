@@ -1,6 +1,6 @@
-# D3V3NDRA Classes — Fractions Test Series
+# D3V3NDRA Classes — IMO Test Series (Chapter 8: Working with Fractions)
 
-A browser-based chapter test for **Working with Fractions** (NCERT Class 7, `gegp108`), rebuilt around a clean blue edtech interface.
+A browser-based **International Math Olympiad (IMO)** test for **Working with Fractions** (NCERT Class 7, `gegp108`), built from Worksheet Chapter Number 8 and rebuilt around a clean blue edtech interface.
 
 **Live site:** https://mest-porutal.vercel.app/
 
@@ -10,6 +10,7 @@ A browser-based chapter test for **Working with Fractions** (NCERT Class 7, `geg
 - **Instructions screen** with a visible honesty note
 - **50 multiple-choice questions**, 4 options each
 - **Full-screen exam lockdown** with copy, selection, and right-click blocking
+- **Two-strike window rule** — leaving or minimizing the test window twice auto-submits the paper
 - **60-minute timer** with automatic submission at `00:00`
 - **100 marks** — 2 marks per correct answer, no negative marking
 - **Free navigation** — Previous, Next, Save & Next, and a question palette
@@ -42,9 +43,10 @@ The answer key is in `test_questions.js`. Difficulty tags (10 Easy, 25 Medium, 1
 Pressing **Start Test** requests full screen before the paper opens. While the exam is active:
 
 - Leaving full screen, minimizing, or switching windows triggers a blocking **Full screen required** screen. The timer keeps running, and the paper stays locked until the student returns to full screen.
+- The first leave is a warning. **On the second leave, the paper is submitted automatically** and the email is sent immediately, even if the window is still minimized.
 - Copy, cut, text selection, dragging, and right-click are disabled.
 - Common copy, save, print, and developer-tools shortcuts are blocked, including `Ctrl+C`, `Ctrl+X`, `Ctrl+A`, `Ctrl+P`, `Ctrl+S`, `Ctrl+U`, `F12`, and `Ctrl+Shift+I/J/C`.
-- Window and full-screen exits are counted in the submission payload as `focusLosses`.
+- Leave events are counted in the submission payload as `focusLosses`, and the email report shows the count and whether the paper was auto-submitted for leaving.
 
 A browser cannot prevent OS-level screenshots, a second device, or a determined user with developer tools. Some mobile browsers do not support full screen; in that case the portal shows a warning and allows the student to continue without the lock. Use Chrome, Edge, or Firefox on a laptop or desktop for a locked attempt.
 
@@ -218,6 +220,7 @@ The app and the Apps Script must use the same `SUBMIT_TOKEN`. The default is `d3
 The report is sent as soon as the paper is submitted, before the optional feedback form.
 
 - Student name/roll number, student ID, submission time, score, percentage, correct/attempted counts, time used, and marked count
+- Window-leave count, plus an auto-submit note if the student left twice
 - All 50 questions in the order the student saw them
 - All four options for each question, with the student's choice and the correct answer clearly marked
 - Correct options highlighted green; wrong selections highlighted red

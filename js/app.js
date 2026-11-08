@@ -68,6 +68,8 @@
     lockEnabled: true,
     focusWarning: false,
     focusLosses: 0,
+    leaveEpisode: false,
+    submitReason: '',
     feedback: null,
     result: null
   };
@@ -130,9 +132,9 @@
 
   function setHeader(mode) {
     const modes = {
-      instructions: { title: 'Fractions Test Series', pill: 'Chapter Test', sep: false, timer: false, fs: false, student: true, logout: true },
-      exam: { title: 'Fractions Test Series', pill: 'Working with Fractions', sep: true, timer: true, fs: false, student: false, logout: true },
-      feedback: { title: 'Test Review & Feedback', pill: 'Feedback', sep: false, timer: false, fs: false, student: true, logout: false },
+      instructions: { title: 'IMO Test Series', pill: 'Chapter 8 · Fractions', sep: false, timer: false, fs: false, student: true, logout: true },
+      exam: { title: 'IMO Test Series', pill: 'Working with Fractions', sep: true, timer: true, fs: false, student: false, logout: true },
+      feedback: { title: 'Test Review & Feedback', pill: 'IMO Test Series', sep: false, timer: false, fs: false, student: true, logout: false },
       result: { title: 'Test Result', pill: 'Fractions', sep: false, timer: false, fs: false, student: true, logout: false }
     };
     const config = modes[mode];
@@ -262,6 +264,8 @@
     state.lockEnabled = true;
     state.focusWarning = false;
     state.focusLosses = 0;
+    state.leaveEpisode = false;
+    state.submitReason = '';
     state.feedback = null;
     state.result = null;
 
@@ -360,9 +364,13 @@
     }
     if (getFullscreenElement()) {
       hideExamLock();
+      resetLeaveEpisodeSoon();
       return;
     }
-    showExamLock('You left full screen. The test is locked until you return to full screen.');
+    noteFocusLoss();
+    if (!state.submitted) {
+      showExamLock(`You left full screen. Warning ${state.focusLosses} of 2 — your paper will be submitted automatically if you leave again.`);
+    }
   }
 
   function toggleFullscreen() {
@@ -521,6 +529,8 @@
     state.lockVisible = false;
     state.focusWarning = false;
     state.focusLosses = 0;
+    state.leaveEpisode = false;
+    state.submitReason = '';
     state.feedback = null;
     state.result = null;
     state.visited.add(state.paper[0].id);
@@ -739,6 +749,7 @@
 
   let modalState = null;
   let toastTimer = null;
+  let leaveEpisodeTimer = null;
 
   function openModal({ title, body, actions = [], size = '' }) {
     closeModal();
@@ -843,10 +854,11 @@
     });
   }
 
-  function submitTest(auto) {
+  function submitTest(auto, reason) {
     if (state.submitted) return;
     state.submitted = true;
     state.running = false;
+    state.submitReason = reason || (auto ? 'time' : 'manual');
     state.submittedAt = Date.now();
     stopTimer();
     removeUnloadGuard();
@@ -873,7 +885,9 @@
     showView('Feedback');
 
     const emailed = sendSubmissionEmail(result);
-    if (auto) {
+    if (reason === 'leaving') {
+      toast('You left the test window twice. Your paper was submitted automatically.', 'error');
+    } else if (auto) {
       toast(emailed
         ? 'Time is up. Test auto-submitted and emailed to your teacher.'
         : 'Time is up. Your test was submitted automatically.');
@@ -951,6 +965,7 @@
       timeUsed: result.timeUsed,
       marked: state.marked.size,
       focusLosses: state.focusLosses,
+      submitReason: state.submitReason,
       site: window.location.origin,
       answers: result.details.map(item => ({
         no: item.index + 1,
@@ -1143,8 +1158,27 @@
 
   function noteFocusLoss() {
     if (!state.running || state.submitted) return;
+    if (state.leaveEpisode) return;
+    state.leaveEpisode = true;
     state.focusLosses += 1;
     state.focusWarning = true;
+    if (state.focusLosses >= 2) autoSubmitForLeaving();
+  }
+
+  function autoSubmitForLeaving() {
+    if (!state.running || state.submitted) return;
+    state.focusWarning = false;
+    submitTest(true, 'leaving');
+  }
+
+  function resetLeaveEpisodeSoon() {
+    window.clearTimeout(leaveEpisodeTimer);
+    leaveEpisodeTimer = window.setTimeout(() => {
+      if (!state.running || state.submitted) return;
+      if (document.visibilityState !== 'visible') return;
+      if (state.lockEnabled && !getFullscreenElement()) return;
+      state.leaveEpisode = false;
+    }, 900);
   }
 
   function showFocusWarning() {
@@ -1155,7 +1189,7 @@
     if (!$('#modalRoot').hidden) return;
     openModal({
       title: 'Test window left',
-      body: '<p>You switched away from the test window. The timer kept running.</p><div class="modal-note warn">Stay in full screen until you submit the test.</div>',
+      body: `<p>You switched away from the test window. This is warning ${state.focusLosses} of 2; the timer kept running.</p><div class="modal-note warn">If you leave the window again, your paper will be submitted automatically.</div>`,
       actions: [{ label: 'Continue test', variant: 'primary' }]
     });
   }
@@ -1172,8 +1206,9 @@
         noteFocusLoss();
         return;
       }
+      resetLeaveEpisodeSoon();
       if (state.lockEnabled && !getFullscreenElement()) {
-        showExamLock('You left the test window. Return to full screen to continue.');
+        showExamLock(`You left the test window. Warning ${state.focusLosses} of 2 — your paper will be submitted automatically if you leave again.`);
       } else {
         showFocusWarning();
       }
@@ -1186,6 +1221,7 @@
 
     window.addEventListener('focus', () => {
       if (!state.running || state.submitted || state.lockVisible) return;
+      resetLeaveEpisodeSoon();
       showFocusWarning();
     });
 
