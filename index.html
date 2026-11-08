@@ -3,448 +3,318 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>D3V3NDRA Classes — Virtual Testing Platform</title>
-<link rel="stylesheet" href="katex.min.css">
-<link rel="icon" href="logo.png">
-<style>
-  :root{
-    --navy:#0a192f; --navy2:#112647; --gold:#d4af37; --gold2:#b8952b;
-    --white:#f7f9fc; --ink:#0b1220; --soft:#5b6b8a; --line:#e2e8f0;
-    --danger:#b33a3a; --success:#2e7d32; --warn:#b8860b;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;overflow:hidden;font-family:'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:var(--navy);color:var(--ink)}
-  body{position:fixed;top:0;left:0;width:100vw;height:100vh;overscroll-behavior:none}
-  img{max-width:100%;height:auto;display:block}
-  .katex{font-size:1.1em}
-  /* ---------- shared ---------- */
-  .page{display:none;width:100vw;height:100vh;position:relative;background:var(--white);overflow-y:auto}
-  .page.active{display:block}
-  .brand{display:flex;align-items:center;gap:14px;padding:16px 28px;background:var(--navy);color:var(--white);box-shadow:0 2px 10px rgba(0,0,0,.25)}
-  .brand img{height:48px;width:auto;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,.35)}
-  .brand .t{font-weight:800;font-size:1.15rem;letter-spacing:.06em}
-  .brand .sub{font-size:.8rem;color:#c7d2e8;margin-top:2px}
-  .brand-right{margin-left:auto;color:#9fb3d8;font-size:.82rem;font-weight:600;letter-spacing:.04em}
-  .container{max-width:980px;margin:0 auto;padding:26px 24px 40px}
-  h1{color:var(--navy);font-size:1.7rem;margin-bottom:8px;letter-spacing:.02em}
-  .lead{color:var(--soft);font-size:1rem;margin-bottom:24px;line-height:1.6}
-  .card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:26px;box-shadow:0 4px 18px rgba(10,25,47,.06);margin-bottom:24px}
-  .badge{display:inline-block;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:#eef2f7;color:var(--navy);margin-bottom:14px}
-  .tag{display:inline-block;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:6px;background:#fff3d6;color:#8a6200;margin-right:6px;margin-bottom:6px}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:10px;border:none;font-weight:700;font-size:.95rem;cursor:pointer;transition:transform .1s,box-shadow .2s,background .2s}
-  .btn:active{transform:translateY(1px)}
-  .btn-primary{background:var(--navy);color:var(--white);box-shadow:0 4px 14px rgba(10,25,47,.35)}
-  .btn-primary:hover{background:#0c244a;box-shadow:0 6px 18px rgba(10,25,47,.45)}
-  .btn-gold{background:var(--gold);color:#3a2d00;box-shadow:0 4px 14px rgba(184,149,43,.35)}
-  .btn-gold:hover{background:var(--gold2)}
-  .btn-outline{background:transparent;color:var(--navy);border:2px solid var(--navy)}
-  .btn-outline:hover{background:var(--navy);color:var(--white)}
-  .btn-danger{background:var(--danger);color:#fff}
-  .btn:disabled{opacity:.55;cursor:not-allowed}
-  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
-  label{font-weight:700;font-size:.88rem;color:var(--navy);display:block;margin-bottom:6px}
-  input[type="text"],input[type="password"]{width:100%;max-width:320px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-size:1rem;background:#fcfdfe}
-  input:focus{outline:none;border-color:var(--gold)}
-  .footer-note{color:var(--soft);font-size:.8rem;margin-top:16px;line-height:1.5;border-top:1px solid var(--line);padding-top:14px}
-  /* timer */
-  .timer-bar{height:8px;background:#e3eaf2;border-radius:4px;overflow:hidden;margin-bottom:14px}
-  .timer-fill{height:100%;background:var(--gold);width:100%;transition:width 1s linear}
-  .timer-wrap{display:flex;justify-content:space-between;align-items:center;gap:12px}
-  .timer-lbl{font-weight:800;font-size:.82rem;letter-spacing:.08em;color:var(--navy);text-transform:uppercase}
-  .timer-val{font-variant-numeric:tabular-nums;font-weight:800;font-size:1.1rem;color:var(--navy)}
-  .timer-val.warn{color:var(--danger)}
-  /* question */
-  .qhead{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:18px}
-  .qnum{font-weight:800;font-size:1.25rem;color:var(--navy);background:#eef2f7;padding:6px 14px;border-radius:10px}
-  .qtext{font-size:1.08rem;line-height:1.7;color:var(--ink);margin-bottom:20px}
-  .options{display:flex;flex-direction:column;gap:10px}
-  .opt{display:flex;align-items:center;gap:14px;padding:14px 18px;border:2px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;transition:all .18s;position:relative}
-  .opt input{width:0;height:0;opacity:0}
-  .opt .ring{width:22px;height:22px;border:2px solid var(--line);border-radius:50%;background:#fff;flex-shrink:0;transition:border-color .18s,box-shadow .18s}
-  .opt .txt{font-size:1rem;color:var(--ink);flex:1}
-  .opt:hover{border-color:#c7d2e8;background:#f4f7fb}
-  .opt.selected{border-color:var(--gold);background:#fffbeb}
-  .opt.selected .ring{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,.25)}
-  .nav{display:flex;justify-content:space-between;align-items:center;margin-top:30px;padding-top:20px;border-top:1px solid var(--line)}
-  .mute{color:var(--soft);font-size:.85rem}
-  .k{display:inline-block;background:#eef2f7;color:var(--navy);padding:2px 8px;border-radius:6px;font-size:.82rem;font-weight:700;margin-right:6px}
-  /* instructions */
-  .inst{list-style:none;margin-bottom:18px}
-  .inst li{margin-bottom:12px;padding-left:26px;position:relative;line-height:1.7;color:var(--ink)}
-  .inst li:before{content:"➤";position:absolute;left:0;color:var(--gold);font-weight:800}
-  .warn-box{border:1px solid #f3e3b3;background:#fbf8ec;border-radius:10px;padding:18px;color:#7a5a00;margin-bottom:20px}
-  .warn-box b{color:#8a6200}
-  .review .star{font-size:1.4rem;color:var(--gold);cursor:pointer}
-  .review .star.off{color:#d7dee8}
-  textarea{width:100%;min-height:120px;padding:12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:1rem;background:#fcfdfe}
-  textarea:focus{outline:none;border-color:var(--gold)}
-  /* lock overlay */
-  #lock{position:fixed;inset:0;background:rgba(10,25,47,.92);z-index:60;display:none;align-items:center;justify-content:center;color:#fff;text-align:center;font-size:1.25rem}
-  #lock b{color:var(--gold)}
-  /* copy block toast */
-  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 18px;border-radius:8px;font-size:.9rem;z-index:70;display:none;box-shadow:0 4px 16px rgba(0,0,0,.35)}
-  /* fullscreen helper */
-  .fs-hint{font-size:.8rem;color:var(--soft);margin-top:6px}
-  @media print{body{background:var(--white)}}
-</style>
+<meta name="theme-color" content="#1d4ed8">
+<meta name="description" content="D3V3NDRA Classes online chapter test for Working with Fractions.">
+<title>Fractions Test Series | D3V3NDRA Classes</title>
+<link rel="icon" href="assets/logo-mark.png">
+<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-<div id="lock"><b>TEST TERMINATED</b><br>Window minimized or navigation blocked.<br>Your session has ended.</div>
-<div id="toast">Copying is disabled during this test.</div>
 
-<!-- ================= LOGIN ================= -->
-<div class="page active" id="page-login">
-  <div class="brand">
-    <img src="logo.png" alt="D3V3NDRA Classes">
-    <div>
-      <div class="t">D3V3NDRA Classes</div>
-      <div class="sub">Virtual Hosted Testing Platform &bull; Working with Fractions</div>
-    </div>
-    <div class="brand-right">ONLINE TEST</div>
-  </div>
-  <div class="container">
-    <div class="card" style="max-width:420px;margin:40px auto">
-      <div class="badge">Candidate Login</div>
-      <h1 style="font-size:1.35rem">Sign In</h1>
-      <p class="lead" style="margin-bottom:22px">Enter your login credentials to begin the test.</p>
-      <label>Login ID</label>
-      <input type="text" id="login-id" placeholder="e.g. AM2026">
-      <label style="margin-top:16px">Password</label>
-      <input type="password" id="login-pass" placeholder="••••••••">
-      <div class="footer-note" style="margin-top:22px">Enter the test credentials provided by your teacher.</div>
-      <div style="margin-top:26px">
-        <button class="btn btn-primary" style="width:100%" onclick="app.login()">Start Test</button>
-      </div>
-    </div>
-    <div class="footer-note" style="max-width:420px;margin:0 auto">D3V3NDRA Classes &mdash; State-of-the-art online assessment</div>
-  </div>
+<div class="bg-art" aria-hidden="true">
+  <span class="glow glow-a"></span>
+  <span class="glow glow-b"></span>
+  <span class="glow glow-c"></span>
+  <svg class="waves" viewBox="0 0 1600 900" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="wave-one" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#dbeafe"/>
+        <stop offset="100%" stop-color="#bfdbfe"/>
+      </linearGradient>
+      <linearGradient id="wave-two" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#bfdbfe"/>
+        <stop offset="100%" stop-color="#93c5fd"/>
+      </linearGradient>
+    </defs>
+    <path d="M0,620 C170,560 360,700 610,660 C900,614 1080,470 1600,560 L1600,900 L0,900 Z" fill="url(#wave-one)" opacity=".55"/>
+    <path d="M0,730 C240,670 470,800 760,750 C1050,700 1240,590 1600,670 L1600,900 L0,900 Z" fill="url(#wave-two)" opacity=".38"/>
+    <path d="M0,820 C320,760 600,880 900,830 C1180,786 1340,730 1600,780 L1600,900 L0,900 Z" fill="#93c5fd" opacity=".22"/>
+  </svg>
 </div>
 
-<!-- ================= INSTRUCTIONS PAGE 1 ================= -->
-<div class="page" id="page-instructions"></div>
-
-<!-- ================= INSTRUCTIONS PAGE 2 ================= -->
-<div class="page" id="page-instructions2"></div>
-
-<!-- ================= QUIZ (rendered by JS) ================= -->
-<div class="page" id="page-quiz"></div>
-
-<!-- ================= REVIEW ================= -->
-<div class="page" id="page-review">
-  <div class="brand">
-    <img src="logo.png" alt="logo" style="height:40px">
-    <div style="flex:1"><div class="t" style="font-size:1rem">D3V3NDRA Classes &bull; Online Test</div><div class="sub">Test Review & Feedback</div></div>
-    <div class="brand-right">Review</div>
-  </div>
-  <div class="container">
-    <div class="card">
-      <div class="badge">How was your experience?</div>
-      <h1 style="font-size:1.35rem">Tell Us About the Platform</h1>
-      <p class="lead">Your feedback helps us improve the virtual testing experience.</p>
-      <div style="margin-bottom:18px">
-        <label style="display:block;margin-bottom:8px;font-weight:700">Overall rating</label>
-        <div id="rev-stars" style="display:flex;gap:6px"></div>
+<header class="app-header" id="appHeader" hidden>
+  <div class="header-inner">
+    <div class="brand" aria-label="D3V3NDRA Edtech Solutions">
+      <img class="brand-mark" src="assets/logo-mark.png" alt="">
+      <img class="brand-wordmark" src="assets/logo-wordmark.png" alt="D3V3NDRA Edtech Solutions">
+    </div>
+    <span class="header-divider" aria-hidden="true"></span>
+    <div class="header-test">
+      <span id="headerTitle">Fractions Test Series</span>
+      <span class="header-sep" id="headerSep" hidden>&rsaquo;</span>
+      <span class="header-pill" id="headerPill">Fractions</span>
+    </div>
+    <div class="header-right">
+      <div class="timer-pill" id="timerPill" hidden>
+        <span data-icon="clock" data-icon-size="17"></span>
+        <span class="timer-label">Time Left</span>
+        <strong id="timerText">60:00</strong>
       </div>
-      <label style="display:block;margin-bottom:8px;font-weight:700">Would you like to continue with online testing?</label>
-      <select id="rev-continue" style="width:100%;max-width:320px;padding:12px;border:1px solid var(--line);border-radius:10px">
-        <option value="yes">Yes, I would like to continue online testing</option>
-        <option value="no">No, I prefer offline/paper testing</option>
-      </select>
-      <label style="margin-top:18px;display:block;margin-bottom:8px;font-weight:700">Any additional comments?</label>
-      <textarea id="rev-feedback" placeholder="Share your thoughts..."></textarea>
-      <div style="margin-top:22px">
-        <button class="btn btn-primary" onclick="app.submitReview()">Submit &amp; View Result</button>
+      <button type="button" class="icon-btn" id="fsBtn" data-icon="fullscreen" data-icon-size="19" aria-label="Toggle full screen" hidden></button>
+      <div class="student-chip" id="studentChip" hidden>
+        <span data-icon="user" data-icon-size="15"></span>
+        <span id="studentName"></span>
       </div>
+      <button type="button" class="icon-btn" id="logoutBtn" data-icon="logout" data-icon-size="18" aria-label="Sign out"></button>
     </div>
   </div>
-</div>
+</header>
 
-<!-- ================= RESULT ================= -->
-<div class="page" id="page-result">
-  <div class="brand">
-    <img src="logo.png" alt="logo" style="height:40px">
-    <div style="flex:1"><div class="t" style="font-size:1rem">D3V3NDRA Classes &bull; Online Test</div><div class="sub">Your Result</div></div>
-    <div class="brand-right">Score</div>
+<main class="view view-login is-active" id="viewLogin">
+  <div class="login-grid">
+    <section class="login-hero">
+      <div class="hero-lockup">
+        <img class="hero-mark" src="assets/logo-mark.png" alt="">
+        <img class="hero-wordmark" src="assets/logo-wordmark.png" alt="D3V3NDRA Edtech Solutions">
+      </div>
+      <p class="eyebrow">D3V3NDRA CLASSES</p>
+      <h1>Fractions Preparation<br>Test Series</h1>
+      <span class="chapter-pill">Chapter Test</span>
+      <div class="hero-subject">Fractions</div>
+      <div class="hero-stats">
+        <span class="hero-stat"><span data-icon="sigma" data-icon-size="18"></span>50 Questions</span>
+        <span class="hero-stat"><span data-icon="clock" data-icon-size="18"></span>60 Minutes</span>
+        <span class="hero-stat"><span data-icon="barChart" data-icon-size="18"></span>Class 7 Level</span>
+      </div>
+    </section>
+
+    <section class="login-panel">
+      <form class="card login-card" id="loginForm" novalidate>
+        <div class="card-title">
+          <span class="title-icon" data-icon="user" data-icon-size="22"></span>
+          <h2>Student Login</h2>
+        </div>
+        <p class="card-sub">Enter the credentials shared by your teacher to begin.</p>
+        <div class="field">
+          <label for="loginId">Student ID / Enrolment No.</label>
+          <div class="input-wrap">
+            <span class="input-icon" data-icon="user" data-icon-size="18"></span>
+            <input id="loginId" name="loginId" type="text" autocomplete="username" placeholder="e.g. DSMG7@012" spellcheck="false">
+          </div>
+        </div>
+        <div class="field">
+          <label for="loginPass">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon" data-icon="lock" data-icon-size="18"></span>
+            <input id="loginPass" name="loginPass" type="password" autocomplete="current-password" placeholder="Enter your password">
+            <button type="button" class="input-action" id="togglePass" data-icon="eye" data-icon-size="18" aria-label="Show password"></button>
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="check-row"><input type="checkbox" id="rememberMe"><span>Remember me</span></label>
+          <button type="button" class="link-btn" id="forgotBtn">Forgot password?</button>
+        </div>
+        <p class="form-error" id="loginError" role="alert" hidden></p>
+        <button type="submit" class="btn btn-primary btn-login">Log In <span data-icon="arrowRight" data-icon-size="19"></span></button>
+        <p class="secure-note"><span data-icon="shield" data-icon-size="14"></span> Single-session test &middot; Auto-submits at 60:00</p>
+      </form>
+      <p class="login-foot">D3V3NDRA Edtech Solutions &middot; Online Assessment</p>
+    </section>
   </div>
-  <div class="container">
-    <div class="card" style="text-align:center">
-      <div id="result-badge" class="badge" style="font-size:1rem;background:#e7f3ee;color:#2e7d32">Test Completed</div>
-      <div style="font-size:3.2rem;font-weight:900;color:var(--navy);margin:14px 0" id="res-score">0 / 100</div>
-      <div style="font-size:1.5rem;color:var(--gold);font-weight:800" id="res-pct">0%</div>
-      <div class="row" style="margin-top:22px;justify-content:center">
-        <div style="text-align:center"><div style="font-size:.8rem;color:var(--soft)">Correct</div><div style="font-weight:800" id="res-correct">0 / 50</div></div>
-        <div style="text-align:center"><div style="font-size:.8rem;color:var(--soft)">Early bonus</div><div style="font-weight:800" id="res-early">No</div></div>
-        <div style="text-align:center"><div style="font-size:.8rem;color:var(--soft)">Time taken</div><div style="font-weight:800" id="res-time">0 min</div></div>
+</main>
+
+<main class="view" id="viewInstructions">
+  <div class="shell shell-md">
+    <section class="card instructions-card">
+      <div class="card-title lg">
+        <span class="title-icon" data-icon="info" data-icon-size="23"></span>
+        <div>
+          <h2>Test Instructions</h2>
+          <p>Read this page before you begin. The test starts only when you press Start Test.</p>
+        </div>
       </div>
-      <div style="margin-top:18px">
-        <div style="font-size:.85rem;color:var(--soft);margin-bottom:6px">Grade</div>
-        <div style="font-size:1.5rem;font-weight:800;color:var(--navy)" id="res-grade">--</div>
+
+      <div class="instructions-grid">
+        <div class="instructions-facts">
+          <div class="fact">
+            <span class="fact-icon" data-icon="clipboard" data-icon-size="18"></span>
+            <span>Total Questions</span><b>: 50</b>
+          </div>
+          <div class="fact">
+            <span class="fact-icon" data-icon="clock" data-icon-size="18"></span>
+            <span>Duration</span><b>: 60 Minutes</b>
+          </div>
+          <div class="fact">
+            <span class="fact-icon" data-icon="layers" data-icon-size="18"></span>
+            <span>Question Type</span><b>: Multiple Choice (A&ndash;D)</b>
+          </div>
+          <div class="fact fact-marking">
+            <span class="fact-icon" data-icon="trophy" data-icon-size="18"></span>
+            <span>Marking</span>
+            <b>: +2 per correct<br><small>0 for unattempted / wrong</small></b>
+          </div>
+        </div>
+
+        <div class="key-instructions">
+          <h3><span data-icon="flag" data-icon-size="18"></span>Key Instructions</h3>
+          <ul>
+            <li>Read each question carefully before answering.</li>
+            <li>All questions are compulsory. Each has one correct option.</li>
+            <li>Use the question palette to move between questions.</li>
+            <li>Use Mark for Review to flag a question and revisit it.</li>
+            <li>You may change an answer until you submit the test.</li>
+            <li>The test auto-submits when the timer reaches 00:00.</li>
+            <li>Keep this tab open. Refreshing or closing it will lose your answers.</li>
+            <li>Do all rough work on paper. Calculators are not permitted.</li>
+          </ul>
+        </div>
       </div>
-      <div style="margin-top:26px">
-        <button class="btn btn-outline" onclick="location.reload()">Take Test Again</button>
+
+      <div class="start-banner">
+        <span class="banner-icon" data-icon="bookOpen" data-icon-size="22"></span>
+        <div class="banner-copy">
+          <b>Please read the instructions carefully.</b>
+          <span>The 60-minute timer starts when you begin.</span>
+        </div>
+        <div class="banner-time"><span>Duration</span><strong>01:00</strong></div>
+        <button type="button" class="btn btn-primary" id="startBtn">Start Test <span data-icon="play" data-icon-size="18"></span></button>
       </div>
+
+      <p class="integrity-note">
+        <span data-icon="shield" data-icon-size="15"></span>
+        <span><b>Honesty note:</b> This is a browser-based test and cannot prevent outside help or note-sharing. Please attempt it honestly under your teacher's guidance.</span>
+      </p>
+    </section>
+  </div>
+</main>
+
+<main class="view" id="viewExam">
+  <div class="exam-shell" id="examShell">
+    <aside class="card palette-card" id="paletteCard">
+      <div class="palette-head">
+        <h2>Questions <span>(1 &ndash; 50)</span></h2>
+        <span class="palette-count" id="paletteCount">0 / 50</span>
+        <button type="button" class="palette-close" id="paletteClose" data-icon="x" data-icon-size="16" aria-label="Close question palette"></button>
+      </div>
+      <div class="palette-grid" id="paletteGrid" aria-label="Question palette"></div>
+      <div class="legend">
+        <span class="legend-item"><i class="legend-swatch current"></i>Current</span>
+        <span class="legend-item"><i class="legend-swatch answered"></i>Answered</span>
+        <span class="legend-item"><i class="legend-swatch marked"></i>Marked for review</span>
+        <span class="legend-item"><i class="legend-swatch visited"></i>Not answered</span>
+      </div>
+      <div class="palette-progress">
+        <div class="progress-meta"><span>Progress</span><b id="progressCount">0 / 50</b></div>
+        <div class="progress-track"><i id="progressFill"></i></div>
+      </div>
+    </aside>
+
+    <section class="card exam-card">
+      <div class="exam-top">
+        <span class="q-chip">Question <b id="qNo">1</b> of 50</span>
+        <span class="mark-badge" id="markBadge" hidden><span data-icon="flag" data-icon-size="13"></span> Marked</span>
+        <span class="marks-chip">2 Marks</span>
+        <button type="button" class="palette-toggle" id="paletteToggle"><span data-icon="grid" data-icon-size="16"></span>Questions</button>
+      </div>
+      <div class="exam-body">
+        <div class="q-text" id="qText"></div>
+        <div class="options" id="qOptions" role="radiogroup" aria-label="Answer options"></div>
+      </div>
+      <div class="exam-footer">
+        <button type="button" class="btn btn-ghost" id="prevBtn"><span data-icon="chevronLeft" data-icon-size="17"></span>Previous</button>
+        <button type="button" class="btn btn-ghost" id="nextBtn">Next<span data-icon="chevronRight" data-icon-size="17"></span></button>
+        <span class="footer-spacer"></span>
+        <button type="button" class="btn btn-mark" id="markBtn"><span data-icon="flag" data-icon-size="16"></span>Mark for Review</button>
+        <button type="button" class="btn btn-clear" id="clearBtn"><span data-icon="eraser" data-icon-size="16"></span>Clear</button>
+        <button type="button" class="btn btn-primary" id="saveNextBtn">Save &amp; Next<span data-icon="chevronRight" data-icon-size="17"></span></button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<main class="view" id="viewFeedback">
+  <div class="shell shell-lg">
+    <div class="feedback-grid">
+      <section class="card success-card">
+        <div class="success-icon" data-icon="check" data-icon-size="42"></div>
+        <h2>Test Submitted Successfully!</h2>
+        <p>Your responses have been recorded for this session.</p>
+        <div class="summary-box">
+          <h3><span data-icon="barChart" data-icon-size="17"></span>Test Summary</h3>
+          <div class="summary-row"><span>Total Questions</span><b>50</b></div>
+          <div class="summary-row"><span>Answered</span><b id="sumAnswered">0</b></div>
+          <div class="summary-row"><span>Marked for Review</span><b id="sumMarked">0</b></div>
+          <div class="summary-row"><span>Not Answered</span><b id="sumUnanswered">0</b></div>
+        </div>
+      </section>
+
+      <section class="card feedback-card">
+        <div class="card-title">
+          <span class="title-icon" data-icon="message" data-icon-size="22"></span>
+          <div>
+            <h2>We Value Your Feedback</h2>
+            <p>Help us improve the online test experience.</p>
+          </div>
+        </div>
+        <form id="feedbackForm" novalidate>
+          <fieldset class="feedback-q">
+            <legend>Do you like the exam?</legend>
+            <div class="radio-row">
+              <label class="radio-option"><input type="radio" name="liked" value="Yes"><span>Yes</span></label>
+              <label class="radio-option"><input type="radio" name="liked" value="No"><span>No</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="feedback-q">
+            <legend>How would you rate the difficulty level?</legend>
+            <div class="pill-options">
+              <label class="pill-option"><input type="radio" name="difficulty" value="Very Easy"><span>Very Easy</span></label>
+              <label class="pill-option"><input type="radio" name="difficulty" value="Easy"><span>Easy</span></label>
+              <label class="pill-option"><input type="radio" name="difficulty" value="Moderate"><span>Moderate</span></label>
+              <label class="pill-option"><input type="radio" name="difficulty" value="Difficult"><span>Difficult</span></label>
+              <label class="pill-option"><input type="radio" name="difficulty" value="Very Difficult"><span>Very Difficult</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="feedback-q">
+            <legend>Was the test accessible and working properly?</legend>
+            <div class="radio-row">
+              <label class="radio-option"><input type="radio" name="accessible" value="Yes"><span>Yes</span></label>
+              <label class="radio-option"><input type="radio" name="accessible" value="No"><span>No</span></label>
+            </div>
+          </fieldset>
+          <div class="field">
+            <label for="feedbackText">Any suggestions or comments?</label>
+            <textarea id="feedbackText" name="comments" placeholder="Share your feedback..."></textarea>
+          </div>
+          <p class="form-error" id="feedbackError" role="alert" hidden></p>
+          <button type="submit" class="btn btn-primary btn-block">Submit Feedback <span data-icon="arrowRight" data-icon-size="18"></span></button>
+        </form>
+      </section>
     </div>
   </div>
-</div>
+</main>
 
-<!-- ================= END (terminated) ================= -->
-<div class="page" id="page-end">
-  <div class="brand">
-    <img src="logo.png" alt="logo" style="height:40px">
-    <div style="flex:1"><div class="t" style="font-size:1rem">D3V3NDRA Classes &bull; Online Test</div><div class="sub">Session Terminated</div></div>
-    <div class="brand-right">End</div>
+<main class="view" id="viewResult">
+  <div class="shell shell-sm">
+    <section class="card result-card">
+      <span class="result-badge"><span data-icon="check" data-icon-size="15"></span>Chapter Test Completed</span>
+      <h1>Your Result</h1>
+      <p class="result-sub" id="resultStudent">Student</p>
+      <div class="score-ring" id="scoreRing" style="--pct:0">
+        <div class="score-inner">
+          <strong id="resultPct">0%</strong>
+          <span id="resultScore">0 / 100</span>
+        </div>
+      </div>
+      <h2 class="result-grade" id="resultGrade"></h2>
+      <p class="result-message" id="resultMessage"></p>
+      <div class="result-metrics">
+        <div class="metric"><span>Correct</span><b id="resultCorrect">0 / 50</b></div>
+        <div class="metric"><span>Time Used</span><b id="resultTime">0 min</b></div>
+        <div class="metric"><span>Marked</span><b id="resultMarked">0</b></div>
+      </div>
+      <div class="result-actions">
+        <button type="button" class="btn btn-ghost" id="reviewBtn"><span data-icon="list" data-icon-size="18"></span>Review Answers</button>
+        <button type="button" class="btn btn-primary" id="finishBtn">Finish &amp; Sign Out <span data-icon="logout" data-icon-size="18"></span></button>
+      </div>
+      <button type="button" class="link-btn result-download" id="downloadBtn"><span data-icon="download" data-icon-size="15"></span>Download result for your teacher</button>
+    </section>
   </div>
-  <div class="container" style="text-align:center;padding-top:18vh">
-    <div style="font-size:2.6rem;font-weight:900;color:var(--danger);margin-bottom:10px">&#9888;</div>
-    <h1 style="font-size:1.5rem;color:var(--navy);margin-bottom:10px">Test Session Terminated</h1>
-    <div id="end-msg" style="color:var(--soft);font-size:1rem;margin-bottom:22px"></div>
-    <div class="warn-box" style="max-width:460px;margin:0 auto">
-      Minimizing or navigating away during the test ends the session immediately. No score is recorded.
-    </div>
-    <div style="margin-top:22px">
-      <button class="btn btn-primary" onclick="location.reload()">Restart Test</button>
-    </div>
-  </div>
-</div>
+</main>
 
-<script src="katex.min.js"></script>
+<div id="modalRoot" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
 <script src="test_questions.js"></script>
-<script>
-/* ---------- config ---------- */
-const TOTAL_MINUTES = 60;
-const MARKS_PER_Q = 2;
-const EARLY_BONUS_MIN = 10;
-const EARLY_BONUS = 5;
-const CORRECT_LOGIN = "DSMG7@012";
-const CORRECT_PASS = "12345678";
-
-let app = {
-  started:false, user:{}, qIndex:0, answers:new Map(),
-  timeLeft:TOTAL_MINUTES*60, timerId:null, startTime:null, submitted:false
-};
-
-/* ---------- security / lock ---------- */
-function toast(){const t=document.getElementById('toast');t.style.display='block';setTimeout(()=>t.style.display='none',1600)}
-function lock(){document.getElementById('lock').style.display='flex';if(app.timerId)clearInterval(app.timerId)}
-function unlock(){document.getElementById('lock').style.display='none'}
-
-/* disable copy/paste/context/drag */
-document.addEventListener('contextmenu',e=>{e.preventDefault();toast()},true);
-document.addEventListener('selectstart',e=>{if(!app.started)return;e.preventDefault();toast()},true);
-document.addEventListener('copy',e=>{e.preventDefault();toast()},true);
-document.addEventListener('cut',e=>{e.preventDefault();toast()},true);
-document.addEventListener('paste',e=>{e.preventDefault();toast()},true);
-document.addEventListener('dragstart',e=>e.preventDefault(),true);
-
-/* keyboard lockdown */
-document.addEventListener('keydown',e=>{
-  if(!app.started)return;
-  if(e.key==='Escape'){e.preventDefault();return false}
-  if((e.ctrlKey||e.metaKey)&&['c','x','v','a','p','s','u','f'].includes(e.key.toLowerCase())){e.preventDefault();toast();return false}
-  if(e.key==='F12'){e.preventDefault();toast();return false}
-},true);
-
-/* minimize / visibility */
-document.addEventListener('visibilitychange',()=>{
-  if(!app.started)return;
-  if(document.hidden){lock();setTimeout(()=>{if(document.hidden){app.endTest('minimized');}},800)}
-  else unlock();
-});
-window.addEventListener('blur',()=>{if(!app.started)return;lock();setTimeout(()=>{if(document.hidden||!document.hasFocus()){app.endTest('blurred');}},1000)});
-window.addEventListener('focus',unlock);
-
-/* block back/forward history */
-history.pushState(null,null,location.href);
-window.addEventListener('popstate',()=>{if(app.started){history.pushState(null,null,location.href);lock();}});
-
-/* fullscreen */
-function requestFullscreen(){
-  const el=document.documentElement;
-  if(el.requestFullscreen)el.requestFullscreen().catch(()=>{});
-  else if(el.webkitRequestFullscreen)el.webkitRequestFullscreen();
-  else if(el.msRequestFullscreen)el.msRequestFullscreen();
-}
-
-/* ---------- render ---------- */
-function show(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active')}
-function renderLatex(node){node.querySelectorAll('.k').forEach(el=>{const t=el.getAttribute('data-k');if(t){try{katex.render(t,el,{throwOnError:false,displayMode:false})}catch{}}})}
-
-/* ---------- login ---------- */
-app.login=function(){
-  const id=document.getElementById('login-id').value.trim();
-  const pw=document.getElementById('login-pass').value.trim();
-  if(id!==CORRECT_LOGIN||pw!==CORRECT_PASS){alert('Invalid login ID or password.');return}
-  app.user={id,pw};
-  app.started=true;
-  requestFullscreen();
-  app.timeLeft=TOTAL_MINUTES*60;
-  show('page-instructions');
-  app.renderInstructions();
-};
-
-/* ---------- timer ---------- */
-app.startTimer=function(){
-  app.timerId=setInterval(()=>{
-    app.timeLeft--;
-    const el=document.getElementById('timer-val');if(el){el.textContent=app.format(app.timeLeft);el.className='timer-val'+(app.timeLeft<=600?' warn':'')}
-    const fill=document.getElementById('timer-fill');if(fill){fill.style.width=(app.timeLeft/(TOTAL_MINUTES*60))*100+'%'}
-    if(app.timeLeft<=0){app.endTest('timeout');}
-  },1000);
-};
-app.format=function(s){const m=Math.floor(s/60),sec=s%60;return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0')};
-
-/* ---------- instructions ---------- */
-app.renderInstructions=function(){
-  const box=document.getElementById('page-instructions');
-  box.innerHTML=`
-  <div class="brand" style="padding:12px 20px;margin-bottom:18px">
-    <img src="logo.png" alt="logo" style="height:40px">
-    <div style="flex:1">
-      <div class="t" style="font-size:1rem">D3V3NDRA Classes &bull; Online Test</div>
-      <div class="sub">Chapter: Working with Fractions (NCERT Class 7 &bull; gegp108)</div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="badge">Test Instructions &mdash; Please Read Carefully</div>
-    <ul class="inst">
-      <li><b>Test duration:</b> One hour (60 minutes). The timer starts once you begin and cannot be paused.</li>
-      <li><b>Format:</b> 50 Multiple Choice Questions (MCQs), one correct option out of four.</li>
-      <li><b>Marking scheme:</b> Each correct answer = 2 marks. Maximum score = 100 marks. No negative marking.</li>
-      <li><b>Early completion bonus:</b> If you finish at least 10 minutes early, you get a bonus of +5 marks.</li>
-      <li><b>One question per page:</b> Answer each question before moving forward. You cannot go back to previous questions.</li>
-      <li><b>No calculator:</b> This is a mathematics test; rough work should be done on paper only.</li>
-      <li><b>Test conduct:</b> Please do not use outside help or a calculator. Browser restrictions are only deterrents and cannot prevent every form of assistance.</li>
-      <li><b>Full screen:</b> Full screen may be requested by your browser. This page cannot reliably detect or prevent all switching or other-device use.</li>
-      <li><b>Submission:</b> After Q50 you will reach a short review page, then your result will be shown.</li>
-    </ul>
-    <div class="warn-box"><b>Important:</b> Once started, the test must be completed in one sitting. There is no pause or resume option.</div>
-  </div>
-  <div style="display:flex;justify-content:flex-end">
-    <button class="btn btn-primary" onclick="app.showInstructions2()">Next Page &rarr;</button>
-  </div>
-  `;
-};
-app.showInstructions2=function(){
-  const box=document.getElementById('page-instructions2');
-  box.innerHTML=`
-  <div class="brand">
-    <img src="logo.png" alt="logo" style="height:40px">
-    <div style="flex:1"><div class="t" style="font-size:1rem">D3V3NDRA Classes &bull; Online Test</div><div class="sub">Test Instructions &mdash; Page 2 of 2</div></div>
-    <div class="brand-right">Page 2</div>
-  </div>
-  <div class="container">
-    <div class="card">
-      <div class="badge">Rules &amp; Conduct &mdash; Read Carefully</div>
-      <h1 style="font-size:1.35rem">Important Test Rules</h1>
-      <p class="lead">Please review these rules before beginning. They apply for the entire test session.</p>
-      <ul class="inst">
-        <li><b>No going back:</b> After you answer a question and move forward, you cannot return to previous questions.</li>
-        <li><b>No calculator:</b> This is a mathematics test. Calculators and calculating devices are not permitted. Use the rough paper provided.</li>
-        <li><b>Test conduct:</b> Please do not use outside help or a calculator. Browser restrictions are only deterrents and are not a guarantee of exam integrity.</li>
-        <li><b>Full screen mode:</b> The test launches in full screen. Do not attempt to exit full screen.</li>
-        <li><b>Staying on the test:</b> Please keep this page open for the test. The browser cannot reliably enforce or monitor this rule.</li>
-        <li><b>One question per page:</b> Each of the 50 questions appears on its own page. Select one of four options and proceed.</li>
-        <li><b>Answer before continuing:</b> You must select an option to enable the Next button.</li>
-        <li><b>Automatic submission:</b> If the 60-minute timer expires, the test submits automatically.</li>
-        <li><b>Review page:</b> After Q50, you will answer a short review about the platform before seeing your result.</li>
-      </ul>
-      <div class="warn-box"><b>Integrity note:</b> This is a browser-only demonstration. Login details and answer keys are present in the downloaded page; do not use it for a high-stakes or confidential exam.</div>
-    </div>
-    <div style="display:flex;justify-content:flex-end">
-      <button class="btn btn-primary" onclick="app.beginQuiz()">I Understand &mdash; Begin Test</button>
-    </div>
-  </div>
-  `;
-  show('page-instructions2');
-};
-app.beginQuiz=function(){app.qIndex=0;app.startTime=Date.now();app.startTimer();app.renderQuestion();show('page-quiz');};
-
-/* ---------- quiz ---------- */
-app.renderQuestion=function(){
-  const q=QUESTIONS[app.qIndex];
-  const p=document.getElementById('page-quiz');
-  p.innerHTML=`
-  <div class="brand">
-    <img src="logo.png" alt="logo" style="height:40px">
-    <div style="flex:1"><div class="t" style="font-size:1rem">D3V3NDRA Classes &bull; Online Test</div><div class="sub">Working with Fractions &bull; Question ${app.qIndex+1} of 50</div></div>
-    <div class="brand-right">Q${app.qIndex+1}/50</div>
-  </div>
-  <div class="container">
-    <div class="timer-wrap">
-      <div class="timer-bar"><div class="timer-fill" id="timer-fill" style="width:${(app.timeLeft/(TOTAL_MINUTES*60))*100}%"></div></div>
-      <div><div class="timer-lbl">Time Remaining</div><div class="timer-val" id="timer-val">${app.format(app.timeLeft)}</div></div>
-    </div>
-    <div class="qhead">
-      <div class="qnum">Question ${app.qIndex+1}</div>
-      <span class="tag">Fractions</span>
-    </div>
-    <div class="qtext">${q.q}</div>
-    <div class="options">${q.opts.map((o,i)=>`<div class="opt" id="opt${i}" onclick="app.select(${i})"><div class="ring"></div><div class="txt">${o}</div></div>`).join('')}</div>
-    <div class="nav">
-      <div class="mute">No back navigation. Minimizing ends the test.</div>
-      <button class="btn btn-primary" id="next-btn" onclick="app.next()">Next &rarr;</button>
-    </div>
-  </div>
-  `;
-  const sel=app.answers.get(app.qIndex);if(sel!==undefined)document.getElementById('opt'+sel).classList.add('selected');
-  document.getElementById('next-btn').disabled = (sel===undefined);
-  renderLatex(p);
-};
-app.select=function(i){
-  app.answers.set(app.qIndex,i);
-  document.querySelectorAll('#page-quiz .opt').forEach(o=>o.classList.remove('selected'));
-  document.getElementById('opt'+i).classList.add('selected');
-  document.getElementById('next-btn').disabled=false;
-};
-app.next=function(){
-  if(!app.answers.has(app.qIndex)){alert('Please select an answer before continuing.');return}
-  if(app.qIndex<QUESTIONS.length-1){app.qIndex++;app.renderQuestion();}
-  else app.showReview();
-};
-
-/* ---------- review ---------- */
-app.showReview=function(){
-  show('page-review');
-  const stars=document.getElementById('rev-stars');stars.innerHTML='';
-  for(let i=1;i<=5;i++){const s=document.createElement('span');s.className='star off';s.textContent='\u2605';s.setAttribute('role','button');s.setAttribute('aria-label',i+' star'+(i===1?'':'s'));s.onclick=()=>{document.querySelectorAll('#rev-stars .star').forEach((x,index)=>{x.classList.toggle('on',index<i);x.classList.toggle('off',index>=i)});app.rating=i};stars.appendChild(s)}
-};
-app.submitReview=function(){
-  const cont=document.getElementById('rev-continue').value.trim();
-  const feedback=document.getElementById('rev-feedback').value.trim();
-  if(!app.rating){alert('Please rate the platform.');return}
-  if(app.answers.size!==QUESTIONS.length){alert('Please answer all 50 questions before submitting.');return}
-  app.result=app.computeResult();
-  app.result.rating=app.rating;app.result.continue=cont;app.result.feedback=feedback;
-  app.renderResult();
-};
-app.computeResult=function(){
-  let correct=0;const detail=[];
-  QUESTIONS.forEach((q,i)=>{const a=app.answers.get(i);const ok=a===q.ans;if(ok)correct++;detail.push({q:q.id,ok,ans:q.ans,you:a})});
-  let early=false;const elapsedMin=(Date.now()-app.startTime)/60000;if(TOTAL_MINUTES-elapsedMin>=EARLY_BONUS_MIN)early=true;
-  let score=correct*MARKS_PER_Q+(early?EARLY_BONUS:0);
-  return{correct,total:QUESTIONS.length,marksPerQ:MARKS_PER_Q,early,bonus:early?EARLY_BONUS:0,score,elapsed:Math.round(elapsedMin),detail};
-};
-app.renderResult=function(){
-  const r=app.result;
-  const pct=Math.round((r.score/100)*100);
-  document.getElementById('res-score').textContent=r.score+' / 100';
-  document.getElementById('res-pct').textContent=pct+'%';
-  document.getElementById('res-correct').textContent=r.correct+' / 50';
-  document.getElementById('res-early').textContent=r.early?'Yes (+5 bonus)':'No';
-  document.getElementById('res-time').textContent=r.elapsed+' min';
-  document.getElementById('res-grade').textContent=pct>=80?'Distinction':(pct>=60?'First Class':(pct>=40?'Second Class':'Needs Improvement'));
-  document.getElementById('result-badge').textContent=r.early?'Excellent — Early bonus earned!':'Test Completed';
-  show('page-result');
-};
-app.endTest=function(reason){
-  app.submitted=true;if(app.timerId)clearInterval(app.timerId);
-  lock();
-  setTimeout(()=>{
-    document.getElementById('page-end').querySelector('#end-msg').textContent='Test ended: '+(reason==='minimized'?'window minimized':'window blurred')+'. Session terminated.';
-    show('page-end');
-  },400);
-};
-
-</script>
+<script src="js/app.js"></script>
 </body>
 </html>

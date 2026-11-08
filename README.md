@@ -1,110 +1,135 @@
-# D3V3NDRA Classes — Online Testing Platform
+# D3V3NDRA Classes — Fractions Test Series
 
-A secure, state-of-the-art virtual testing platform for the **Working with Fractions** chapter (NCERT Class 7, `gegp108`).
+A browser-based chapter test for **Working with Fractions** (NCERT Class 7, `gegp108`), rebuilt around a clean blue edtech interface.
 
-- **50 Multiple Choice Questions** (4 options each, 1 correct)
-- **100 Marks** — 2 marks per correct answer, no negative marking
-- **+5 bonus** if completed 10+ minutes early
-- **60-minute timer** with auto-submission
-- **Full-screen lock** — minimizing or switching tabs ends the test immediately
-- **No copy/paste** — clipboard, right-click, drag, and keyboard shortcuts disabled
-- **No going back** — one question per page, forward-only navigation
-- **No calculator** — mathematics test, rough work on paper only
-- **D3V3NDRA Classes branding** on every page
+**Live site:** https://mest-porutal.vercel.app/
 
----
+## What is included
 
-## Question Distribution (per AGENTS.md protocol)
+- **Student login** with a show/hide password control and optional "Remember me"
+- **Instructions screen** with a visible honesty note
+- **50 multiple-choice questions**, 4 options each
+- **60-minute timer** with automatic submission at `00:00`
+- **100 marks** — 2 marks per correct answer, no negative marking
+- **Free navigation** — Previous, Next, Save & Next, and a question palette
+- **Mark for Review** and **Clear answer** controls
+- **Palette legend** for current, answered, marked, and not-answered questions
+- **Submit confirmation** showing answered, unanswered, and marked counts
+- **Feedback form** after submission
+- **Result screen** with score, percentage, time used, and grade
+- **Answer review** with the student's answer and the correct answer for every question
+- **Downloadable text report** that a student can share with the teacher
 
-| Level | Count | Description |
-|-------|-------|-------------|
-| Easy | 10 | Direct recall, foundational speed math |
-| Medium | 20 | Multi-step problem solving, estimation |
-| Tough / Achievers | 20 | Class 10 HOTS — cryptarithms, optimization, structural invariants |
+Question order **and answer-option order** are shuffled per student and date, so the paper is not identical for every attempt.
 
-Questions are deterministically interleaved so difficulty is unpredictable. Difficulty labels are **not** shown on the paper.
+## Marking and timing
 
----
+| Item | Value |
+|------|-------|
+| Questions | 50 |
+| Marks per correct answer | 2 |
+| Total marks | 100 |
+| Negative marking | None |
+| Duration | 60 minutes |
+| Auto-submit | Yes, at `00:00` |
 
-## Flow
+The answer key is in `test_questions.js`. Difficulty tags (10 Easy, 25 Medium, 15 Tough) are metadata only and are not shown to students.
 
-1. **Login Page** — Login ID + Password
-2. **Instruction Page 1** — Timing, marking scheme, bonus, format
-3. **Instruction Page 2** — Rules & conduct (no back, no calculator, no copying, full-screen, minimize ends test)
-4. **50 Question Pages** — One question per page, select an option to continue
-5. **Review Page** — Rate the platform, continue online testing? + feedback
-6. **Result Page** — Score / 100, percentage, grade, time taken
+## Student credentials
 
----
+The current demo credentials are:
 
-## Login Credentials
+- **Student ID:** `DSMG7@012`
+- **Password:** `12345678`
 
-Edit `index.html` to change credentials:
+They are defined in the `CONFIG` object near the top of `js/app.js`:
 
-```javascript
-const CORRECT_LOGIN = "DSMG7@012";
-const CORRECT_PASS = "12345678";
+```js
+const CONFIG = {
+  loginId: 'DSMG7@012',
+  password: '12345678',
+  totalMinutes: 60,
+  marksPerQ: 2
+};
 ```
 
----
+Change these values before sharing the site with a new group.
 
-## Deploy on Vercel
+## Project structure
 
-### Option A: Vercel Dashboard (Recommended)
+```text
+.
+├── index.html              # All screen markup
+├── css/
+│   └── styles.css          # Blue edtech visual system and responsive rules
+├── js/
+│   └── app.js              # Login, timer, exam, palette, scoring, feedback, review
+├── test_questions.js       # 50-question source bank with answers
+├── assets/
+│   ├── logo-mark.png       # D3V3NDRA emblem
+│   ├── logo-wordmark.png   # D3V3NDRA wordmark
+│   └── fonts/              # Self-hosted Inter font files
+├── vercel.json             # Static deployment + security headers
+├── package.json
+└── README.md
+```
 
-1. Push this folder to a GitHub repository.
-2. Go to [vercel.com](https://vercel.com) and log in.
-3. Click **Add New → Project** and import your GitHub repo.
-4. Select the `d3v3ndra-online-test` folder (or the root if that's all that's in the repo).
-5. Framework Preset: **Other** (or leave blank).
-6. Build Command: (leave empty) | Output Directory: (leave empty / root)
-7. Click **Deploy**.
+There is no build step. The site is plain HTML, CSS, and JavaScript.
 
-Your test will be live at a `https://*.vercel.app` link.
+## Run locally
 
-### Option B: Vercel CLI
+From this folder, start any static file server. For example:
 
 ```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy from inside the project folder
-vercel
+npx serve .
 ```
 
-### Option C: GitHub Pages
+or, with Python installed:
 
-1. Push to GitHub.
-2. Settings → Pages → Build from `main` branch, `/root` folder.
-3. Your site is live at `https://<user>.github.io/<repo>/`.
-
----
-
-## File Structure
-
-```
-d3v3ndra-online-test/
-├── index.html          # Entry point (test platform)
-├── test_questions.js   # 50 MCQs (Easy/Medium/Tough)
-├── logo.png            # D3V3NDRA Classes brand logo
-├── katex.min.js        # LaTeX math rendering
-├── katex.min.css       # KaTeX styles
-├── vercel.json         # Vercel deployment config
-├── package.json        # Project metadata
-└── .gitignore          # Git ignore rules
+```bash
+python -m http.server 4175
 ```
 
----
+Then open `http://localhost:4175/`.
+
+Opening `index.html` directly from the filesystem may work in some browsers, but a local server is recommended so fonts and scripts load consistently.
+
+## Deploy to Vercel
+
+The repository is already connected to Vercel. Push changes to the `main` branch and Vercel redeploys automatically.
+
+For a fresh project:
+
+1. Push this folder to a GitHub repository.
+2. In Vercel, choose **Add New → Project** and import the repository.
+3. Framework preset: **Other**.
+4. Leave the build command and output directory empty.
+5. Deploy.
+
+`vercel.json` intentionally has **no catch-all rewrite**. The app is a single HTML page, but `/css`, `/js`, and `/assets` must be served as real files. A catch-all route would return `index.html` for every asset request and break the styling and scripts.
 
 ## Customization
 
-- **Logo:** Replace `logo.png` with your own branding image.
-- **Questions:** Edit `test_questions.js` to add/modify questions.
-- **Styling:** Edit the `<style>` block in `index.html`.
-- **Timer / Marks:** Change `TOTAL_MINUTES`, `MARKS_PER_Q`, `EARLY_BONUS_MIN`, `EARLY_BONUS` at the top of the script.
+- **Branding:** replace `assets/logo-mark.png` and `assets/logo-wordmark.png`.
+- **Questions and answers:** edit `test_questions.js`. Keep each correct answer index in `ans` pointing at the right entry in `opts`.
+- **Timer and marks:** edit `totalMinutes` and `marksPerQ` in `js/app.js`.
+- **Colors and layout:** edit `css/styles.css`.
+- **Login credentials:** edit `CONFIG.loginId` and `CONFIG.password` in `js/app.js`.
 
----
+## Security and honest limitations
 
-## Security Notes
+This is a **static client-side app**, not a secure exam server:
 
-This is a client-side (static HTML/JS) test. For high-stakes production use, consider adding server-side answer validation and user authentication. The current version locks the browser during the test but stores answers in memory.
+- The login ID, password, and full answer key are visible in the page source.
+- Answers, results, and feedback stay in the browser. They are **not transmitted to a teacher or saved to a database**.
+- The "Download result" button creates a local text file; students must share it themselves.
+- Browser controls can discourage accidental navigation, but they cannot prevent a determined student from using another device, notes, or outside help.
+- Results reset when the page is refreshed, and anyone with the link can start an attempt.
+
+For high-stakes assessment, add server-side authentication, server-held answer keys, attempt logging, and submission storage. The current version is suitable for guided classroom practice and revision.
+
+## Live deployment note
+
+The GitHub repository is `dev351en/Test-portal`. The Vercel project is available at:
+
+**https://mest-porutal.vercel.app/**

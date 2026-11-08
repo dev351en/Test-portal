@@ -1,0 +1,904 @@
+/* D3V3NDRA Classes — Fractions Test Series
+   Browser-based chapter test. No backend: answers and credentials are in the page source. */
+(() => {
+  'use strict';
+
+  const CONFIG = {
+    loginId: 'DSMG7@012',
+    password: '12345678',
+    totalMinutes: 60,
+    marksPerQ: 2,
+    storageKey: 'd3v3ndra.student'
+  };
+
+  const ICONS = {
+    user: '<path d="M20 21a8 8 0 1 0-16 0"/><circle cx="12" cy="7" r="4"/>',
+    lock: '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+    eye: '<path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+    eyeOff: '<path d="m3 3 18 18"/><path d="M10.6 6.7A10.9 10.9 0 0 1 12 6.5c6.5 0 10 5.5 10 5.5a17.6 17.6 0 0 1-3.2 3.8"/><path d="M6.2 6.8C3.8 8.3 2 12 2 12s3.5 6.5 10 6.5c1.5 0 2.9-.3 4.2-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
+    arrowRight: '<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>',
+    sigma: '<path d="M18 5H7l6 7-6 7h11"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    barChart: '<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/>',
+    clipboard: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 9h6M9 13h6M9 17h4"/>',
+    layers: '<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/><path d="m3 17 9 5 9-5"/>',
+    trophy: '<path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"/><path d="M8 6H4v2a3 3 0 0 0 3 3h1M16 6h4v2a3 3 0 0 1-3 3h-1"/><path d="M12 13v4M9 21h6M10 17h4"/>',
+    flag: '<path d="M5 21V4"/><path d="M5 5c4-2 7 2 11 0v8c-4 2-7-2-11 0"/>',
+    bookOpen: '<path d="M12 6c-2-2-5-2-7-2v14c2 0 5 0 7 2 2-2 5-2 7-2V4c-2 0-5 0-7 2Z"/><path d="M12 6v14"/>',
+    check: '<path d="m5 12 4 4L19 6"/>',
+    chevronLeft: '<path d="m15 18-6-6 6-6"/>',
+    chevronRight: '<path d="m9 18 6-6-6-6"/>',
+    grid: '<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/>',
+    eraser: '<path d="m4 16 8-10 7 6-6 8H7l-3-4Z"/><path d="M8 20h11"/>',
+    fullscreen: '<path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/>',
+    fullscreenExit: '<path d="M3 8h5V3M21 8h-5V3M3 16h5v5M21 16h-5v5"/>',
+    logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
+    message: '<path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8Z"/><path d="M8 10h8M8 14h5"/>',
+    list: '<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/>',
+    download: '<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>',
+    shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/>',
+    x: '<path d="M6 6l12 12M18 6 6 18"/>',
+    alert: '<path d="m12 3 10 18H2L12 3Z"/><path d="M12 9v5M12 17h.01"/>',
+    play: '<path d="m8 5 11 7-11 7V5Z"/>'
+  };
+
+  const state = {
+    studentId: '',
+    paper: [],
+    answers: new Map(),
+    marked: new Set(),
+    visited: new Set(),
+    current: 0,
+    remaining: CONFIG.totalMinutes * 60,
+    endsAt: 0,
+    startedAt: 0,
+    submittedAt: 0,
+    timerId: null,
+    running: false,
+    submitted: false,
+    feedback: null,
+    result: null
+  };
+
+  const $ = (selector, root = document) => root.querySelector(selector);
+  const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+
+  function icon(name, size = 20) {
+    return `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
+  }
+
+  function hydrateIcons(root = document) {
+    $$('[data-icon]', root).forEach(el => {
+      el.innerHTML = icon(el.dataset.icon, Number(el.dataset.iconSize) || 20);
+    });
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[char]);
+  }
+
+  function fractionMarkup(num, den) {
+    return `<span class="frac"><span class="num">${num}</span><span class="den">${den}</span></span>`;
+  }
+
+  function formatMath(text) {
+    let out = escapeHtml(text);
+    out = out.replace(/(^|[\s(])(\d+)\s+(\d+)\/(\d+)(?![\d/])/g, (match, prefix, whole, num, den) =>
+      `${prefix}<span class="mixed"><span class="whole">${whole}</span>${fractionMarkup(num, den)}</span>`
+    );
+    out = out.replace(/(^|[\s(])(\d+)\/(\d+)(?![\d/])/g, (match, prefix, num, den) =>
+      `${prefix}${fractionMarkup(num, den)}`
+    );
+    return out.replace(/m²/g, 'm<sup>2</sup>');
+  }
+
+  function formatTime(totalSeconds) {
+    const safe = Math.max(0, totalSeconds);
+    const minutes = Math.floor(safe / 60);
+    const seconds = safe % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+
+  function formatDuration(totalSeconds) {
+    const safe = Math.max(0, Math.round(totalSeconds));
+    const minutes = Math.floor(safe / 60);
+    const seconds = safe % 60;
+    if (minutes === 0) return `${seconds} sec`;
+    if (seconds === 0) return `${minutes} min`;
+    return `${minutes} min ${seconds} sec`;
+  }
+
+  function showView(name) {
+    $$('.view').forEach(view => view.classList.toggle('is-active', view.id === `view${name}`));
+    $('#appHeader').hidden = name === 'Login';
+    window.scrollTo(0, 0);
+  }
+
+  function setHeader(mode) {
+    const modes = {
+      instructions: { title: 'Fractions Test Series', pill: 'Chapter Test', sep: false, timer: false, fs: false, student: true, logout: true },
+      exam: { title: 'Fractions Test Series', pill: 'Working with Fractions', sep: true, timer: true, fs: true, student: false, logout: true },
+      feedback: { title: 'Test Review & Feedback', pill: 'Feedback', sep: false, timer: false, fs: false, student: true, logout: false },
+      result: { title: 'Test Result', pill: 'Fractions', sep: false, timer: false, fs: false, student: true, logout: false }
+    };
+    const config = modes[mode];
+    if (!config) return;
+    $('#headerTitle').textContent = config.title;
+    $('#headerSep').hidden = !config.sep;
+    $('#headerPill').textContent = config.pill;
+    $('#timerPill').hidden = !config.timer;
+    $('#fsBtn').hidden = !config.fs;
+    $('#studentChip').hidden = !config.student;
+    $('#logoutBtn').hidden = !config.logout;
+    $('#studentName').textContent = state.studentId;
+  }
+
+  function safeStorageGet(key) {
+    try { return localStorage.getItem(key) || ''; } catch (error) { return ''; }
+  }
+
+  function safeStorageSet(key, value) {
+    try {
+      if (value) localStorage.setItem(key, value);
+      else localStorage.removeItem(key);
+    } catch (error) { /* storage can be unavailable */ }
+  }
+
+  function showLoginError(message) {
+    const error = $('#loginError');
+    const form = $('#loginForm');
+    error.textContent = message;
+    error.hidden = false;
+    form.classList.remove('shake');
+    void form.offsetWidth;
+    form.classList.add('shake');
+  }
+
+  function hideLoginError() {
+    $('#loginError').hidden = true;
+    $('#loginForm').classList.remove('shake');
+  }
+
+  function handleLogin(event) {
+    event.preventDefault();
+    const id = $('#loginId').value.trim();
+    const password = $('#loginPass').value;
+
+    if (!id || !password) {
+      showLoginError('Enter your student ID and password to continue.');
+      (!id ? $('#loginId') : $('#loginPass')).focus();
+      return;
+    }
+
+    if (id.toUpperCase() !== CONFIG.loginId.toUpperCase() || password !== CONFIG.password) {
+      showLoginError('Incorrect student ID or password. Please check with your teacher and try again.');
+      $('#loginPass').select();
+      return;
+    }
+
+    hideLoginError();
+    state.studentId = id;
+    safeStorageSet(CONFIG.storageKey, $('#rememberMe').checked ? id : '');
+    $('#studentName').textContent = id;
+    setHeader('instructions');
+    showView('Instructions');
+    $('#startBtn').focus();
+  }
+
+  function togglePasswordVisibility() {
+    const input = $('#loginPass');
+    const button = $('#togglePass');
+    const reveal = input.type === 'password';
+    input.type = reveal ? 'text' : 'password';
+    button.innerHTML = icon(reveal ? 'eyeOff' : 'eye', 18);
+    button.setAttribute('aria-label', reveal ? 'Hide password' : 'Show password');
+    input.focus();
+  }
+
+  function openForgotModal() {
+    openModal({
+      title: 'Forgot password?',
+      body: '<p>Test credentials are issued by your teacher. Please contact D3V3NDRA Classes to get them reset.</p><div class="modal-note">This browser-based test cannot reset passwords on its own.</div>',
+      actions: [{ label: 'Got it', variant: 'primary' }]
+    });
+  }
+
+  function requestLogout() {
+    if (state.running && !state.submitted) {
+      openModal({
+        title: 'Leave the test?',
+        body: '<p>Your attempt is still in progress. Signing out will discard all answers and stop the timer.</p><div class="modal-note warn">This cannot be undone.</div>',
+        actions: [
+          { label: 'Keep testing', variant: 'ghost' },
+          { label: 'Sign out', variant: 'danger', onClick: resetToLogin }
+        ]
+      });
+      return;
+    }
+    resetToLogin();
+  }
+
+  function resetToLogin() {
+    stopTimer();
+    removeUnloadGuard();
+    closeModal();
+    state.studentId = '';
+    state.paper = [];
+    state.answers.clear();
+    state.marked.clear();
+    state.visited.clear();
+    state.current = 0;
+    state.remaining = CONFIG.totalMinutes * 60;
+    state.endsAt = 0;
+    state.startedAt = 0;
+    state.submittedAt = 0;
+    state.running = false;
+    state.submitted = false;
+    state.feedback = null;
+    state.result = null;
+
+    $('#feedbackForm').reset();
+    $('#feedbackError').hidden = true;
+    $('#feedbackText').value = '';
+    $('#examShell').classList.remove('palette-open');
+    $('#loginPass').value = '';
+    $('#loginPass').type = 'password';
+    $('#togglePass').innerHTML = icon('eye', 18);
+    $('#togglePass').setAttribute('aria-label', 'Show password');
+    hideLoginError();
+
+    const remembered = safeStorageGet(CONFIG.storageKey);
+    $('#loginId').value = remembered;
+    $('#rememberMe').checked = !!remembered;
+    showView('Login');
+    $('#loginId').focus();
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      const request = document.documentElement.requestFullscreen;
+      if (!request) {
+        toast('Full screen is not available in this browser.', 'error');
+        return;
+      }
+      Promise.resolve(request.call(document.documentElement)).catch(() => {
+        toast('The browser blocked full screen. You can continue normally.', 'error');
+      });
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+
+  function initHeader() {
+    $('#logoutBtn').addEventListener('click', requestLogout);
+    $('#fsBtn').addEventListener('click', toggleFullscreen);
+    document.addEventListener('fullscreenchange', () => {
+      $('#fsBtn').innerHTML = icon(document.fullscreenElement ? 'fullscreenExit' : 'fullscreen', 19);
+      $('#fsBtn').setAttribute('aria-label', document.fullscreenElement ? 'Exit full screen' : 'Enter full screen');
+    });
+  }
+
+  function initLogin() {
+    const remembered = safeStorageGet(CONFIG.storageKey);
+    if (remembered) {
+      $('#loginId').value = remembered;
+      $('#rememberMe').checked = true;
+    }
+    $('#loginForm').addEventListener('submit', handleLogin);
+    $('#togglePass').addEventListener('click', togglePasswordVisibility);
+    $('#forgotBtn').addEventListener('click', openForgotModal);
+    ['#loginId', '#loginPass'].forEach(selector => {
+      $(selector).addEventListener('input', hideLoginError);
+    });
+  }
+
+  function initInstructions() {
+    $('#startBtn').addEventListener('click', startTest);
+  }
+
+  function hashString(value) {
+    let hash = 2166136261;
+    for (let i = 0; i < value.length; i += 1) {
+      hash ^= value.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+  }
+
+  function mulberry32(seed) {
+    return function random() {
+      seed |= 0;
+      seed = (seed + 0x6D2B79F5) | 0;
+      let value = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      value = (value + Math.imul(value ^ (value >>> 7), 61 | value)) ^ value;
+      return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function buildPaper(studentId) {
+    const bank = Array.isArray(window.QUESTIONS) ? window.QUESTIONS.slice() : [];
+    if (bank.length === 0) return [];
+    const day = new Date().toISOString().slice(0, 10);
+    const random = mulberry32(hashString(`${studentId}|${day}|fractions`));
+    for (let i = bank.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(random() * (i + 1));
+      [bank[i], bank[j]] = [bank[j], bank[i]];
+    }
+    return bank.map(question => {
+      const options = question.opts.map((text, index) => ({ text, index }));
+      for (let i = options.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(random() * (i + 1));
+        [options[i], options[j]] = [options[j], options[i]];
+      }
+      return {
+        ...question,
+        opts: options.map(option => option.text),
+        ans: options.findIndex(option => option.index === question.ans)
+      };
+    });
+  }
+
+  function currentQuestion() {
+    return state.paper[state.current] || null;
+  }
+
+  function startTest() {
+    const paper = buildPaper(state.studentId);
+    if (paper.length !== 50) {
+      openModal({
+        title: 'Question bank unavailable',
+        body: '<p>The test could not load all 50 questions. Please refresh the page and try again.</p>',
+        actions: [{ label: 'Close', variant: 'primary' }]
+      });
+      return;
+    }
+
+    state.paper = paper;
+    state.answers.clear();
+    state.marked.clear();
+    state.visited.clear();
+    state.current = 0;
+    state.remaining = CONFIG.totalMinutes * 60;
+    state.startedAt = Date.now();
+    state.endsAt = state.startedAt + CONFIG.totalMinutes * 60 * 1000;
+    state.submittedAt = 0;
+    state.running = true;
+    state.submitted = false;
+    state.feedback = null;
+    state.result = null;
+    state.visited.add(state.paper[0].id);
+
+    $('#feedbackForm').reset();
+    $('#feedbackError').hidden = true;
+    $('#feedbackText').value = '';
+    $('#examShell').classList.remove('palette-open');
+    $('#timerPill').classList.remove('is-warning');
+    $('#timerText').textContent = formatTime(state.remaining);
+
+    buildPalette();
+    renderExam();
+    setHeader('exam');
+    showView('Exam');
+    addUnloadGuard();
+    startTimer();
+    toast('Test started — 60 minutes remaining.');
+  }
+
+  function buildPalette() {
+    const grid = $('#paletteGrid');
+    grid.innerHTML = state.paper.map((question, index) =>
+      `<button type="button" class="pal-btn" data-palette-index="${index}" aria-label="Question ${index + 1}">${index + 1}</button>`
+    ).join('');
+  }
+
+  function updatePalette() {
+    const total = state.paper.length;
+    const answered = state.answers.size;
+    const percent = total ? Math.round((answered / total) * 100) : 0;
+    const buttons = $$('#paletteGrid .pal-btn');
+
+    buttons.forEach((button, index) => {
+      const question = state.paper[index];
+      if (!question) return;
+      const isAnswered = state.answers.has(question.id);
+      const isMarked = state.marked.has(question.id);
+      const isVisited = state.visited.has(question.id);
+      const isCurrent = index === state.current;
+      button.className = 'pal-btn';
+      if (isVisited) button.classList.add('is-visited');
+      if (isAnswered) button.classList.add('is-answered');
+      if (isMarked) button.classList.add('is-marked');
+      if (isCurrent) button.classList.add('is-current');
+      button.setAttribute('aria-current', isCurrent ? 'true' : 'false');
+      const status = isAnswered ? 'answered' : isMarked ? 'marked for review' : isVisited ? 'not answered' : 'not visited';
+      button.setAttribute('aria-label', `Question ${index + 1}, ${status}`);
+    });
+
+    $('#paletteCount').textContent = `${answered} / ${total}`;
+    $('#progressCount').textContent = `${answered} / ${total}`;
+    $('#progressFill').style.width = `${percent}%`;
+  }
+
+  function renderExam() {
+    const question = currentQuestion();
+    if (!question) return;
+    state.visited.add(question.id);
+    const selected = state.answers.get(question.id);
+    const marked = state.marked.has(question.id);
+    const last = state.current === state.paper.length - 1;
+
+    $('#qNo').textContent = String(state.current + 1);
+    $('#qText').innerHTML = formatMath(question.q);
+    $('#qOptions').innerHTML = question.opts.map((option, index) => {
+      const letter = 'ABCD'[index];
+      const active = selected === index;
+      return `<button type="button" class="option${active ? ' is-selected' : ''}" data-option="${index}" role="radio" aria-checked="${active ? 'true' : 'false'}">
+        <span class="option-radio"></span>
+        <span class="option-letter">${letter}.</span>
+        <span class="option-text">${formatMath(option)}</span>
+      </button>`;
+    }).join('');
+
+    $('#markBadge').hidden = !marked;
+    $('#prevBtn').disabled = state.current === 0;
+    $('#nextBtn').disabled = last;
+    $('#clearBtn').disabled = selected === undefined;
+    $('#markBtn').classList.toggle('is-active', marked);
+    $('#markBtn').innerHTML = `${icon('flag', 16)}${marked ? 'Marked for Review' : 'Mark for Review'}`;
+    $('#saveNextBtn').innerHTML = last
+      ? `Submit Test ${icon('check', 17)}`
+      : `Save &amp; Next${icon('chevronRight', 17)}`;
+
+    updatePalette();
+  }
+
+  function selectOption(index) {
+    const question = currentQuestion();
+    if (!question) return;
+    state.answers.set(question.id, index);
+    $$('#qOptions .option').forEach((button, optionIndex) => {
+      const active = optionIndex === index;
+      button.classList.toggle('is-selected', active);
+      button.setAttribute('aria-checked', active ? 'true' : 'false');
+    });
+    $('#clearBtn').disabled = false;
+    updatePalette();
+  }
+
+  function goToQuestion(index) {
+    if (index < 0 || index >= state.paper.length) return;
+    state.current = index;
+    state.visited.add(state.paper[index].id);
+    renderExam();
+    if (window.matchMedia('(max-width: 980px)').matches) {
+      $('#examShell').classList.remove('palette-open');
+    }
+  }
+
+  function markCurrentQuestion() {
+    const question = currentQuestion();
+    if (!question) return;
+    if (state.marked.has(question.id)) {
+      state.marked.delete(question.id);
+      toast('Removed from review.', 'info');
+    } else {
+      state.marked.add(question.id);
+      toast('Marked for review.');
+    }
+    renderExam();
+  }
+
+  function clearCurrentAnswer() {
+    const question = currentQuestion();
+    if (!question) return;
+    if (!state.answers.has(question.id)) return;
+    state.answers.delete(question.id);
+    $$('#qOptions .option').forEach(button => {
+      button.classList.remove('is-selected');
+      button.setAttribute('aria-checked', 'false');
+    });
+    $('#clearBtn').disabled = true;
+    updatePalette();
+    toast('Answer cleared.', 'info');
+  }
+
+  function saveAndNext() {
+    if (state.current === state.paper.length - 1) {
+      openSubmitModal();
+      return;
+    }
+    state.current += 1;
+    state.visited.add(currentQuestion().id);
+    renderExam();
+  }
+
+  function initExam() {
+    $('#qOptions').addEventListener('click', event => {
+      const button = event.target.closest('.option');
+      if (!button) return;
+      selectOption(Number(button.dataset.option));
+    });
+
+    $('#paletteGrid').addEventListener('click', event => {
+      const button = event.target.closest('.pal-btn');
+      if (!button) return;
+      goToQuestion(Number(button.dataset.paletteIndex));
+    });
+
+    $('#prevBtn').addEventListener('click', () => goToQuestion(state.current - 1));
+    $('#nextBtn').addEventListener('click', () => goToQuestion(state.current + 1));
+    $('#saveNextBtn').addEventListener('click', saveAndNext);
+    $('#markBtn').addEventListener('click', markCurrentQuestion);
+    $('#clearBtn').addEventListener('click', clearCurrentAnswer);
+    $('#paletteToggle').addEventListener('click', () => {
+      const open = $('#examShell').classList.toggle('palette-open');
+      if (open) window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    $('#paletteClose').addEventListener('click', () => {
+      $('#examShell').classList.remove('palette-open');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  function startTimer() {
+    stopTimer();
+    tickTimer();
+    state.timerId = window.setInterval(tickTimer, 1000);
+  }
+
+  function tickTimer() {
+    if (!state.running) return;
+    const remaining = Math.max(0, Math.ceil((state.endsAt - Date.now()) / 1000));
+    state.remaining = remaining;
+    $('#timerText').textContent = formatTime(remaining);
+    $('#timerPill').classList.toggle('is-warning', remaining <= 300);
+    if (remaining <= 0) {
+      stopTimer();
+      submitTest(true);
+    }
+  }
+
+  function stopTimer() {
+    if (state.timerId) {
+      window.clearInterval(state.timerId);
+      state.timerId = null;
+    }
+  }
+
+  function beforeUnloadHandler(event) {
+    if (!state.running || state.submitted) return;
+    event.preventDefault();
+    event.returnValue = '';
+  }
+
+  function addUnloadGuard() {
+    window.addEventListener('beforeunload', beforeUnloadHandler);
+  }
+
+  function removeUnloadGuard() {
+    window.removeEventListener('beforeunload', beforeUnloadHandler);
+  }
+
+  let modalState = null;
+  let toastTimer = null;
+
+  function openModal({ title, body, actions = [], size = '' }) {
+    closeModal();
+    const previousFocus = document.activeElement;
+    const root = $('#modalRoot');
+    const actionsHtml = actions.map((action, index) => {
+      const variant = action.variant === 'primary' ? 'btn-primary' : action.variant === 'danger' ? 'btn-clear' : 'btn-ghost';
+      return `<button type="button" class="btn ${variant}" data-modal-action="${index}">${action.label}</button>`;
+    }).join('');
+
+    root.innerHTML = `<div class="modal-overlay" data-modal-overlay>
+      <div class="modal ${size === 'lg' ? 'modal-lg' : ''}" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-head">
+          <h2 id="modalTitle">${escapeHtml(title)}</h2>
+          <button type="button" class="icon-btn" data-modal-close aria-label="Close dialog">${icon('x', 18)}</button>
+        </div>
+        <div class="modal-body">${body}</div>
+        <div class="modal-actions">${actionsHtml}</div>
+      </div>
+    </div>`;
+    root.hidden = false;
+    document.body.classList.add('modal-open');
+
+    const overlay = $('[data-modal-overlay]', root);
+    const dialog = $('.modal', root);
+    const close = () => closeModal();
+
+    $('[data-modal-close]', root).addEventListener('click', close);
+    overlay.addEventListener('click', event => {
+      if (event.target === overlay) close();
+    });
+    $$('[data-modal-action]', root).forEach(button => {
+      button.addEventListener('click', () => {
+        const action = actions[Number(button.dataset.modalAction)];
+        closeModal();
+        if (action && typeof action.onClick === 'function') action.onClick();
+      });
+    });
+
+    const keyHandler = event => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeModal();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = $$('button, [href], input, textarea, select, [tabindex]:not([tabindex="-1"])', dialog)
+        .filter(element => !element.disabled && element.offsetParent !== null);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', keyHandler, true);
+    modalState = { previousFocus, keyHandler };
+
+    window.requestAnimationFrame(() => {
+      const target = $('.btn-primary', root) || $('[data-modal-close]', root);
+      if (target) target.focus();
+    });
+  }
+
+  function closeModal() {
+    const root = $('#modalRoot');
+    if (modalState) {
+      document.removeEventListener('keydown', modalState.keyHandler, true);
+      const previousFocus = modalState.previousFocus;
+      modalState = null;
+      document.body.classList.remove('modal-open');
+      root.hidden = true;
+      root.innerHTML = '';
+      if (previousFocus && document.contains(previousFocus)) previousFocus.focus();
+    } else {
+      document.body.classList.remove('modal-open');
+      root.hidden = true;
+      root.innerHTML = '';
+    }
+  }
+
+  function openSubmitModal() {
+    const total = state.paper.length;
+    const answered = state.answers.size;
+    const marked = state.marked.size;
+    const unanswered = total - answered;
+    const body = `<p>You have answered <b>${answered}</b> of <b>${total}</b> questions.</p>
+      ${unanswered > 0 ? `<p><b>${unanswered}</b> question${unanswered === 1 ? '' : 's'} will be left unanswered and score zero.</p>` : '<p>All questions have an answer.</p>'}
+      ${marked > 0 ? `<p><b>${marked}</b> question${marked === 1 ? '' : 's'} are marked for review. You can still go back before submitting.</p>` : ''}
+      <div class="modal-note ${unanswered > 0 ? 'warn' : ''}">You cannot change answers after submission.</div>`;
+    openModal({
+      title: 'Submit your test?',
+      body,
+      actions: [
+        { label: 'Keep working', variant: 'ghost' },
+        { label: 'Submit test', variant: 'primary', onClick: () => submitTest(false) }
+      ]
+    });
+  }
+
+  function submitTest(auto) {
+    if (state.submitted) return;
+    state.submitted = true;
+    state.running = false;
+    state.submittedAt = Date.now();
+    stopTimer();
+    removeUnloadGuard();
+    closeModal();
+
+    const total = state.paper.length;
+    const answered = state.answers.size;
+    const marked = state.marked.size;
+    $('#sumAnswered').textContent = String(answered);
+    $('#sumMarked').textContent = String(marked);
+    $('#sumUnanswered').textContent = String(total - answered);
+    $('#feedbackForm').reset();
+    $('#feedbackError').hidden = true;
+    $('#feedbackText').value = '';
+    state.feedback = null;
+    state.result = null;
+
+    setHeader('feedback');
+    showView('Feedback');
+    toast(auto ? 'Time is up. Your test was submitted automatically.' : 'Test submitted successfully.');
+  }
+
+  function initFeedback() {
+    $('#feedbackForm').addEventListener('change', () => {
+      $('#feedbackError').hidden = true;
+    });
+    $('#feedbackForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const liked = form.querySelector('input[name="liked"]:checked');
+      const difficulty = form.querySelector('input[name="difficulty"]:checked');
+      const accessible = form.querySelector('input[name="accessible"]:checked');
+      const error = $('#feedbackError');
+
+      if (!liked || !difficulty || !accessible) {
+        error.textContent = 'Please answer the three feedback questions above.';
+        error.hidden = false;
+        error.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      error.hidden = true;
+      state.feedback = {
+        liked: liked.value,
+        difficulty: difficulty.value,
+        accessible: accessible.value,
+        comments: $('#feedbackText').value.trim()
+      };
+      state.result = computeResult();
+      renderResult();
+      setHeader('result');
+      showView('Result');
+      toast('Feedback recorded. Here is your result.');
+    });
+  }
+
+  function computeResult() {
+    const details = state.paper.map((question, index) => {
+      const your = state.answers.get(question.id);
+      return { question, index, your, ok: your === question.ans };
+    });
+    const correct = details.filter(item => item.ok).length;
+    const attempted = details.filter(item => item.your !== undefined).length;
+    const totalMarks = state.paper.length * CONFIG.marksPerQ;
+    const score = correct * CONFIG.marksPerQ;
+    const percent = totalMarks ? Math.round((score / totalMarks) * 100) : 0;
+    const timeUsed = Math.max(0, Math.min(
+      CONFIG.totalMinutes * 60,
+      Math.round((state.submittedAt - state.startedAt) / 1000)
+    ));
+    return { details, correct, attempted, total: state.paper.length, totalMarks, score, percent, timeUsed };
+  }
+
+  function gradeFor(percent) {
+    if (percent >= 90) return { grade: 'Outstanding!', message: 'A superb result. You have a strong command of fractions.' };
+    if (percent >= 75) return { grade: 'Excellent!', message: 'Great work. Review the few questions you missed to reach the top.' };
+    if (percent >= 60) return { grade: 'Good work!', message: 'A solid result. A little more practice will make it excellent.' };
+    if (percent >= 40) return { grade: 'Keep going!', message: 'You are getting there. Review the worked answers and try again.' };
+    return { grade: 'Needs practice', message: 'Do not worry. Review the chapter and attempt the test again when ready.' };
+  }
+
+  function renderResult() {
+    const result = state.result;
+    if (!result) return;
+    const grading = gradeFor(result.percent);
+    const date = new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+
+    $('#resultStudent').textContent = `${state.studentId} · ${date}`;
+    $('#resultPct').textContent = `${result.percent}%`;
+    $('#resultScore').textContent = `${result.score} / ${result.totalMarks}`;
+    $('#scoreRing').style.setProperty('--pct', String(result.percent));
+    $('#resultGrade').textContent = grading.grade;
+    $('#resultMessage').textContent = `${grading.message} You answered ${result.correct} of ${result.total} correctly.`;
+    $('#resultCorrect').textContent = `${result.correct} / ${result.total}`;
+    $('#resultTime').textContent = formatDuration(result.timeUsed);
+    $('#resultMarked').textContent = String(state.marked.size);
+  }
+
+  function initResult() {
+    $('#reviewBtn').addEventListener('click', openReviewModal);
+    $('#finishBtn').addEventListener('click', resetToLogin);
+    $('#downloadBtn').addEventListener('click', downloadResult);
+  }
+
+  function openReviewModal() {
+    const result = state.result;
+    if (!result) return;
+    const incorrect = result.details.filter(item => item.your !== undefined && !item.ok).length;
+    const skipped = result.details.filter(item => item.your === undefined).length;
+    const items = result.details.map(item => {
+      const question = item.question;
+      const answered = item.your !== undefined;
+      const statusClass = item.ok ? 'ok' : answered ? 'bad' : 'skip';
+      const statusText = item.ok ? 'Correct' : answered ? 'Incorrect' : 'Not answered';
+      const yourText = answered
+        ? `${'ABCD'[item.your]}. ${formatMath(question.opts[item.your])}`
+        : 'Not answered';
+      const correctText = `${'ABCD'[question.ans]}. ${formatMath(question.opts[question.ans])}`;
+      return `<div class="review-item">
+        <div class="review-item-head"><span>Question ${item.index + 1}</span><span class="review-status ${statusClass}">${statusText}</span></div>
+        <div class="review-q">${formatMath(question.q)}</div>
+        <div class="review-answers">
+          <span>Your answer: <b>${yourText}</b></span>
+          <span>Correct answer: <b class="answer-correct">${correctText}</b></span>
+        </div>
+      </div>`;
+    }).join('');
+
+    openModal({
+      title: 'Review your answers',
+      size: 'lg',
+      body: `<div class="review-summary"><span><b>${result.correct}</b> correct</span><span><b>${incorrect}</b> incorrect</span><span><b>${skipped}</b> not answered</span></div><div class="review-list">${items}</div>`,
+      actions: [{ label: 'Close', variant: 'primary' }]
+    });
+  }
+
+  function downloadResult() {
+    const result = state.result;
+    if (!result) return;
+    const grading = gradeFor(result.percent);
+    const date = new Date().toLocaleString();
+    const lines = [
+      'D3V3NDRA CLASSES — FRACTIONS TEST SERIES',
+      'Result report',
+      '========================================',
+      `Student ID   : ${state.studentId}`,
+      `Submitted    : ${date}`,
+      `Score        : ${result.score} / ${result.totalMarks} (${result.percent}%)`,
+      `Correct      : ${result.correct} / ${result.total}`,
+      `Attempted    : ${result.attempted} / ${result.total}`,
+      `Time used    : ${formatDuration(result.timeUsed)}`,
+      `Grade        : ${grading.grade.replace('!', '')}`,
+      '',
+      'Feedback',
+      '----------------------------------------',
+      `Likes the exam : ${state.feedback ? state.feedback.liked : 'Not provided'}`,
+      `Difficulty     : ${state.feedback ? state.feedback.difficulty : 'Not provided'}`,
+      `Accessible     : ${state.feedback ? state.feedback.accessible : 'Not provided'}`,
+      `Comments       : ${state.feedback && state.feedback.comments ? state.feedback.comments : 'None'}`,
+      '',
+      'Answer review',
+      '----------------------------------------'
+    ];
+
+    result.details.forEach(item => {
+      const question = item.question;
+      const answered = item.your !== undefined;
+      const status = item.ok ? 'CORRECT' : answered ? 'INCORRECT' : 'NOT ANSWERED';
+      lines.push(`${item.index + 1}. [${status}] ${question.q}`);
+      lines.push(`   Your answer   : ${answered ? `${'ABCD'[item.your]}. ${question.opts[item.your]}` : '—'}`);
+      if (!item.ok) lines.push(`   Correct answer: ${'ABCD'[question.ans]}. ${question.opts[question.ans]}`);
+      lines.push('');
+    });
+
+    const blob = new Blob([lines.join('\r\n')], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const safeId = state.studentId.replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'student';
+    link.href = url;
+    link.download = `fractions-result-${safeId}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast('Result downloaded.');
+  }
+
+  function toast(message, type = 'success') {
+    const element = $('#toast');
+    element.innerHTML = `${icon(type === 'error' ? 'alert' : type === 'info' ? 'info' : 'check', 16)}<span>${escapeHtml(message)}</span>`;
+    element.classList.add('is-visible');
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => element.classList.remove('is-visible'), 2800);
+  }
+
+  function init() {
+    hydrateIcons();
+    initHeader();
+    initLogin();
+    initInstructions();
+    initExam();
+    initFeedback();
+    initResult();
+    showView('Login');
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+})();
+
+
