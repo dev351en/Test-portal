@@ -100,7 +100,7 @@
       <div class="t">D3V3NDRA Classes</div>
       <div class="sub">Virtual Hosted Testing Platform &bull; Working with Fractions</div>
     </div>
-    <div class="brand-right">SECURE TEST SESSION</div>
+    <div class="brand-right">ONLINE TEST</div>
   </div>
   <div class="container">
     <div class="card" style="max-width:420px;margin:40px auto">
@@ -111,7 +111,7 @@
       <input type="text" id="login-id" placeholder="e.g. AM2026">
       <label style="margin-top:16px">Password</label>
       <input type="password" id="login-pass" placeholder="••••••••">
-      <div class="footer-note" style="margin-top:22px">Authorized users only. Session is monitored.</div>
+      <div class="footer-note" style="margin-top:22px">Enter the test credentials provided by your teacher.</div>
       <div style="margin-top:26px">
         <button class="btn btn-primary" style="width:100%" onclick="app.login()">Start Test</button>
       </div>
@@ -277,10 +277,8 @@ app.login=function(){
   app.user={id,pw};
   app.started=true;
   requestFullscreen();
-  app.startTime=Date.now();
   app.timeLeft=TOTAL_MINUTES*60;
   show('page-instructions');
-  app.startTimer();
   app.renderInstructions();
 };
 
@@ -297,8 +295,7 @@ app.format=function(s){const m=Math.floor(s/60),sec=s%60;return String(m).padSta
 
 /* ---------- instructions ---------- */
 app.renderInstructions=function(){
-  document.getElementById('inst-hello').textContent='Hello, '+app.user.id+'.';
-  const box=document.getElementById('inst-content');
+  const box=document.getElementById('page-instructions');
   box.innerHTML=`
   <div class="brand" style="padding:12px 20px;margin-bottom:18px">
     <img src="logo.png" alt="logo" style="height:40px">
@@ -316,8 +313,8 @@ app.renderInstructions=function(){
       <li><b>Early completion bonus:</b> If you finish at least 10 minutes early, you get a bonus of +5 marks.</li>
       <li><b>One question per page:</b> Answer each question before moving forward. You cannot go back to previous questions.</li>
       <li><b>No calculator:</b> This is a mathematics test; rough work should be done on paper only.</li>
-      <li><b>No copying:</b> Copy, paste, right-click, print-screen, and keyboard shortcuts are disabled during the test.</li>
-      <li><b>Full screen:</b> The test runs in full screen. Minimizing or switching away will end the test immediately and your session will be terminated.</li>
+      <li><b>Test conduct:</b> Please do not use outside help or a calculator. Browser restrictions are only deterrents and cannot prevent every form of assistance.</li>
+      <li><b>Full screen:</b> Full screen may be requested by your browser. This page cannot reliably detect or prevent all switching or other-device use.</li>
       <li><b>Submission:</b> After Q50 you will reach a short review page, then your result will be shown.</li>
     </ul>
     <div class="warn-box"><b>Important:</b> Once started, the test must be completed in one sitting. There is no pause or resume option.</div>
@@ -343,15 +340,15 @@ app.showInstructions2=function(){
       <ul class="inst">
         <li><b>No going back:</b> After you answer a question and move forward, you cannot return to previous questions.</li>
         <li><b>No calculator:</b> This is a mathematics test. Calculators and calculating devices are not permitted. Use the rough paper provided.</li>
-        <li><b>No copying:</b> Copy, paste, cut, right-click, drag, print-screen, and keyboard shortcuts are disabled. Any attempt is logged.</li>
+        <li><b>Test conduct:</b> Please do not use outside help or a calculator. Browser restrictions are only deterrents and are not a guarantee of exam integrity.</li>
         <li><b>Full screen mode:</b> The test launches in full screen. Do not attempt to exit full screen.</li>
-        <li><b>Minimizing ends the test:</b> If you minimize the window, switch tabs, or lose focus, the test ends immediately and your session is terminated. No score is recorded.</li>
+        <li><b>Staying on the test:</b> Please keep this page open for the test. The browser cannot reliably enforce or monitor this rule.</li>
         <li><b>One question per page:</b> Each of the 50 questions appears on its own page. Select one of four options and proceed.</li>
         <li><b>Answer before continuing:</b> You must select an option to enable the Next button.</li>
         <li><b>Automatic submission:</b> If the 60-minute timer expires, the test submits automatically.</li>
         <li><b>Review page:</b> After Q50, you will answer a short review about the platform before seeing your result.</li>
       </ul>
-      <div class="warn-box"><b>Security notice:</b> This session is monitored. Tampering with the browser, developer tools, or navigation will terminate the test and invalidate your attempt.</div>
+      <div class="warn-box"><b>Integrity note:</b> This is a browser-only demonstration. Login details and answer keys are present in the downloaded page; do not use it for a high-stakes or confidential exam.</div>
     </div>
     <div style="display:flex;justify-content:flex-end">
       <button class="btn btn-primary" onclick="app.beginQuiz()">I Understand &mdash; Begin Test</button>
@@ -360,7 +357,7 @@ app.showInstructions2=function(){
   `;
   show('page-instructions2');
 };
-app.beginQuiz=function(){app.qIndex=0;app.renderQuestion();show('page-quiz');};
+app.beginQuiz=function(){app.qIndex=0;app.startTime=Date.now();app.startTimer();app.renderQuestion();show('page-quiz');};
 
 /* ---------- quiz ---------- */
 app.renderQuestion=function(){
@@ -400,6 +397,7 @@ app.select=function(i){
   document.getElementById('next-btn').disabled=false;
 };
 app.next=function(){
+  if(!app.answers.has(app.qIndex)){alert('Please select an answer before continuing.');return}
   if(app.qIndex<QUESTIONS.length-1){app.qIndex++;app.renderQuestion();}
   else app.showReview();
 };
@@ -407,14 +405,14 @@ app.next=function(){
 /* ---------- review ---------- */
 app.showReview=function(){
   show('page-review');
-  document.getElementById('rev-hello').textContent='Hello, '+app.user.id+'.';
   const stars=document.getElementById('rev-stars');stars.innerHTML='';
-  for(let i=1;i<=5;i++){const s=document.createElement('span');s.className='star off';s.textContent='\u2605';s.onclick=()=>{document.querySelectorAll('#rev-stars .star').forEach(x=>x.classList.remove('on'));s.classList.add('on');app.rating=i};stars.appendChild(s)}
+  for(let i=1;i<=5;i++){const s=document.createElement('span');s.className='star off';s.textContent='\u2605';s.setAttribute('role','button');s.setAttribute('aria-label',i+' star'+(i===1?'':'s'));s.onclick=()=>{document.querySelectorAll('#rev-stars .star').forEach((x,index)=>{x.classList.toggle('on',index<i);x.classList.toggle('off',index>=i)});app.rating=i};stars.appendChild(s)}
 };
 app.submitReview=function(){
   const cont=document.getElementById('rev-continue').value.trim();
   const feedback=document.getElementById('rev-feedback').value.trim();
   if(!app.rating){alert('Please rate the platform.');return}
+  if(app.answers.size!==QUESTIONS.length){alert('Please answer all 50 questions before submitting.');return}
   app.result=app.computeResult();
   app.result.rating=app.rating;app.result.continue=cont;app.result.feedback=feedback;
   app.renderResult();
@@ -435,7 +433,7 @@ app.renderResult=function(){
   document.getElementById('res-early').textContent=r.early?'Yes (+5 bonus)':'No';
   document.getElementById('res-time').textContent=r.elapsed+' min';
   document.getElementById('res-grade').textContent=pct>=80?'Distinction':(pct>=60?'First Class':(pct>=40?'Second Class':'Needs Improvement'));
-  document.getElementById('result-badge').textContent=r.early?'Excellent &mdash; Early bonus earned!':'Test Completed';
+  document.getElementById('result-badge').textContent=r.early?'Excellent — Early bonus earned!':'Test Completed';
   show('page-result');
 };
 app.endTest=function(reason){
