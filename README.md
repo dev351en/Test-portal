@@ -1,6 +1,6 @@
-# D3V3NDRA Classes — IMO Test Series (Chapter 8: Working with Fractions)
+# D3V3NDRA Classes — IMO Test Series (Chapter 12: Decimals)
 
-A browser-based **International Math Olympiad (IMO)** test for **Working with Fractions** (NCERT Class 7, `gegp108`), built from Worksheet Chapter Number 8 and rebuilt around a clean blue edtech interface.
+A browser-based **International Math Olympiad (IMO)** test for **Decimals** (NCERT advanced syllabus), built from Worksheet Chapter Number 12 and rebuilt around a clean blue edtech interface. Questions and options are written in LaTeX and typeset with MathJax.
 
 **Live site:** https://mest-porutal.vercel.app/
 
@@ -10,8 +10,8 @@ A browser-based **International Math Olympiad (IMO)** test for **Working with Fr
 - **Instructions screen** with a visible honesty note
 - **50 multiple-choice questions**, 4 options each
 - **Full-screen exam lockdown** with copy, selection, and right-click blocking
-- **Two-strike window rule** — leaving or minimizing the test window twice auto-submits the paper
-- **Scheduled test window** — the hosted page only opens on 9 November 2026, 10:00 AM to 5:00 PM IST
+- **Three-exit window rule** — three window exits are allowed; the fourth exit auto-submits the paper
+- **Scheduled test window** — the hosted page only opens on 10 November 2026, 10:00 AM to 12:00 AM (midnight) IST
 - **Signature and unique-name check** — a name can attempt the paper only once
 - **Colour-coded question palette** with a matching legend on the instructions page
 - **60-minute timer** with automatic submission at `00:00`
@@ -24,6 +24,7 @@ A browser-based **International Math Olympiad (IMO)** test for **Working with Fr
 - **Result screen** with score, percentage, time used, and grade
 - **Answer review** with the student's answer and the correct answer for every question
 - **Downloadable text report** that a student can share with the teacher
+- **Worksheet PDF download** on the result screen — the full Worksheet Chapter 12 with its answer key (`assets/worksheet-chapter-12-decimals.pdf`)
 - **Optional instant email report** to the teacher with every option and the student's choice marked
 
 Question order **and answer-option order** are shuffled per student and date, so the paper is not identical for every attempt.
@@ -45,18 +46,19 @@ The answer key is in `test_questions.js`. Difficulty tags (10 Easy, 25 Medium, 1
 
 The hosted site is gated by `middleware.js` (Vercel Edge Middleware) and by a client-side check in `js/app.js`:
 
-- **9 November 2026, 10:00 AM – 5:00 PM IST** — the portal opens normally.
+- **10 November 2026, 10:00 AM – 12:00 AM (midnight) IST** — the portal opens normally.
 - **Before 10:00 AM IST** — visitors see a **403 / Test not open yet** screen.
-- **After 5:00 PM IST** — visitors see a **404 / Test window closed** screen with “Sorry, the test time has run out. Contact the teacher.”
+- **After 12:00 AM (midnight) IST** — visitors see a **404 / Test window closed** screen with “Sorry, the test time has run out. Contact the teacher.”
 - If a paper is in progress when the window closes, it is auto-submitted immediately.
 - Teacher preview: add `?preview=teacher-imo-2026` to the URL to open the portal outside the window. The key lives in `CONFIG.previewKey` in `js/app.js` and in `middleware.js`.
 
 ## Signature and unique attempts
 
-The instructions page includes a **Signature** field. The student must type their full name, and it must match the name entered at login. The same name cannot attempt the paper twice:
+The instructions page includes a **Signature** field. The student must type their full name, and it must match the name entered at login. A name can attempt **each chapter once**:
 
-- Locally, completed sign-in names are stored in `localStorage` (`d3v3ndra.attempts`) and blocked from a second attempt on the same browser.
-- Globally, the portal claims the name through the Apps Script endpoint (`?action=claim`). The script keeps the name registry in its Script Properties. If the name is already claimed anywhere, the student is stopped before the paper opens.
+- Locally, completed sign-in names are stored per chapter in `localStorage` (`d3v3ndra.attempts.decimals`) and blocked from a second attempt on the same browser. `CONFIG.chapter` in `js/app.js` scopes the rule — changing it opens a fresh local registry.
+- Globally, the portal claims the name through the Apps Script endpoint (`?action=claim&chapter=decimals`). The script keeps one name registry per chapter (`imo_attempt_names_<chapter>`). If the name is already claimed for that chapter, the student is stopped before the paper opens; the same name can attempt a different chapter once the portal chapter is switched.
+- Legacy untagged registry entries are honoured as `decimals` attempts.
 - If the Apps Script does not yet support `claim`, the portal falls back to the local check and still records the signature in the report.
 
 ## Full-screen exam lockdown

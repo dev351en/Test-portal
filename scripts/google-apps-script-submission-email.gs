@@ -23,6 +23,7 @@ const SUBMIT_TOKEN = 'd3v3ndra-fractions-2026';
 const SUBJECT_PREFIX = 'IMO Decimals test submitted';
 const TIME_ZONE = 'Asia/Kolkata';
 const ATTEMPT_KEY = 'imo_attempt_names';
+const DEFAULT_CHAPTER = 'decimals';
 
 function doGet(e) {
   const params = (e && e.parameter) || {};
@@ -34,11 +35,54 @@ function doGet(e) {
   });
 }
 
+// One attempt per name per chapter. Each chapter keeps its own registry under
+// 'imo_attempt_names_<chapter>', so changing the chapter on the portal opens a
+// fresh registry for the same students. Legacy untagged entries are honoured
+// as 'decimals' (the chapter that was live before chapter tagging existed).
+function sanitizeChapter_(value) {
+  const chapter = String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .slice(0, 40);
+  return chapter || DEFAULT_CHAPTER;
+}
+
+function registryKeyFor_(chapter) {
+  return 'imo_attempt_names_' + sanitizeChapter_(chapter);
+}
+
+function readRegistry_(props, chapter) {
+  let entries = [];
+  try {
+    const raw = props.getProperty(registryKeyFor_(chapter));
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (Array.isArray(parsed)) entries = parsed;
+  } catch (error) {
+    entries = [];
+  }
+  if (!entries.length && chapter === DEFAULT_CHAPTER) {
+    entries = readLegacyRegistry_(props);
+  }
+  return entries;
+}
+
+function readLegacyRegistry_(props) {
+  try {
+    const raw = props.getProperty(ATTEMPT_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
 function handleClaim_(params) {
   if (SUBMIT_TOKEN && params.token !== SUBMIT_TOKEN) {
     return json_({ ok: false, claimed: true, error: 'Invalid submission token.' });
   }
   const name = normalizeName_(params.name);
+  const chapter = sanitizeChapter_(params.chapter);
   if (!name) return json_({ ok: false, claimed: true, error: 'Missing name.' });
 
   const lock = LockService.getScriptLock();
@@ -49,27 +93,28 @@ function handleClaim_(params) {
   }
   try {
     const props = PropertiesService.getScriptProperties();
-    const registry = readRegistry_(props);
+    const registry = readRegistry_(props, chapter);
     if (registry.some(entry => entry.name === name)) {
       return json_({ ok: true, claimed: true, taken: true });
     }
     registry.push({ name: name, at: new Date().toISOString() });
-    props.setProperty(ATTEMPT_KEY, JSON.stringify(registry.slice(-300)));
+    props.setProperty(registryKeyFor_(chapter), JSON.stringify(registry.slice(-300)));
     return json_({ ok: true, claimed: true, taken: false });
   } finally {
     lock.releaseLock();
   }
 }
 
-function registerAttempt_(name) {
+function registerAttempt_(chapter, name) {
   const normalized = normalizeName_(name);
+  const cleanChapter = sanitizeChapter_(chapter);
   if (!normalized) return;
   try {
     const props = PropertiesService.getScriptProperties();
-    const registry = readRegistry_(props);
+    const registry = readRegistry_(props, cleanChapter);
     if (registry.some(entry => entry.name === normalized)) return;
     registry.push({ name: normalized, at: new Date().toISOString() });
-    props.setProperty(ATTEMPT_KEY, JSON.stringify(registry.slice(-300)));
+    props.setProperty(registryKeyFor_(cleanChapter), JSON.stringify(registry.slice(-300)));
   } catch (error) { /* storage failure must not block the email */ }
 }
 
@@ -114,7 +159,7 @@ function doPost(e) {
       name: 'D3V3NDRA Classes'
     });
 
-    registerAttempt_(String(data.signature || data.studentName || ''));
+    registerAttempt_(sanitizeChapter_(data.chapter), String(data.signature || data.studentName || ''));
 
     return json_({ ok: true, emailedTo: recipient });
   } catch (error) {
@@ -206,7 +251,7 @@ function buildReport_(data) {
   <div class="wrap">
     <div class="hero">
       <p class="eyebrow">D3V3NDRA Classes</p>
-      <h1>IMO Fractions test submission</h1>
+      <h1>IMO Decimals test submission</h1>
       <p>${escapeHtml_(identity)} · ${escapeHtml_(submittedAt)}</p>
     </div>
     <div class="card">
@@ -248,7 +293,7 @@ function summaryHtml_(studentName, studentId, signature, totals, submittedAt, ti
     ${row('Time used', timeUsed)}
     ${row('Marked for review', String(totals.marked))}
     ${row('Window left', `${totals.leaves} time${totals.leaves === 1 ? '' : 's'}`)}
-    ${totals.reason === 'leaving' ? row('Auto-submitted', 'Left the test window twice') : ''}
+    ${totals.reason === 'leaving' ? row('Auto-submitted', 'Left the test window more than three times') : ''}
   </table>`;
 }
 
@@ -307,7 +352,7 @@ function buildTextReport_(data, totals, submittedAt, timeUsed) {
   const signature = String(data.signature || '').trim();
   const answers = Array.isArray(data.answers) ? data.answers : [];
   const lines = [
-    'D3V3NDRA CLASSES — IMO FRACTIONS TEST SUBMISSION',
+    'D3V3NDRA CLASSES — IMO DECIMALS TEST SUBMISSION',
     '================================================',
     `Student name : ${studentName || 'Not provided'}`,
     `Signature    : ${signature || 'Not provided'}`,
@@ -319,7 +364,7 @@ function buildTextReport_(data, totals, submittedAt, timeUsed) {
     `Time used    : ${timeUsed}`,
     `Marked       : ${totals.marked}`,
     `Window left  : ${totals.leaves} time(s)`,
-    ...(totals.reason === 'leaving' ? ['Auto-submit  : Left the test window twice'] : []),
+    ...(totals.reason === 'leaving' ? ['Auto-submit  : Left the test window more than three times'] : []),
     '',
     'OPTIONS: [STUDENT ANSWER] = chosen by the student; [CORRECT ANSWER] = right option.',
     ''

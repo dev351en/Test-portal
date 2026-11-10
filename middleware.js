@@ -2,7 +2,7 @@
  * IMO Test Series — hosting-level time gate.
  *
  * The paper is available only on 10 November 2026 between
- * 10:00 AM and 11:00 PM IST (UTC+05:30). Outside that window the
+ * 10:00 AM and 12:00 AM (midnight) IST (UTC+05:30). Outside that window the
  * page is replaced by a 403 (not open yet) or 404 (window closed) screen.
  *
  * Teacher preview: open any page with ?preview=teacher-imo-2026,
@@ -10,7 +10,7 @@
  */
 
 const WINDOW_START = Date.parse('2026-11-10T04:30:00.000Z'); // 10:00 AM IST
-const WINDOW_END = Date.parse('2026-11-10T18:30:00.000Z');   // 11:00 PM IST
+const WINDOW_END = Date.parse('2026-11-10T18:30:00.000Z');   // 12:00 AM midnight IST (end of 10 Nov)
 const PREVIEW_KEY = 'teacher-imo-2026';
 
 export const config = {
@@ -23,7 +23,7 @@ function gateHtml(mode) {
   const title = expired ? 'Test window closed' : 'Test not open yet';
   const message = expired
     ? 'Sorry, the test time has run out. Contact the teacher.'
-    : 'The test has not started yet. It opens at 10:00 AM IST on 10 November 2026 and closes at 11:00 PM IST.';
+    : 'The test has not started yet. It opens at 10:00 AM IST on 10 November 2026 and closes at 12:00 AM (midnight) IST.';
   return `<!DOCTYPE html>
 <html lang="en">
 <head>

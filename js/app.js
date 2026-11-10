@@ -9,13 +9,16 @@
     totalMinutes: 60,
     marksPerQ: 2,
     storageKey: 'd3v3ndra.student',
-    attemptsKey: 'd3v3ndra.attempts',
+    // One attempt per chapter per name/device. Changing the chapter name opens
+    // a fresh attempt registry, so the same student can attempt each chapter once.
+    chapter: 'decimals',
+    attemptsKey: 'd3v3ndra.attempts.decimals',
     // Paste the Google Apps Script Web app URL here to email each submission.
     // Leave blank to keep the test working without email delivery.
     submissionEndpoint: 'https://script.google.com/macros/s/AKfycbysYy6f6_RPPgmFYO3VQwJDDe0SBL1GFEX9wkKMEj3Z10yros4BwJ-tA0vHjW_rRUfhvA/exec',
     // Must match SUBMIT_TOKEN in scripts/google-apps-script-submission-email.gs.
     submissionToken: 'd3v3ndra-fractions-2026',
-    // Test window: 10 November 2026, 10:00 AM to 11:00 PM IST (UTC+05:30) — open for testing.
+    // Test window: 10 November 2026, 10:00 AM to 12:00 AM midnight IST (UTC+05:30) — open for testing.
     testWindow: {
       start: '2026-11-10T04:30:00.000Z',
       end: '2026-11-10T18:30:00.000Z'
@@ -110,12 +113,15 @@
 
   function formatMath(text) {
     let out = escapeHtml(text);
-    out = out.replace(/(^|[\s(])(\d+)\s+(\d+)\/(\d+)(?![\d/])/g, (match, prefix, whole, num, den) =>
-      `${prefix}<span class="mixed"><span class="whole">${whole}</span>${fractionMarkup(num, den)}</span>`
-    );
-    out = out.replace(/(^|[\s(])(\d+)\/(\d+)(?![\d/])/g, (match, prefix, num, den) =>
-      `${prefix}${fractionMarkup(num, den)}`
-    );
+    const hasLatex = /[$\\]/.test(text) && /\$|\\\(|\\\[/.test(text);
+    if (!hasLatex) {
+      out = out.replace(/(^|[\s(])(\d+)\s+(\d+)\/(\d+)(?![\d/])/g, (match, prefix, whole, num, den) =>
+        `${prefix}<span class="mixed"><span class="whole">${whole}</span>${fractionMarkup(num, den)}</span>`
+      );
+      out = out.replace(/(^|[\s(])(\d+)\/(\d+)(?![\d/])/g, (match, prefix, num, den) =>
+        `${prefix}${fractionMarkup(num, den)}`
+      );
+    }
     return out.replace(/m²/g, 'm<sup>2</sup>');
   }
 
@@ -243,6 +249,7 @@
     }
     url.searchParams.set('action', 'claim');
     url.searchParams.set('name', String(name || '').trim());
+    url.searchParams.set('chapter', String(CONFIG.chapter || '').trim());
     url.searchParams.set('token', CONFIG.submissionToken);
     const request = fetch(url.toString(), { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
@@ -278,7 +285,7 @@
     $('#gateTitle').textContent = expired ? 'Test window closed' : 'Test not open yet';
     $('#gateMessage').textContent = expired
       ? 'Sorry, the test time has run out. Contact the teacher.'
-      : 'The test has not started yet. It opens at 10:00 AM IST on 10 November 2026 and closes at 11:00 PM IST.';
+      : 'The test has not started yet. It opens at 10:00 AM IST on 10 November 2026 and closes at 12:00 AM (midnight) IST.';
     gate.hidden = false;
     $('#appHeader').hidden = true;
     $$('.view').forEach(view => view.classList.remove('is-active'));
@@ -523,7 +530,7 @@
     }
     noteFocusLoss();
     if (!state.submitted) {
-      showExamLock(`You left full screen. Warning ${state.focusLosses} of 2 — your paper will be submitted automatically if you leave again.`);
+      showExamLock(`You left full screen. Warning ${state.focusLosses} of 3 — the fourth exit will auto-submit your paper.`);
     }
   }
 
@@ -760,6 +767,15 @@
     $('#paletteCount').textContent = `${answered} / ${total}`;
     $('#progressCount').textContent = `${answered} / ${total}`;
     $('#progressFill').style.width = `${percent}%`;
+
+    const unattempted = total - answered;
+    const markedCount = state.marked.size;
+    const statAttempted = $('#statAttempted');
+    const statUnattempted = $('#statUnattempted');
+    const statMarked = $('#statMarked');
+    if (statAttempted) statAttempted.textContent = String(answered);
+    if (statUnattempted) statUnattempted.textContent = String(unattempted);
+    if (statMarked) statMarked.textContent = String(markedCount);
   }
 
   function renderExam() {
@@ -1132,6 +1148,7 @@
   function buildSubmissionPayload(result) {
     return {
       token: CONFIG.submissionToken,
+      chapter: CONFIG.chapter,
       studentId: state.studentId,
       studentName: state.studentName,
       signature: state.signature,
@@ -1243,7 +1260,6 @@
     $('#reviewBtn').addEventListener('click', openReviewModal);
     $('#finishBtn').addEventListener('click', resetToLogin);
     $('#downloadBtn').addEventListener('click', downloadResult);
-    $('#downloadSheetBtn').addEventListener('click', downloadWorksheet);
   }
 
   function openReviewModal() {
@@ -1279,36 +1295,6 @@
     if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
       MathJax.typesetPromise([document.getElementById('modalRoot')]).catch(() => { /* LaTeX failure must not block the review */ });
     }
-  }
-
-  function downloadWorksheet() {
-    const questions = Array.isArray(window.QUESTIONS) ? window.QUESTIONS : [];
-    const lines = [
-      'D3V3NDRA CLASSES — IMO DECIMALS TEST SERIES',
-      'Worksheet with answer key',
-      '========================================',
-      '50 MCQs • 2 marks each • 100 marks • 60 minutes',
-      ''
-    ];
-    questions.forEach((question, index) => {
-      lines.push(`${index + 1}. ${question.q}`);
-      question.opts.forEach((option, optionIndex) => {
-        lines.push(`   ${'ABCD'[optionIndex]}. ${option}`);
-      });
-      lines.push(`   Answer : ${'ABCD'[question.ans]}. ${question.opts[question.ans]}`);
-      lines.push(`   Solution : ${question.sol || ''}`);
-      lines.push('');
-    });
-    const blob = new Blob([lines.join('\r\n')], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'decimal-worksheet-answer-key.txt';
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-    toast('Worksheet and answer key downloaded.');
   }
 
   function downloadResult() {
@@ -1377,7 +1363,7 @@
     state.leaveEpisode = true;
     state.focusLosses += 1;
     state.focusWarning = true;
-    if (state.focusLosses >= 2) autoSubmitForLeaving();
+    if (state.focusLosses > 3) autoSubmitForLeaving();
   }
 
   function autoSubmitForLeaving() {
@@ -1404,7 +1390,7 @@
     if (!$('#modalRoot').hidden) return;
     openModal({
       title: 'Test window left',
-      body: `<p>You switched away from the test window. This is warning ${state.focusLosses} of 2; the timer kept running.</p><div class="modal-note warn">If you leave the window again, your paper will be submitted automatically.</div>`,
+      body: `<p>You switched away from the test window. This is exit ${state.focusLosses} of 3 — you may leave up to three times, and the timer keeps running.</p><div class="modal-note warn">A fourth exit will auto-submit your paper immediately.</div>`,
       actions: [{ label: 'Continue test', variant: 'primary' }]
     });
   }
@@ -1423,7 +1409,7 @@
       }
       resetLeaveEpisodeSoon();
       if (state.lockEnabled && !getFullscreenElement()) {
-        showExamLock(`You left the test window. Warning ${state.focusLosses} of 2 — your paper will be submitted automatically if you leave again.`);
+        showExamLock(`You left the test window. Exit ${state.focusLosses} of 3 — the fourth exit will auto-submit your paper.`);
       } else {
         showFocusWarning();
       }

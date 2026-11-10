@@ -164,7 +164,7 @@
           <div class="fact fact-window">
             <span class="fact-icon" data-icon="calendar" data-icon-size="18"></span>
             <span>Test Window</span>
-            <b>: 10 Nov 2026<br><small>10:00 AM &ndash; 11:00 PM IST</small></b>
+            <b>: 10 Nov 2026<br><small>10:00 AM &ndash; 12:00 AM (midnight) IST</small></b>
           </div>
         </div>
 
@@ -175,9 +175,9 @@
             <li>Use the question palette to move between questions. Use <b>Mark for Review</b> to flag a question and revisit it later.</li>
             <li>You may change an answer until you submit the test.</li>
             <li>The test runs in <b>full screen</b>. <b>Exiting full screen is not allowed</b> &mdash; the paper locks until you return to full screen.</li>
-            <li><b>Closing the test screen, minimizing the tab, or leaving the browser window is strictly not allowed.</b> The first leave records a warning. The <b>second leave ends the test immediately and auto-submits your paper</b>.</li>
+            <li><b>Closing the test screen, minimizing the tab, or leaving the browser window is strictly not allowed.</b> You are allowed <b>three exits</b> &mdash; each one records a warning and the timer keeps running. A <b>fourth exit auto-submits your paper immediately</b>.</li>
             <li><b>Copying and right-click are disabled.</b> Text cannot be selected, and shortcuts such as Ctrl+C, Ctrl+A, Ctrl+P, Ctrl+S, Ctrl+U and F12 are blocked during the test.</li>
-            <li>The test auto-submits when the timer reaches 00:00, and also when the test window closes at 11:00 PM IST.</li>
+            <li>The test auto-submits when the timer reaches 00:00, and also when the test window closes at 12:00 AM (midnight) IST.</li>
             <li>Keep this tab open. Refreshing or closing it will lose your answers.</li>
             <li>Do all rough work on paper. Calculators, phones, and outside help are not permitted.</li>
           </ul>
@@ -249,6 +249,11 @@
         <span class="legend-item"><i class="legend-swatch answered"></i>Answered</span>
         <span class="legend-item"><i class="legend-swatch marked"></i>Marked for review</span>
         <span class="legend-item"><i class="legend-swatch visited"></i>Not answered</span>
+      </div>
+      <div class="palette-stats">
+        <div class="stat-chip stat-attempted"><b id="statAttempted">0</b><span>Attempted</span></div>
+        <div class="stat-chip stat-unattempted"><b id="statUnattempted">50</b><span>Unattempted</span></div>
+        <div class="stat-chip stat-marked"><b id="statMarked">0</b><span>Marked</span></div>
       </div>
       <div class="palette-progress">
         <div class="progress-meta"><span>Progress</span><b id="progressCount">0 / 50</b></div>
@@ -365,7 +370,7 @@
         <button type="button" class="btn btn-primary" id="finishBtn">Finish &amp; Sign Out <span data-icon="logout" data-icon-size="18"></span></button>
       </div>
       <button type="button" class="link-btn result-download" id="downloadBtn"><span data-icon="download" data-icon-size="15"></span>Download result for your teacher</button>
-        <button type="button" class="link-btn result-download" id="downloadSheetBtn"><span data-icon="download" data-icon-size="15"></span>Download worksheet &amp; answer key</button>
+      <a class="link-btn result-download" id="downloadSheetBtn" href="assets/worksheet-chapter-12-decimals.pdf" download="Chapter-12-Decimals-Worksheet-with-Answer-Key.pdf"><span data-icon="download" data-icon-size="15"></span>Download worksheet PDF with answer key</a>
     </section>
   </div>
 </main>
