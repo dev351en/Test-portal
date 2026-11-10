@@ -122,16 +122,6 @@ function normalizeName_(value) {
   return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
-function readRegistry_(props) {
-  try {
-    const raw = props.getProperty(ATTEMPT_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    return [];
-  }
-}
-
 function doPost(e) {
   try {
     const raw = e && e.parameter ? e.parameter.payload : '';
