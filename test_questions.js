@@ -1,5 +1,5 @@
 // D3V3NDRA Classes — IMO Test Series
-// Chapter 8: Working with Fractions (NCERT Class 7, gegp108)
+// Chapter 8: Working with Decimals (NCERT Class 7, gegp108)
 // Questions and answer key sourced from Worksheet Chapter Number 8 (50 MCQs).
 // 50 MCQs • 2 marks each • 100 marks • 60 minutes
 // The paper is shuffled per student/date in js/app.js; order below is the source bank.

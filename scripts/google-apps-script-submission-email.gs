@@ -1,7 +1,7 @@
 /**
  * D3V3NDRA Classes — instant submission email endpoint
  *
- * This Google Apps Script receives a finished IMO Fractions test from the portal and
+ * This Google Apps Script receives a finished IMO Decimals test from the portal and
  * emails the teacher a formatted report with every option marked.
  *
  * ONE-TIME SETUP
@@ -20,7 +20,7 @@
 
 const TEACHER_EMAIL = ''; // e.g. 'teacher@example.com'. Blank = the deploying account's email.
 const SUBMIT_TOKEN = 'd3v3ndra-fractions-2026';
-const SUBJECT_PREFIX = 'IMO Fractions test submitted';
+const SUBJECT_PREFIX = 'IMO Decimals test submitted';
 const TIME_ZONE = 'Asia/Kolkata';
 const ATTEMPT_KEY = 'imo_attempt_names';
 

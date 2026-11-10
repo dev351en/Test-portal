@@ -1,4 +1,4 @@
-/* D3V3NDRA Classes — IMO Test Series (Chapter 8: Working with Fractions)
+/* D3V3NDRA Classes — IMO Test Series (Chapter 8: Working with Decimals)
    Browser-based Olympiad test. No backend: answers and credentials are in the page source. */
 (() => {
   'use strict';
@@ -15,10 +15,10 @@
     submissionEndpoint: 'https://script.google.com/macros/s/AKfycbysYy6f6_RPPgmFYO3VQwJDDe0SBL1GFEX9wkKMEj3Z10yros4BwJ-tA0vHjW_rRUfhvA/exec',
     // Must match SUBMIT_TOKEN in scripts/google-apps-script-submission-email.gs.
     submissionToken: 'd3v3ndra-fractions-2026',
-    // Test window: 9 November 2026, 10:00 AM to 5:00 PM IST (UTC+05:30).
+    // Test window: 10 November 2026, 10:00 AM to 11:00 PM IST (UTC+05:30) — open for testing.
     testWindow: {
-      start: '2026-11-09T04:30:00.000Z',
-      end: '2026-11-09T11:30:00.000Z'
+      start: '2026-11-10T04:30:00.000Z',
+      end: '2026-11-10T18:30:00.000Z'
     },
     // Teacher-only preview bypass for the time gate: open the site with
     // ?preview=teacher-imo-2026 to check the portal before/after the window.
@@ -143,10 +143,10 @@
 
   function setHeader(mode) {
     const modes = {
-      instructions: { title: 'IMO Test Series', pill: 'Chapter 8 · Fractions', sep: false, timer: false, fs: false, student: true, logout: true },
-      exam: { title: 'IMO Test Series', pill: 'Working with Fractions', sep: true, timer: true, fs: false, student: false, logout: true },
+      instructions: { title: 'IMO Test Series', pill: 'Chapter 8 · Decimals', sep: false, timer: false, fs: false, student: true, logout: true },
+      exam: { title: 'IMO Test Series', pill: 'Working with Decimals', sep: true, timer: true, fs: false, student: false, logout: true },
       feedback: { title: 'Test Review & Feedback', pill: 'IMO Test Series', sep: false, timer: false, fs: false, student: true, logout: false },
-      result: { title: 'Test Result', pill: 'Fractions', sep: false, timer: false, fs: false, student: true, logout: false }
+      result: { title: 'Test Result', pill: 'Decimals', sep: false, timer: false, fs: false, student: true, logout: false }
     };
     const config = modes[mode];
     if (!config) return;
@@ -278,7 +278,7 @@
     $('#gateTitle').textContent = expired ? 'Test window closed' : 'Test not open yet';
     $('#gateMessage').textContent = expired
       ? 'Sorry, the test time has run out. Contact the teacher.'
-      : 'The test has not started yet. It opens at 10:00 AM IST on 9 November 2026 and closes at 5:00 PM IST.';
+      : 'The test has not started yet. It opens at 10:00 AM IST on 10 November 2026 and closes at 11:00 PM IST.';
     gate.hidden = false;
     $('#appHeader').hidden = true;
     $$('.view').forEach(view => view.classList.remove('is-active'));
@@ -599,7 +599,7 @@
     const bank = Array.isArray(window.QUESTIONS) ? window.QUESTIONS.slice() : [];
     if (bank.length === 0) return [];
     const day = new Date().toISOString().slice(0, 10);
-    const random = mulberry32(hashString(`${studentId}|${day}|fractions`));
+    const random = mulberry32(hashString(`${studentId}|${day}|decimals`));
     for (let i = bank.length - 1; i > 0; i -= 1) {
       const j = Math.floor(random() * (i + 1));
       [bank[i], bank[j]] = [bank[j], bank[i]];
@@ -772,6 +772,9 @@
 
     $('#qNo').textContent = String(state.current + 1);
     $('#qText').innerHTML = formatMath(question.q);
+    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+      MathJax.typesetPromise([document.getElementById('qText'), document.getElementById('qOptions')]).catch(() => { /* LaTeX failure must not block the exam */ });
+    }
     $('#qOptions').innerHTML = question.opts.map((option, index) => {
       const letter = 'ABCD'[index];
       const active = selected === index;
@@ -1211,7 +1214,7 @@
   }
 
   function gradeFor(percent) {
-    if (percent >= 90) return { grade: 'Outstanding!', message: 'A superb result. You have a strong command of fractions.' };
+    if (percent >= 90) return { grade: 'Outstanding!', message: 'A superb result. You have a strong command of decimals.' };
     if (percent >= 75) return { grade: 'Excellent!', message: 'Great work. Review the few questions you missed to reach the top.' };
     if (percent >= 60) return { grade: 'Good work!', message: 'A solid result. A little more practice will make it excellent.' };
     if (percent >= 40) return { grade: 'Keep going!', message: 'You are getting there. Review the worked answers and try again.' };
@@ -1240,6 +1243,7 @@
     $('#reviewBtn').addEventListener('click', openReviewModal);
     $('#finishBtn').addEventListener('click', resetToLogin);
     $('#downloadBtn').addEventListener('click', downloadResult);
+    $('#downloadSheetBtn').addEventListener('click', downloadWorksheet);
   }
 
   function openReviewModal() {
@@ -1272,6 +1276,39 @@
       body: `<div class="review-summary"><span><b>${result.correct}</b> correct</span><span><b>${incorrect}</b> incorrect</span><span><b>${skipped}</b> not answered</span></div><div class="review-list">${items}</div>`,
       actions: [{ label: 'Close', variant: 'primary' }]
     });
+    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+      MathJax.typesetPromise([document.getElementById('modalRoot')]).catch(() => { /* LaTeX failure must not block the review */ });
+    }
+  }
+
+  function downloadWorksheet() {
+    const questions = Array.isArray(window.QUESTIONS) ? window.QUESTIONS : [];
+    const lines = [
+      'D3V3NDRA CLASSES — IMO DECIMALS TEST SERIES',
+      'Worksheet with answer key',
+      '========================================',
+      '50 MCQs • 2 marks each • 100 marks • 60 minutes',
+      ''
+    ];
+    questions.forEach((question, index) => {
+      lines.push(`${index + 1}. ${question.q}`);
+      question.opts.forEach((option, optionIndex) => {
+        lines.push(`   ${'ABCD'[optionIndex]}. ${option}`);
+      });
+      lines.push(`   Answer : ${'ABCD'[question.ans]}. ${question.opts[question.ans]}`);
+      lines.push(`   Solution : ${question.sol || ''}`);
+      lines.push('');
+    });
+    const blob = new Blob([lines.join('\r\n')], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'decimal-worksheet-answer-key.txt';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast('Worksheet and answer key downloaded.');
   }
 
   function downloadResult() {
@@ -1280,7 +1317,7 @@
     const grading = gradeFor(result.percent);
     const date = new Date().toLocaleString();
     const lines = [
-      'D3V3NDRA CLASSES — FRACTIONS TEST SERIES',
+      'D3V3NDRA CLASSES — DECIMALS TEST SERIES',
       'Result report',
       '========================================',
       `Student name : ${state.studentName || 'Not provided'}`,
@@ -1318,7 +1355,7 @@
     const link = document.createElement('a');
     const safeId = state.studentId.replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'student';
     link.href = url;
-    link.download = `fractions-result-${safeId}.txt`;
+    link.download = `decimal-result-${safeId}.txt`;
     document.body.appendChild(link);
     link.click();
     link.remove();
