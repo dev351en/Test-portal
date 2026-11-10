@@ -788,9 +788,6 @@
 
     $('#qNo').textContent = String(state.current + 1);
     $('#qText').innerHTML = formatMath(question.q);
-    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
-      MathJax.typesetPromise([document.getElementById('qText'), document.getElementById('qOptions')]).catch(() => { /* LaTeX failure must not block the exam */ });
-    }
     $('#qOptions').innerHTML = question.opts.map((option, index) => {
       const letter = 'ABCD'[index];
       const active = selected === index;
@@ -812,6 +809,12 @@
       : `Save &amp; Next${icon('chevronRight', 17)}`;
 
     updatePalette();
+
+    // Typeset LaTeX after both the question and its options are in the DOM.
+    // MathJax failure must never block the exam.
+    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+      MathJax.typesetPromise([document.getElementById('qText'), document.getElementById('qOptions')]).catch(() => { });
+    }
   }
 
   function selectOption(index) {
