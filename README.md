@@ -11,7 +11,7 @@ A browser-based **International Math Olympiad (IMO)** test for **Decimals** (NCE
 - **50 multiple-choice questions**, 4 options each
 - **Full-screen exam lockdown** with copy, selection, and right-click blocking
 - **Three-exit window rule** — three window exits are allowed; the fourth exit auto-submits the paper
-- **Scheduled test window** — the hosted page only opens on 10 November 2026, 10:00 AM to 12:00 AM (midnight) IST
+- **Scheduled test window** — the hosted page only opens on 11 November 2026, 9:00 AM to 5:00 PM IST
 - **Signature and unique-name check** — a name can attempt the paper only once
 - **Colour-coded question palette** with a matching legend on the instructions page
 - **60-minute timer** with automatic submission at `00:00`
@@ -46,9 +46,9 @@ The answer key is in `test_questions.js`. Difficulty tags (10 Easy, 25 Medium, 1
 
 The hosted site is gated by `middleware.js` (Vercel Edge Middleware) and by a client-side check in `js/app.js`:
 
-- **10 November 2026, 10:00 AM – 12:00 AM (midnight) IST** — the portal opens normally.
-- **Before 10:00 AM IST** — visitors see a **403 / Test not open yet** screen.
-- **After 12:00 AM (midnight) IST** — visitors see a **404 / Test window closed** screen with “Sorry, the test time has run out. Contact the teacher.”
+- **11 November 2026, 9:00 AM – 5:00 PM IST** — the portal opens normally.
+- **Before 9:00 AM IST** — visitors see a **403 / Test not open yet** screen.
+- **After 5:00 PM IST** — visitors see a **404 / Test window closed** screen with “Sorry, the test time has run out. Contact the teacher.”
 - If a paper is in progress when the window closes, it is auto-submitted immediately.
 - Teacher preview: add `?preview=teacher-imo-2026` to the URL to open the portal outside the window. The key lives in `CONFIG.previewKey` in `js/app.js` and in `middleware.js`.
 
