@@ -1,4 +1,4 @@
-/* D3V3NDRA Classes — IMO Test Series (Chapter 8: Working with Decimals)
+/* D3V3NDRA Classes — IMO Test Series (Chapter 10: Operations with Integers)
    Browser-based Olympiad test. No backend: answers and credentials are in the page source. */
 (() => {
   'use strict';
@@ -11,17 +11,17 @@
     storageKey: 'd3v3ndra.student',
     // One attempt per chapter per name/device. Changing the chapter name opens
     // a fresh attempt registry, so the same student can attempt each chapter once.
-    chapter: 'decimals',
-    attemptsKey: 'd3v3ndra.attempts.decimals',
+    chapter: 'integers',
+    attemptsKey: 'd3v3ndra.attempts.integers',
     // Paste the Google Apps Script Web app URL here to email each submission.
     // Leave blank to keep the test working without email delivery.
-    submissionEndpoint: 'https://script.google.com/macros/s/AKfycbysYy6f6_RPPgmFYO3VQwJDDe0SBL1GFEX9wkKMEj3Z10yros4BwJ-tA0vHjW_rRUfhvA/exec',
+    submissionEndpoint: 'https://script.google.com/macros/s/AKfycbxspHEmrfJJStpXsr1aqWl5JyeGUtXnomYy8gHXjj_nbAEcC_7TWPt-Od7WYlhytgUFnA/exec',
     // Must match SUBMIT_TOKEN in scripts/google-apps-script-submission-email.gs.
     submissionToken: 'd3v3ndra-fractions-2026',
-    // Test window: 11 November 2026, 9:00 AM to 5:00 PM IST (UTC+05:30).
+    // Test window: 12 November 2026, 9:00 AM to 5:00 PM IST (UTC+05:30).
     testWindow: {
-      start: '2026-11-11T03:30:00.000Z',
-      end: '2026-11-11T11:30:00.000Z'
+      start: '2026-11-12T03:30:00.000Z',
+      end: '2026-11-12T11:30:00.000Z'
     },
     // Teacher-only preview bypass for the time gate: open the site with
     // ?preview=teacher-imo-2026 to check the portal before/after the window.
@@ -149,10 +149,10 @@
 
   function setHeader(mode) {
     const modes = {
-      instructions: { title: 'IMO Test Series', pill: 'Chapter 8 · Decimals', sep: false, timer: false, fs: false, student: true, logout: true },
-      exam: { title: 'IMO Test Series', pill: 'Working with Decimals', sep: true, timer: true, fs: false, student: false, logout: true },
+      instructions: { title: 'IMO Test Series', pill: 'Chapter 10 · Integers', sep: false, timer: false, fs: false, student: true, logout: true },
+      exam: { title: 'IMO Test Series', pill: 'Operations with Integers', sep: true, timer: true, fs: false, student: false, logout: true },
       feedback: { title: 'Test Review & Feedback', pill: 'IMO Test Series', sep: false, timer: false, fs: false, student: true, logout: false },
-      result: { title: 'Test Result', pill: 'Decimals', sep: false, timer: false, fs: false, student: true, logout: false }
+      result: { title: 'Test Result', pill: 'Integers', sep: false, timer: false, fs: false, student: true, logout: false }
     };
     const config = modes[mode];
     if (!config) return;
@@ -285,7 +285,7 @@
     $('#gateTitle').textContent = expired ? 'Test window closed' : 'Test not open yet';
     $('#gateMessage').textContent = expired
       ? 'Sorry, the test time has run out. Contact the teacher.'
-      : 'The test has not started yet. It opens at 9:00 AM IST on 11 November 2026 and closes at 5:00 PM IST.';
+      : 'The test has not started yet. It opens at 9:00 AM IST on 12 November 2026 and closes at 5:00 PM IST.';
     gate.hidden = false;
     $('#appHeader').hidden = true;
     $$('.view').forEach(view => view.classList.remove('is-active'));
@@ -583,44 +583,15 @@
     $('#signatureInput').addEventListener('input', hideSignatureError);
   }
 
-  function hashString(value) {
-    let hash = 2166136261;
-    for (let i = 0; i < value.length; i += 1) {
-      hash ^= value.charCodeAt(i);
-      hash = Math.imul(hash, 16777619);
-    }
-    return hash >>> 0;
-  }
-
-  function mulberry32(seed) {
-    return function random() {
-      seed |= 0;
-      seed = (seed + 0x6D2B79F5) | 0;
-      let value = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-      value = (value + Math.imul(value ^ (value >>> 7), 61 | value)) ^ value;
-      return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
-    };
-  }
-
-  function buildPaper(studentId) {
+  function buildPaper() {
     const bank = Array.isArray(window.QUESTIONS) ? window.QUESTIONS.slice() : [];
     if (bank.length === 0) return [];
-    const day = new Date().toISOString().slice(0, 10);
-    const random = mulberry32(hashString(`${studentId}|${day}|decimals`));
-    for (let i = bank.length - 1; i > 0; i -= 1) {
-      const j = Math.floor(random() * (i + 1));
-      [bank[i], bank[j]] = [bank[j], bank[i]];
-    }
+    // Keep the exact question and option order from the worksheet.
     return bank.map(question => {
-      const options = question.opts.map((text, index) => ({ text, index }));
-      for (let i = options.length - 1; i > 0; i -= 1) {
-        const j = Math.floor(random() * (i + 1));
-        [options[i], options[j]] = [options[j], options[i]];
-      }
       return {
         ...question,
-        opts: options.map(option => option.text),
-        ans: options.findIndex(option => option.index === question.ans)
+        opts: question.opts.slice(),
+        ans: question.ans
       };
     });
   }
@@ -640,7 +611,7 @@
     if (!signature) return;
     state.signature = signature;
 
-    const paper = buildPaper(state.studentId);
+    const paper = buildPaper();
     if (paper.length !== 50) {
       openModal({
         title: 'Question bank unavailable',
@@ -1234,7 +1205,7 @@
   }
 
   function gradeFor(percent) {
-    if (percent >= 90) return { grade: 'Outstanding!', message: 'A superb result. You have a strong command of decimals.' };
+    if (percent >= 90) return { grade: 'Outstanding!', message: 'A superb result. You have a strong command of integers.' };
     if (percent >= 75) return { grade: 'Excellent!', message: 'Great work. Review the few questions you missed to reach the top.' };
     if (percent >= 60) return { grade: 'Good work!', message: 'A solid result. A little more practice will make it excellent.' };
     if (percent >= 40) return { grade: 'Keep going!', message: 'You are getting there. Review the worked answers and try again.' };
@@ -1292,7 +1263,7 @@
     openModal({
       title: 'Review your answers',
       size: 'lg',
-      body: `<div class="review-summary"><span><b>${result.correct}</b> correct</span><span><b>${incorrect}</b> incorrect</span><span><b>${skipped}</b> not answered</span></div><div class="review-list">${items}</div>`,
+      body: `<div class="review-summary"><span><b>${result.correct}</b> correct</span><span><b>${incorrect}</b> incorrect</span><span><b>${skipped}</b> not answered</span></div><div class="review-list">${items}</div><div class="review-share-note"><b>After reviewing your answers, share your name and your rough work on WhatsApp.</b></div>`,
       actions: [{ label: 'Close', variant: 'primary' }]
     });
     if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
@@ -1306,7 +1277,7 @@
     const grading = gradeFor(result.percent);
     const date = new Date().toLocaleString();
     const lines = [
-      'D3V3NDRA CLASSES — DECIMALS TEST SERIES',
+      'D3V3NDRA CLASSES — INTEGER OPERATIONS TEST SERIES',
       'Result report',
       '========================================',
       `Student name : ${state.studentName || 'Not provided'}`,
@@ -1344,7 +1315,7 @@
     const link = document.createElement('a');
     const safeId = state.studentId.replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'student';
     link.href = url;
-    link.download = `decimal-result-${safeId}.txt`;
+    link.download = `integers-result-${safeId}.txt`;
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -1466,5 +1437,3 @@
 
   document.addEventListener('DOMContentLoaded', init);
 })();
-
-

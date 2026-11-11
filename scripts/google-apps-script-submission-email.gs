@@ -1,8 +1,10 @@
 /**
  * D3V3NDRA Classes — instant submission email endpoint
  *
- * This Google Apps Script receives a finished IMO Decimals test from the portal and
- * emails the teacher a formatted report with every option marked.
+ * This Google Apps Script receives a finished chapter test from the portal and
+ * emails the teacher a formatted report with every option marked. The chapter
+ * is read from the submission payload, so this script does not need chapter-
+ * specific edits when the portal moves to a new chapter.
  *
  * ONE-TIME SETUP
  * 1. Go to https://script.google.com and create a new project.
@@ -15,15 +17,20 @@
  * 5. Authorize the script, then copy the Web app URL.
  * 6. Open js/app.js, put that URL in CONFIG.submissionEndpoint, and redeploy the site.
  *
+ * This script is chapter-generic. Future chapter changes send a different
+ * `chapter` value in the portal payload; do not change SUBJECT_PREFIX or this
+ * file for each chapter. Only redeploy Apps Script when this script itself is
+ * changed, and keep the same deployment URL.
+ *
  * The app and this script must share the same SUBMIT_TOKEN.
  */
 
 const TEACHER_EMAIL = ''; // e.g. 'teacher@example.com'. Blank = the deploying account's email.
 const SUBMIT_TOKEN = 'd3v3ndra-fractions-2026';
-const SUBJECT_PREFIX = 'IMO Decimals test submitted';
 const TIME_ZONE = 'Asia/Kolkata';
 const ATTEMPT_KEY = 'imo_attempt_names';
-const DEFAULT_CHAPTER = 'decimals';
+const DEFAULT_CHAPTER = 'integers';
+const LEGACY_CHAPTER = 'decimals';
 
 function doGet(e) {
   const params = (e && e.parameter) || {};
@@ -61,7 +68,7 @@ function readRegistry_(props, chapter) {
   } catch (error) {
     entries = [];
   }
-  if (!entries.length && chapter === DEFAULT_CHAPTER) {
+  if (!entries.length && chapter === LEGACY_CHAPTER) {
     entries = readLegacyRegistry_(props);
   }
   return entries;
@@ -120,6 +127,12 @@ function registerAttempt_(chapter, name) {
 
 function normalizeName_(value) {
   return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function chapterLabel_(value) {
+  return sanitizeChapter_(value)
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b\w/g, letter => letter.toUpperCase());
 }
 
 function doPost(e) {
@@ -196,7 +209,10 @@ function buildReport_(data) {
   const submittedAt = formatDate_(data.submittedAt);
   const timeUsed = formatDuration_(data.timeUsed);
   const identity = studentName ? `${studentName} — ${studentId}` : studentId;
-  const subject = `${SUBJECT_PREFIX} — ${identity} — ${totals.score}/${totals.totalMarks} (${totals.percent}%)`;
+  const chapter = sanitizeChapter_(data.chapter);
+  const chapterLabel = chapterLabel_(chapter);
+  const subjectPrefix = `IMO ${chapterLabel} test submitted`;
+  const subject = `${subjectPrefix} — ${identity} — ${totals.score}/${totals.totalMarks} (${totals.percent}%)`;
   const questionBlocks = answers.map((answer, index) => buildQuestionHtml_(answer, index)).join('');
 
   const html = `<!DOCTYPE html>
@@ -241,7 +257,7 @@ function buildReport_(data) {
   <div class="wrap">
     <div class="hero">
       <p class="eyebrow">D3V3NDRA Classes</p>
-      <h1>IMO Decimals test submission</h1>
+      <h1>IMO ${escapeHtml_(chapterLabel)} test submission</h1>
       <p>${escapeHtml_(identity)} · ${escapeHtml_(submittedAt)}</p>
     </div>
     <div class="card">
@@ -341,9 +357,10 @@ function buildTextReport_(data, totals, submittedAt, timeUsed) {
   const studentName = String(data.studentName || '').trim();
   const signature = String(data.signature || '').trim();
   const answers = Array.isArray(data.answers) ? data.answers : [];
+  const chapterLabel = chapterLabel_(data.chapter);
   const lines = [
-    'D3V3NDRA CLASSES — IMO DECIMALS TEST SUBMISSION',
-    '================================================',
+    `D3V3NDRA CLASSES — IMO ${chapterLabel.toUpperCase()} TEST SUBMISSION`,
+    '='.repeat(`D3V3NDRA CLASSES — IMO ${chapterLabel.toUpperCase()} TEST SUBMISSION`.length),
     `Student name : ${studentName || 'Not provided'}`,
     `Signature    : ${signature || 'Not provided'}`,
     `Student ID   : ${studentId}`,

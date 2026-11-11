@@ -1,7 +1,7 @@
 {
   "name": "d3v3ndra-online-test",
   "version": "1.0.0",
-  "description": "D3V3NDRA Classes - Working with Decimals chapter test (static site)",
+  "description": "D3V3NDRA Classes - Operations with Integers chapter test (static site)",
   "private": true,
   "scripts": {
     "export:sheet": "node scripts/export-question-sheet.js",
