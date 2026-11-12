@@ -7,7 +7,7 @@
     storageKey: 'd3v3ndra.student',
     // Paste the Google Apps Script Web app URL here to email each submission.
     // Leave blank to keep the test working without email delivery.
-    submissionEndpoint: 'https://script.google.com/macros/s/AKfycbxspHEmrfJJStpXsr1aqWl5JyeGUtXnomYy8gHXjj_nbAEcC_7TWPt-Od7WYlhytgUFnA/exec',
+    submissionEndpoint: 'https://script.google.com/macros/s/AKfycbzK4Sc5yqHtiGPbbO-h3h9ZGuColY8fqnKlbJbdQji26vyzwvpTLtGGUSd16qVfPG-IGw/exec',
     // Must match SUBMIT_TOKEN in scripts/google-apps-script-submission-email.gs.
     submissionToken: 'd3v3ndra-fractions-2026',
     // Test window: 13 November 2026, 9:00 AM to 5:00 PM IST (UTC+05:30).
