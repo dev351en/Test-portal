@@ -1,5 +1,5 @@
 /**
- * IMO Test Series — hosting-level time gate.
+ * Testing Portal — hosting-level time gate for both assigned papers.
  *
  * The paper is available only on 13 November 2026 between
  * 9:00 AM and 5:00 PM IST (UTC+05:30). Outside that window the
@@ -30,7 +30,7 @@ function gateHtml(mode) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
-<title>${code} · IMO Test Series | D3V3NDRA Classes</title>
+<title>${code} · Testing Portal | D3V3NDRA Classes</title>
 <style>
   *{box-sizing:border-box}
   body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;
@@ -50,7 +50,7 @@ function gateHtml(mode) {
     <span class="code">${code}</span>
     <h1>${title}</h1>
     <p>${message}</p>
-    <p class="note">D3V3NDRA Classes &middot; IMO Test Series</p>
+    <p class="note">D3V3NDRA Classes &middot; Testing Portal</p>
   </main>
 </body>
 </html>`;

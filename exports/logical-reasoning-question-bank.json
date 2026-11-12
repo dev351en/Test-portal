@@ -1,0 +1,961 @@
+{
+  "paperId": "logical-reasoning",
+  "title": "Logical Reasoning",
+  "grade": 7,
+  "count": 50,
+  "totalMarks": 100,
+  "shuffled": false,
+  "seed": null,
+  "questions": [
+    {
+      "no": 1,
+      "id": 1,
+      "question": "Choose the correct mirror image in the vertical mirror line shown.",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctIndex": 3,
+      "correctOption": "D",
+      "correctAnswer": "Option D",
+      "marks": 2,
+      "category": "mirror",
+      "diagram": "https://mest-porutal.vercel.app/assets/logical-reasoning-q01.png",
+      "optionImages": [],
+      "solution": "The vertical mirror reverses left and right but keeps the top at the top. The character order becomes R2F, and each character is also reflected sideways. Merely typing the characters in reverse order does not produce a true mirror image. Compare both the order and the letter shapes with the answer diagram."
+    },
+    {
+      "no": 2,
+      "id": 2,
+      "question": "Choose the correct mirror image in the vertical mirror line shown.",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctIndex": 0,
+      "correctOption": "A",
+      "correctAnswer": "Option A",
+      "marks": 2,
+      "category": "mirror",
+      "diagram": "https://mest-porutal.vercel.app/assets/logical-reasoning-q02.png",
+      "optionImages": [],
+      "solution": "The vertical mirror reverses left and right but keeps the top at the top. The character order becomes DRIB, and each character is also reflected sideways. Merely typing the characters in reverse order does not produce a true mirror image. Compare both the order and the letter shapes with the answer diagram."
+    },
+    {
+      "no": 3,
+      "id": 3,
+      "question": "Choose the correct mirror image in the vertical mirror line shown.",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctIndex": 0,
+      "correctOption": "A",
+      "correctAnswer": "Option A",
+      "marks": 2,
+      "category": "mirror",
+      "diagram": "https://mest-porutal.vercel.app/assets/logical-reasoning-q03.png",
+      "optionImages": [],
+      "solution": "The vertical mirror reverses left and right but keeps the top at the top. The character order becomes G6B, and each character is also reflected sideways. Merely typing the characters in reverse order does not produce a true mirror image. Compare both the order and the letter shapes with the answer diagram."
+    },
+    {
+      "no": 4,
+      "id": 4,
+      "question": "Choose the correct mirror image in the vertical mirror line shown.",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctIndex": 0,
+      "correctOption": "A",
+      "correctAnswer": "Option A",
+      "marks": 2,
+      "category": "mirror",
+      "diagram": "https://mest-porutal.vercel.app/assets/logical-reasoning-q04.png",
+      "optionImages": [],
+      "solution": "The vertical mirror reverses left and right but keeps the top at the top. The character order becomes NEP, and each character is also reflected sideways. Merely typing the characters in reverse order does not produce a true mirror image. Compare both the order and the letter shapes with the answer diagram."
+    },
+    {
+      "no": 5,
+      "id": 5,
+      "question": "Choose the correct mirror image in the vertical mirror line shown.",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctIndex": 3,
+      "correctOption": "D",
+      "correctAnswer": "Option D",
+      "marks": 2,
+      "category": "mirror",
+      "diagram": "https://mest-porutal.vercel.app/assets/logical-reasoning-q05.png",
+      "optionImages": [],
+      "solution": "A vertical mirror swaps left and right, keeping each part at the same height. The black dot moves from top-right to top-left. The arrow pointing left must point right. All other parts must undergo the same reflection; the matching diagram is shown alongside."
+    },
+    {
+      "no": 6,
+      "id": 6,
+      "question": "Choose the correct mirror image in the vertical mirror line shown.",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctIndex": 1,
+      "correctOption": "B",
+      "correctAnswer": "Option B",
+      "marks": 2,
+      "category": "mirror",
+      "diagram": "https://mest-porutal.vercel.app/assets/logical-reasoning-q06.png",
+      "optionImages": [],
+      "solution": "A vertical mirror swaps left and right, keeping each part at the same height. The black dot moves from bottom-right to bottom-left. The arrow pointing down must point down. All other parts must undergo the same reflection; the matching diagram is shown alongside."
+    },
+    {
+      "no": 7,
+      "id": 7,
+      "question": "Choose the correct mirror image in the vertical mirror line shown.",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctIndex": 2,
+      "correctOption": "C",
+      "correctAnswer": "Option C",
+      "marks": 2,
+      "category": "mirror",
+      "diagram": "https://mest-porutal.vercel.app/assets/logical-reasoning-q07.png",
+      "optionImages": [],
+      "solution": "A vertical mirror swaps left and right, keeping each part at the same height. The black dot moves from top-left to top-right. The arrow pointing right must point left. All other parts must undergo the same reflection; the matching diagram is shown alongside."
+    },
+    {
+      "no": 8,
+      "id": 8,
+      "question": "Choose the correct mirror image in the vertical mirror line shown.",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctIndex": 3,
+      "correctOption": "D",
+      "correctAnswer": "Option D",
+      "marks": 2,
+      "category": "mirror",
+      "diagram": "https://mest-porutal.vercel.app/assets/logical-reasoning-q08.png",
+      "optionImages": [],
+      "solution": "A vertical mirror swaps left and right, keeping each part at the same height. The black dot moves from top-left to top-right. The arrow pointing right must point left. All other parts must undergo the same reflection; the matching diagram is shown alongside."
+    },
+    {
+      "no": 9,
+      "id": 9,
+      "question": "Choose the correct water image in the horizontal water line shown.",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctIndex": 3,
+      "correctOption": "D",
+      "correctAnswer": "Option D",
+      "marks": 2,
+      "category": "water",
+      "diagram": "https://mest-porutal.vercel.app/assets/logical-reasoning-q09.png",
+      "optionImages": [],
+      "solution": "The horizontal water line reverses top and bottom but keeps left and right fixed. The characters stay in the left-to-right order F3L, while each character is flipped vertically. Compare the tops and bottoms of the letters with the answer diagram; a half-turn would also reverse their order and is incorrect."
+    },
+    {
+      "no": 10,
+      "id": 10,
+      "question": "Choose the correct water image in the horizontal water line shown.",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctIndex": 3,
+      "correctOption": "D",
+      "correctAnswer": "Option D",
+      "marks": 2,
+      "category": "water",
+      "diagram": "https://mest-porutal.vercel.app/assets/logical-reasoning-q10.png",
+      "optionImages": [],
+      "solution": "The horizontal water line reverses top and bottom but keeps left and right fixed. The characters stay in the left-to-right order READ, while each character is flipped vertically. Compare the tops and bottoms of the letters with the answer diagram; a half-turn would also reverse their order and is incorrect."
+    },
+    {
+      "no": 11,
+      "id": 11,
+      "question": "Choose the correct water image in the horizontal water line shown.",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctIndex": 2,
+      "correctOption": "C",
+      "correctAnswer": "Option C",
+      "marks": 2,
+      "category": "water",
+      "diagram": "https://mest-porutal.vercel.app/assets/logical-reasoning-q11.png",
+      "optionImages": [],
+      "solution": "The horizontal water line reverses top and bottom but keeps left and right fixed. The characters stay in the left-to-right order G2P, while each character is flipped vertically. Compare the tops and bottoms of the letters with the answer diagram; a half-turn would also reverse their order and is incorrect."
+    },
+    {
+      "no": 12,
+      "id": 12,
+      "question": "Choose the correct water image in the horizontal water line shown.",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctIndex": 0,
+      "correctOption": "A",
+      "correctAnswer": "Option A",
+      "marks": 2,
+      "category": "water",
+      "diagram": "https://mest-porutal.vercel.app/assets/logical-reasoning-q12.png",
+      "optionImages": [],
+      "solution": "The horizontal water line reverses top and bottom but keeps left and right fixed. The characters stay in the left-to-right order LEAF, while each character is flipped vertically. Compare the tops and bottoms of the letters with the answer diagram; a half-turn would also reverse their order and is incorrect."
+    },
+    {
+      "no": 13,
+      "id": 13,
+      "question": "Choose the correct water image in the horizontal water line shown.",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctIndex": 2,
+      "correctOption": "C",
+      "correctAnswer": "Option C",
+      "marks": 2,
+      "category": "water",
+      "diagram": "https://mest-porutal.vercel.app/assets/logical-reasoning-q13.png",
+      "optionImages": [],
+      "solution": "A water image swaps top and bottom, keeping each part in the same left-right position. The black dot moves from bottom-left to top-left. The arrow pointing down must point up. All other parts must undergo the same reflection; the matching diagram is shown alongside."
+    },
+    {
+      "no": 14,
+      "id": 14,
+      "question": "Choose the correct water image in the horizontal water line shown.",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctIndex": 3,
+      "correctOption": "D",
+      "correctAnswer": "Option D",
+      "marks": 2,
+      "category": "water",
+      "diagram": "https://mest-porutal.vercel.app/assets/logical-reasoning-q14.png",
+      "optionImages": [],
+      "solution": "A water image swaps top and bottom, keeping each part in the same left-right position. The black dot moves from top-left to bottom-left. The arrow pointing right must point right. All other parts must undergo the same reflection; the matching diagram is shown alongside."
+    },
+    {
+      "no": 15,
+      "id": 15,
+      "question": "Choose the correct water image in the horizontal water line shown.",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctIndex": 2,
+      "correctOption": "C",
+      "correctAnswer": "Option C",
+      "marks": 2,
+      "category": "water",
+      "diagram": "https://mest-porutal.vercel.app/assets/logical-reasoning-q15.png",
+      "optionImages": [],
+      "solution": "A water image swaps top and bottom, keeping each part in the same left-right position. The black dot moves from bottom-right to top-right. The arrow pointing up must point down. All other parts must undergo the same reflection; the matching diagram is shown alongside."
+    },
+    {
+      "no": 16,
+      "id": 16,
+      "question": "Choose the correct water image in the horizontal water line shown.",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctIndex": 2,
+      "correctOption": "C",
+      "correctAnswer": "Option C",
+      "marks": 2,
+      "category": "water",
+      "diagram": "https://mest-porutal.vercel.app/assets/logical-reasoning-q16.png",
+      "optionImages": [],
+      "solution": "A water image swaps top and bottom, keeping each part in the same left-right position. The black dot moves from bottom-right to top-right. The arrow pointing up must point down. All other parts must undergo the same reflection; the matching diagram is shown alongside."
+    },
+    {
+      "no": 17,
+      "id": 17,
+      "question": "Find the next number: 6, 11, 16, 21, 26, ?",
+      "options": [
+        "32",
+        "31",
+        "36",
+        "30"
+      ],
+      "correctIndex": 1,
+      "correctOption": "B",
+      "correctAnswer": "31",
+      "marks": 2,
+      "category": "series",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "The difference is always +5: 11 - 6 = 5 and 16 - 11 = 5. Continue by adding 5 to 26: 26 + 5 = 31."
+    },
+    {
+      "no": 18,
+      "id": 18,
+      "question": "Find the next number: 1, 4, 9, 16, 25, ?",
+      "options": [
+        "49",
+        "35",
+        "30",
+        "36"
+      ],
+      "correctIndex": 3,
+      "correctOption": "D",
+      "correctAnswer": "36",
+      "marks": 2,
+      "category": "series",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "These are consecutive squares: 1 x 1, 2 x 2, 3 x 3, 4 x 4 and 5 x 5. The next is 6 x 6 = 36."
+    },
+    {
+      "no": 19,
+      "id": 19,
+      "question": "Find the next number: 3, 7, 13, 21, 31, ?",
+      "options": [
+        "42",
+        "41",
+        "45",
+        "43"
+      ],
+      "correctIndex": 3,
+      "correctOption": "D",
+      "correctAnswer": "43",
+      "marks": 2,
+      "category": "series",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "The differences are 4, 6, 8 and 10. Increase the difference by 2 again to get 12. Then 31 + 12 = 43."
+    },
+    {
+      "no": 20,
+      "id": 20,
+      "question": "Find the next number: 50, 47, 43, 38, 32, ?",
+      "options": [
+        "26",
+        "25",
+        "27",
+        "24"
+      ],
+      "correctIndex": 1,
+      "correctOption": "B",
+      "correctAnswer": "25",
+      "marks": 2,
+      "category": "series",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Work out what is subtracted: 50 - 47 = 3, 47 - 43 = 4, 43 - 38 = 5 and 38 - 32 = 6. Next subtract 7, giving 32 - 7 = 25."
+    },
+    {
+      "no": 21,
+      "id": 21,
+      "question": "Find the next number: 1/2, 1, 3/2, 2, 5/2, ?",
+      "options": [
+        "4",
+        "7/2",
+        "3",
+        "11/4"
+      ],
+      "correctIndex": 2,
+      "correctOption": "C",
+      "correctAnswer": "3",
+      "marks": 2,
+      "category": "series",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Write the terms in halves: 1/2, 2/2, 3/2, 4/2 and 5/2. The numerator increases by 1 each time. The next term is 6/2, which simplifies to 3."
+    },
+    {
+      "no": 22,
+      "id": 22,
+      "question": "Find the next number: 5, 10, 8, 16, 14, 28, ?",
+      "options": [
+        "24",
+        "56",
+        "30",
+        "26"
+      ],
+      "correctIndex": 3,
+      "correctOption": "D",
+      "correctAnswer": "26",
+      "marks": 2,
+      "category": "series",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Alternate two operations: multiply by 2, then subtract 2. After 14 x 2 = 28, the next operation is 28 - 2 = 26."
+    },
+    {
+      "no": 23,
+      "id": 23,
+      "question": "Every letter is shifted forward by one place in the alphabet. If CAT is coded as DBU, how is DOG coded?",
+      "options": [
+        "EPH",
+        "FQI",
+        "EOG",
+        "CNE"
+      ],
+      "correctIndex": 0,
+      "correctOption": "A",
+      "correctAnswer": "EPH",
+      "marks": 2,
+      "category": "coding",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Move each letter forward one position: D becomes E, O becomes P, and G becomes H. Combining them gives EPH."
+    },
+    {
+      "no": 24,
+      "id": 24,
+      "question": "Every letter is shifted forward by two places. If BALL is coded as DCNN, how is GAME coded?",
+      "options": [
+        "HBNF",
+        "ICOG",
+        "ICOH",
+        "EZKC"
+      ],
+      "correctIndex": 1,
+      "correctOption": "B",
+      "correctAnswer": "ICOG",
+      "marks": 2,
+      "category": "coding",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Apply +2 to every letter: G to I, A to C, M to O, E to G. Thus GAME becomes ICOG."
+    },
+    {
+      "no": 25,
+      "id": 25,
+      "question": "Use A=1, B=2, ..., Z=26. Which word is represented by 3-1-20?",
+      "options": [
+        "CAR",
+        "CAT",
+        "CUT",
+        "BAT"
+      ],
+      "correctIndex": 1,
+      "correctOption": "B",
+      "correctAnswer": "CAT",
+      "marks": 2,
+      "category": "coding",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Convert each number into a letter: 3 is C, 1 is A and 20 is T. Reading in order gives CAT."
+    },
+    {
+      "no": 26,
+      "id": 26,
+      "question": "A word is first reversed, then every letter is moved forward one place. For example, CAT becomes UBD. How is DOG coded?",
+      "options": [
+        "GOD",
+        "HPE",
+        "EPH",
+        "IQF"
+      ],
+      "correctIndex": 1,
+      "correctOption": "B",
+      "correctAnswer": "HPE",
+      "marks": 2,
+      "category": "coding",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "First reverse DOG to get GOD. Next shift each letter forward one: G to H, O to P, D to E. This gives HPE."
+    },
+    {
+      "no": 27,
+      "id": 27,
+      "question": "Letters in positions 1 and 3 move forward two places; letters in positions 2 and 4 move backward one place. If FROG becomes HQQF, how is LION coded?",
+      "options": [
+        "NHRM",
+        "MHPM",
+        "NHQM",
+        "NKQP"
+      ],
+      "correctIndex": 2,
+      "correctOption": "C",
+      "correctAnswer": "NHQM",
+      "marks": 2,
+      "category": "coding",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Use +2, -1, +2, -1 in order. L becomes N, I becomes H, O becomes Q, and N becomes M. Hence LION becomes NHQM."
+    },
+    {
+      "no": 28,
+      "id": 28,
+      "question": "A word is coded by the sum of its alphabet positions (A=1, ..., Z=26). What is the code for HOME?",
+      "options": [
+        "39",
+        "42",
+        "40",
+        "41"
+      ],
+      "correctIndex": 3,
+      "correctOption": "D",
+      "correctAnswer": "41",
+      "marks": 2,
+      "category": "coding",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "H=8, O=15, M=13 and E=5. The total is 8 + 15 + 13 + 5 = 41."
+    },
+    {
+      "no": 29,
+      "id": 29,
+      "question": "Asha is the mother of Rohan. Rohan is the father of Meera. How is Asha related to Meera?",
+      "options": [
+        "Mother",
+        "Sister",
+        "Grandmother",
+        "Aunt"
+      ],
+      "correctIndex": 2,
+      "correctOption": "C",
+      "correctAnswer": "Grandmother",
+      "marks": 2,
+      "category": "blood",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Asha is one generation above Rohan, and Rohan is one generation above Meera. Asha is therefore Meera's father's mother: her grandmother."
+    },
+    {
+      "no": 30,
+      "id": 30,
+      "question": "Rita and Sita are sisters. Rita is the mother of Kabir, and Sita is the mother of Anu. How is Kabir related to Anu?",
+      "options": [
+        "Nephew",
+        "Cousin",
+        "Uncle",
+        "Brother"
+      ],
+      "correctIndex": 1,
+      "correctOption": "B",
+      "correctAnswer": "Cousin",
+      "marks": 2,
+      "category": "blood",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Rita and Sita are sisters, so their children belong to two branches of the same family. Kabir is Rita's child and Anu is Sita's child. Children of siblings are cousins."
+    },
+    {
+      "no": 31,
+      "id": 31,
+      "question": "Neel is the brother of Kavya. Kavya is the mother of her daughter Isha. How is Isha related to Neel?",
+      "options": [
+        "Niece",
+        "Aunt",
+        "Sister",
+        "Daughter"
+      ],
+      "correctIndex": 0,
+      "correctOption": "A",
+      "correctAnswer": "Niece",
+      "marks": 2,
+      "category": "blood",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Kavya is Neel's sister. Isha is Kavya's daughter, so Isha is the daughter of Neel's sister. A sibling's daughter is called a niece; therefore Isha is Neel's niece."
+    },
+    {
+      "no": 32,
+      "id": 32,
+      "question": "Pointing to a woman, Sameer says, \"Her father is my mother's father.\" The woman is not Sameer's mother. How is the woman related to Sameer?",
+      "options": [
+        "Aunt",
+        "Grandmother",
+        "Daughter",
+        "Sister"
+      ],
+      "correctIndex": 0,
+      "correctOption": "A",
+      "correctAnswer": "Aunt",
+      "marks": 2,
+      "category": "blood",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "The woman and Sameer's mother have the same father. Since the woman is not his mother, she is his mother's sister and hence his aunt."
+    },
+    {
+      "no": 33,
+      "id": 33,
+      "question": "Pooja and Seema are sisters. Seema is the mother of her son Anil. How is Anil related to Pooja?",
+      "options": [
+        "Nephew",
+        "Brother",
+        "Son",
+        "Cousin"
+      ],
+      "correctIndex": 0,
+      "correctOption": "A",
+      "correctAnswer": "Nephew",
+      "marks": 2,
+      "category": "blood",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Seema is Pooja's sister, and Anil is Seema's son. Thus Anil is the son of Pooja's sister. A sister's son is a nephew, so Anil is Pooja's nephew."
+    },
+    {
+      "no": 34,
+      "id": 34,
+      "question": "Farah is the mother of Nabil. Nabil is the father of Sara. Sara is the sister of Yusuf. Yusuf is male. How is Yusuf related to Farah?",
+      "options": [
+        "Grandson",
+        "Brother",
+        "Nephew",
+        "Son"
+      ],
+      "correctIndex": 0,
+      "correctOption": "A",
+      "correctAnswer": "Grandson",
+      "marks": 2,
+      "category": "blood",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Sara and Yusuf are siblings, so Nabil is also Yusuf's father. Farah is Nabil's mother. Thus Yusuf is Farah's male grandchild, or grandson."
+    },
+    {
+      "no": 35,
+      "id": 35,
+      "question": "Ravi faces North. He makes a quarter-turn to his right. Which direction does he face now?",
+      "options": [
+        "West",
+        "South",
+        "East",
+        "North"
+      ],
+      "correctIndex": 2,
+      "correctOption": "C",
+      "correctAnswer": "East",
+      "marks": 2,
+      "category": "directions",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "A quarter-turn is 90 degrees. The clockwise compass order is North, East, South, West. Turning right means following this order one step, so a right turn from North ends at East."
+    },
+    {
+      "no": 36,
+      "id": 36,
+      "question": "Mina faces East. She turns left, then turns left again. Which direction does she face?",
+      "options": [
+        "North",
+        "West",
+        "East",
+        "South"
+      ],
+      "correctIndex": 1,
+      "correctOption": "B",
+      "correctAnswer": "West",
+      "marks": 2,
+      "category": "directions",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Track one turn at a time. A left turn from East points North. A second left turn from North points West. Two quarter-turns have reversed the original facing direction."
+    },
+    {
+      "no": 37,
+      "id": 37,
+      "question": "A child walks 4 m North, then 3 m East. In which direction is the child from the start?",
+      "options": [
+        "North-West",
+        "South-West",
+        "South-East",
+        "North-East"
+      ],
+      "correctIndex": 3,
+      "correctOption": "D",
+      "correctAnswer": "North-East",
+      "marks": 2,
+      "category": "directions",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "The final position is both north and east of the start. Combining these two directions gives North-East."
+    },
+    {
+      "no": 38,
+      "id": 38,
+      "question": "Omar faces West. He makes three quarter-turns to his right. Which direction does he face?",
+      "options": [
+        "West",
+        "North",
+        "South",
+        "East"
+      ],
+      "correctIndex": 2,
+      "correctOption": "C",
+      "correctAnswer": "South",
+      "marks": 2,
+      "category": "directions",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Track each right turn: West to North, North to East, East to South. After three turns he faces South."
+    },
+    {
+      "no": 39,
+      "id": 39,
+      "question": "Arun faces North. He turns 180 degrees, then makes a quarter-turn left. Which direction does he face?",
+      "options": [
+        "West",
+        "North",
+        "South",
+        "East"
+      ],
+      "correctIndex": 3,
+      "correctOption": "D",
+      "correctAnswer": "East",
+      "marks": 2,
+      "category": "directions",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "First complete the half-turn: 180 degrees changes North to South. Now use the new facing direction. A person facing South has East on their left, so the final direction is East."
+    },
+    {
+      "no": 40,
+      "id": 40,
+      "question": "At the start, a toy faces East. It turns 270 degrees clockwise and then 180 degrees anticlockwise. Which direction does it face?",
+      "options": [
+        "West",
+        "South",
+        "North",
+        "East"
+      ],
+      "correctIndex": 1,
+      "correctOption": "B",
+      "correctAnswer": "South",
+      "marks": 2,
+      "category": "directions",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "A 270-degree clockwise turn is three right quarter-turns: East to South to West to North. A further 180-degree turn changes North to South."
+    },
+    {
+      "no": 41,
+      "id": 41,
+      "question": "A lesson starts at 9:35 a.m. and lasts 45 minutes. When does it end?",
+      "options": [
+        "10:20 a.m.",
+        "10:25 a.m.",
+        "10:10 a.m.",
+        "10:15 a.m."
+      ],
+      "correctIndex": 0,
+      "correctOption": "A",
+      "correctAnswer": "10:20 a.m.",
+      "marks": 2,
+      "category": "time",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "From 9:35 to 10:00 is 25 minutes. There are 45 - 25 = 20 minutes left. Add these to 10:00 to get 10:20 a.m."
+    },
+    {
+      "no": 42,
+      "id": 42,
+      "question": "A bus must reach school at 8:15 a.m. The journey takes 50 minutes. At what time must it leave?",
+      "options": [
+        "7:15 a.m.",
+        "8:05 a.m.",
+        "7:35 a.m.",
+        "7:25 a.m."
+      ],
+      "correctIndex": 3,
+      "correctOption": "D",
+      "correctAnswer": "7:25 a.m.",
+      "marks": 2,
+      "category": "time",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Work backward 50 minutes from 8:15. Subtract 15 minutes to reach 8:00, then the remaining 35 minutes to reach 7:25 a.m."
+    },
+    {
+      "no": 43,
+      "id": 43,
+      "question": "Sports practice starts at 4:10 p.m. and ends at 5:05 p.m. How many minutes does it last?",
+      "options": [
+        "55 minutes",
+        "45 minutes",
+        "50 minutes",
+        "65 minutes"
+      ],
+      "correctIndex": 0,
+      "correctOption": "A",
+      "correctAnswer": "55 minutes",
+      "marks": 2,
+      "category": "time",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Split the interval at the next hour. From 4:10 p.m. to 5:00 p.m. is 50 minutes. From 5:00 to 5:05 is another 5 minutes. Add them: 50 + 5 = 55 minutes."
+    },
+    {
+      "no": 44,
+      "id": 44,
+      "question": "A clock is 8 minutes slow. When the correct time is 9:05 a.m., what does the clock show?",
+      "options": [
+        "8:53 a.m.",
+        "8:57 a.m.",
+        "9:05 a.m.",
+        "9:13 a.m."
+      ],
+      "correctIndex": 1,
+      "correctOption": "B",
+      "correctAnswer": "8:57 a.m.",
+      "marks": 2,
+      "category": "time",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "A slow clock shows an earlier time. Subtract 8 minutes from 9:05: go back 5 minutes to 9:00, then 3 more minutes to 8:57 a.m."
+    },
+    {
+      "no": 45,
+      "id": 45,
+      "question": "What is the smaller angle between the clock hands at exactly 6:30?",
+      "options": [
+        "15 degrees",
+        "180 degrees",
+        "30 degrees",
+        "0 degrees"
+      ],
+      "correctIndex": 0,
+      "correctOption": "A",
+      "correctAnswer": "15 degrees",
+      "marks": 2,
+      "category": "time",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "At 6:30, the minute hand is at 180 degrees from 12. The hour hand has moved halfway from 6 to 7: 180 + 15 = 195 degrees. Their smaller separation is 195 - 180 = 15 degrees."
+    },
+    {
+      "no": 46,
+      "id": 46,
+      "question": "Six notebooks cost Rs 150. At the same price per notebook, what do 10 notebooks cost?",
+      "options": [
+        "Rs 300",
+        "Rs 200",
+        "Rs 250",
+        "Rs 225"
+      ],
+      "correctIndex": 2,
+      "correctOption": "C",
+      "correctAnswer": "Rs 250",
+      "marks": 2,
+      "category": "price",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "One notebook costs 150 / 6 = Rs 25. Therefore 10 notebooks cost 10 x 25 = Rs 250."
+    },
+    {
+      "no": 47,
+      "id": 47,
+      "question": "A pack of 5 identical pencils costs Rs 40. How many pencils can be bought for Rs 96 if pencils are also sold individually at the same rate?",
+      "options": [
+        "10",
+        "12",
+        "11",
+        "15"
+      ],
+      "correctIndex": 1,
+      "correctOption": "B",
+      "correctAnswer": "12",
+      "marks": 2,
+      "category": "price",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "One pencil costs 40 / 5 = Rs 8. Divide the budget by the unit price: 96 / 8 = 12 pencils."
+    },
+    {
+      "no": 48,
+      "id": 48,
+      "question": "A box costs Rs 18. Ribbon for each box costs another Rs 7. What is the total cost of preparing 6 boxes?",
+      "options": [
+        "Rs 168",
+        "Rs 150",
+        "Rs 108",
+        "Rs 126"
+      ],
+      "correctIndex": 1,
+      "correctOption": "B",
+      "correctAnswer": "Rs 150",
+      "marks": 2,
+      "category": "price",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Each prepared box costs 18 + 7 = Rs 25. Six prepared boxes cost 6 x 25 = Rs 150."
+    },
+    {
+      "no": 49,
+      "id": 49,
+      "question": "A shopkeeper buys a toy for Rs 240 and sells it for Rs 300. What is the profit percentage on the cost price?",
+      "options": [
+        "30%",
+        "20%",
+        "60%",
+        "25%"
+      ],
+      "correctIndex": 3,
+      "correctOption": "D",
+      "correctAnswer": "25%",
+      "marks": 2,
+      "category": "price",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Profit = 300 - 240 = Rs 60. Profit percentage is profit divided by cost price, times 100: 60 / 240 x 100 = 25%."
+    },
+    {
+      "no": 50,
+      "id": 50,
+      "question": "At the same rate, 12 stickers cost as much as 3 badges. If one badge costs Rs 28, what is the price of one sticker?",
+      "options": [
+        "Rs 7",
+        "Rs 9",
+        "Rs 6",
+        "Rs 8"
+      ],
+      "correctIndex": 0,
+      "correctOption": "A",
+      "correctAnswer": "Rs 7",
+      "marks": 2,
+      "category": "price",
+      "diagram": "",
+      "optionImages": [],
+      "solution": "Three badges cost 3 x 28 = Rs 84, which is also the cost of 12 stickers. One sticker costs 84 / 12 = Rs 7."
+    }
+  ]
+}

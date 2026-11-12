@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#1d4ed8">
-<meta name="description" content="D3V3NDRA Classes IMO Logical Reasoning Master Examination — Class 7.">
-<title>IMO Test Series | D3V3NDRA Classes</title>
+<meta name="description" content="D3V3NDRA Classes Testing Portal. Sign in with your student ID to open your assigned paper, review your results and download your worksheet.">
+<title>Testing Portal | D3V3NDRA Classes</title>
 <link rel="icon" href="assets/logo-mark.png">
 <link rel="stylesheet" href="css/styles.css">
   <script>
@@ -16,7 +16,7 @@
         displayMath: [['$$', '$$'], ['\\[', '\\]']],
         processEscapes: true
       },
-      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+      options: { ignoreHtmlClass: 'plain-text', skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
     };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
@@ -52,9 +52,9 @@
     </div>
     <span class="header-divider" aria-hidden="true"></span>
     <div class="header-test">
-      <span id="headerTitle">IMO Test Series</span>
+      <span id="headerTitle">Testing Portal</span>
       <span class="header-sep" id="headerSep" hidden>&rsaquo;</span>
-  <span class="header-pill" id="headerPill">Logical Reasoning</span>
+      <span class="header-pill" id="headerPill"></span>
     </div>
     <div class="header-right">
       <div class="timer-pill" id="timerPill" hidden>
@@ -80,13 +80,18 @@
         <img class="hero-wordmark" src="assets/logo-wordmark.png" alt="D3V3NDRA Edtech Solutions">
       </div>
       <p class="eyebrow">D3V3NDRA CLASSES</p>
-      <h1>International Math Olympiad<br>Test Series</h1>
-      <span class="chapter-pill">Logical Reasoning</span>
-      <div class="hero-subject">Logical Reasoning</div>
+      <span class="chapter-pill">LEARN. THINK. ACHIEVE.</span>
+      <h1>Testing <span>Portal</span></h1>
+      <p class="hero-intro">Your next challenge starts here. Sign in to open the paper assigned to your class.</p>
       <div class="hero-stats">
-        <span class="hero-stat"><span data-icon="sigma" data-icon-size="18"></span>50 Questions</span>
-        <span class="hero-stat"><span data-icon="clock" data-icon-size="18"></span>60 Minutes</span>
-        <span class="hero-stat"><span data-icon="barChart" data-icon-size="18"></span>Class 7 Level</span>
+        <span class="hero-stat"><span data-icon="bookOpen" data-icon-size="18"></span>Your assigned paper</span>
+        <span class="hero-stat"><span data-icon="clock" data-icon-size="18"></span>60-minute tests</span>
+        <span class="hero-stat"><span data-icon="barChart" data-icon-size="18"></span>Instant results</span>
+      </div>
+      <div class="portal-steps" aria-label="How it works">
+        <div><span>01</span><b>Sign in</b><small>Use your student ID</small></div>
+        <div><span>02</span><b>Take your test</b><small>Read, think, answer</small></div>
+        <div><span>03</span><b>Review &amp; learn</b><small>Get your worksheet</small></div>
       </div>
     </section>
 
@@ -101,14 +106,14 @@
           <label for="loginId">Student ID / Enrolment No.</label>
           <div class="input-wrap">
             <span class="input-icon" data-icon="user" data-icon-size="18"></span>
-            <input id="loginId" name="loginId" type="text" autocomplete="username" placeholder="e.g. DSMG7@012" spellcheck="false">
+            <input id="loginId" name="loginId" type="text" autocomplete="username" autocapitalize="none" placeholder="Enter your assigned student ID" spellcheck="false">
           </div>
         </div>
         <div class="field">
           <label for="studentNameInput">Full Name / Roll No.</label>
           <div class="input-wrap">
             <span class="input-icon" data-icon="clipboard" data-icon-size="18"></span>
-            <input id="studentNameInput" name="studentName" type="text" autocomplete="name" placeholder="e.g. Aarav Sharma / 7A-12" spellcheck="false">
+            <input id="studentNameInput" name="studentName" type="text" autocomplete="name" placeholder="Enter your full name / roll number" spellcheck="false">
           </div>
         </div>
         <div class="field">
@@ -125,7 +130,7 @@
         </div>
         <p class="form-error" id="loginError" role="alert" hidden></p>
         <button type="submit" class="btn btn-primary btn-login">Log In <span data-icon="arrowRight" data-icon-size="19"></span></button>
-        <p class="secure-note"><span data-icon="shield" data-icon-size="14"></span> Single-session test &middot; Auto-submits at 60:00</p>
+        <p class="secure-note"><span data-icon="bookOpen" data-icon-size="14"></span>Your student ID opens your assigned paper automatically.</p>
       </form>
       <p class="login-foot">D3V3NDRA Edtech Solutions &middot; Online Assessment</p>
     </section>
@@ -135,6 +140,11 @@
 <main class="view" id="viewInstructions">
   <div class="shell shell-md">
     <section class="card instructions-card">
+      <div class="assigned-paper">
+        <span class="paper-emblem" data-icon="bookOpen" data-icon-size="28"></span>
+        <div><span class="paper-grade" data-paper-grade></span><h1 data-paper-title></h1><p id="paperSubtitle"></p></div>
+        <span class="paper-total"><b data-paper-marks></b> marks</span>
+      </div>
       <div class="card-title lg">
         <span class="title-icon" data-icon="info" data-icon-size="23"></span>
         <div>
@@ -147,11 +157,11 @@
         <div class="instructions-facts">
           <div class="fact">
             <span class="fact-icon" data-icon="clipboard" data-icon-size="18"></span>
-            <span>Total Questions</span><b>: 50</b>
+            <span>Total Questions</span><b data-paper-count></b>
           </div>
           <div class="fact">
             <span class="fact-icon" data-icon="clock" data-icon-size="18"></span>
-            <span>Duration</span><b>: 60 Minutes</b>
+            <span>Duration</span><b><span data-paper-minutes></span> Minutes</b>
           </div>
           <div class="fact">
             <span class="fact-icon" data-icon="layers" data-icon-size="18"></span>
@@ -160,7 +170,7 @@
           <div class="fact fact-marking">
             <span class="fact-icon" data-icon="trophy" data-icon-size="18"></span>
             <span>Marking</span>
-            <b>: +2 per correct<br><small>0 for unattempted / wrong</small></b>
+            <b><span id="paperMarking"></span><br><small>0 for unattempted / wrong</small></b>
           </div>
           <div class="fact fact-window">
             <span class="fact-icon" data-icon="calendar" data-icon-size="18"></span>
@@ -223,9 +233,9 @@
         <span class="banner-icon" data-icon="bookOpen" data-icon-size="22"></span>
         <div class="banner-copy">
           <b>Please read the instructions carefully.</b>
-          <span>The 60-minute timer starts when you begin.</span>
+          <span>The <span class="inline-value" data-paper-minutes></span>-minute timer starts when you begin.</span>
         </div>
-        <div class="banner-time"><span>Duration</span><strong>01:00</strong></div>
+        <div class="banner-time"><span>Duration</span><strong id="bannerDuration"></strong></div>
          <button type="button" class="btn btn-view-paper" id="viewPaperBtn"><span data-icon="bookOpen" data-icon-size="18"></span>View Question Paper First</button>
          <button type="button" class="btn btn-primary" id="startBtn">Start Test <span data-icon="play" data-icon-size="18"></span></button>
       </div>
@@ -242,8 +252,8 @@
   <div class="exam-shell" id="examShell">
     <aside class="card palette-card" id="paletteCard">
       <div class="palette-head">
-        <h2>Questions <span>(1 &ndash; 50)</span></h2>
-        <span class="palette-count" id="paletteCount">0 / 50</span>
+        <h2>Questions <span>(1 &ndash; <span data-paper-count></span>)</span></h2>
+        <span class="palette-count" id="paletteCount"></span>
         <button type="button" class="palette-close" id="paletteClose" data-icon="x" data-icon-size="16" aria-label="Close question palette"></button>
       </div>
       <div class="palette-grid" id="paletteGrid" aria-label="Question palette"></div>
@@ -255,20 +265,21 @@
       </div>
       <div class="palette-stats">
         <div class="stat-chip stat-attempted"><b id="statAttempted">0</b><span>Attempted</span></div>
-        <div class="stat-chip stat-unattempted"><b id="statUnattempted">50</b><span>Unattempted</span></div>
+        <div class="stat-chip stat-unattempted"><b id="statUnattempted">0</b><span>Unattempted</span></div>
         <div class="stat-chip stat-marked"><b id="statMarked">0</b><span>Marked</span></div>
       </div>
       <div class="palette-progress">
-        <div class="progress-meta"><span>Progress</span><b id="progressCount">0 / 50</b></div>
+        <div class="progress-meta"><span>Progress</span><b id="progressCount"></b></div>
         <div class="progress-track"><i id="progressFill"></i></div>
       </div>
     </aside>
 
     <section class="card exam-card">
+      <div class="exam-paper-label"><span data-paper-grade></span><strong data-paper-title></strong></div>
       <div class="exam-top">
-        <span class="q-chip">Question <b id="qNo">1</b> of 50</span>
+        <span class="q-chip">Question <b id="qNo">1</b> of <span data-paper-count></span></span>
         <span class="mark-badge" id="markBadge" hidden><span data-icon="flag" data-icon-size="13"></span> Marked</span>
-        <span class="marks-chip">2 Marks</span>
+        <span class="marks-chip" id="questionMarks"></span>
         <button type="button" class="palette-toggle" id="paletteToggle"><span data-icon="grid" data-icon-size="16"></span>Questions</button>
       </div>
       <div class="exam-body">
@@ -298,7 +309,9 @@
         <p>Your responses have been recorded for this session.</p>
         <div class="summary-box">
           <h3><span data-icon="barChart" data-icon-size="17"></span>Test Summary</h3>
-          <div class="summary-row"><span>Total Questions</span><b>50</b></div>
+          <p class="summary-paper" data-paper-title></p>
+          <div class="summary-row"><span>Class / Grade</span><b data-paper-grade></b></div>
+          <div class="summary-row"><span>Total Questions</span><b data-paper-count></b></div>
           <div class="summary-row"><span>Answered</span><b id="sumAnswered">0</b></div>
           <div class="summary-row"><span>Marked for Review</span><b id="sumMarked">0</b></div>
           <div class="summary-row"><span>Not Answered</span><b id="sumUnanswered">0</b></div>
@@ -353,20 +366,21 @@
 <main class="view" id="viewResult">
   <div class="shell shell-sm">
     <section class="card result-card">
-      <span class="result-badge"><span data-icon="check" data-icon-size="15"></span>IMO Test Completed</span>
+      <span class="result-badge"><span data-icon="check" data-icon-size="15"></span>Test Completed</span>
       <h1>Your Result</h1>
+      <p class="result-paper"><span data-paper-grade></span><strong data-paper-title></strong></p>
       <p class="result-sub" id="resultStudent">Student</p>
       <div class="score-ring" id="scoreRing" style="--pct:0">
         <div class="score-inner">
           <strong id="resultPct">0%</strong>
-          <span id="resultScore">0 / 100</span>
+          <span id="resultScore"></span>
         </div>
       </div>
       <h2 class="result-grade" id="resultGrade"></h2>
        <p class="result-message" id="resultMessage"></p>
        <div class="result-share-note"><b>After reviewing your result, share your name and your rough work on WhatsApp.</b></div>
        <div class="result-metrics">
-         <div class="metric"><span>Correct</span><b id="resultCorrect">0 / 50</b></div>
+         <div class="metric metric-correct"><span>Correct</span><b id="resultCorrect">0</b></div>
          <div class="metric"><span>Incorrect</span><b id="resultIncorrect">0</b></div>
          <div class="metric"><span>Unattempted</span><b id="resultUnattempted">0</b></div>
          <div class="metric"><span>Time Used</span><b id="resultTime">0 min</b></div>
@@ -379,8 +393,8 @@
        <button type="button" class="link-btn result-download" id="downloadBtn"><span data-icon="download" data-icon-size="15"></span>Download result for your teacher</button>
        <div class="worksheet-download-card">
          <span class="worksheet-download-icon" data-icon="download" data-icon-size="25"></span>
-         <div class="worksheet-download-copy"><b>Download the complete worksheet + answer key</b><small>Keep the Logical Reasoning question paper and answer key for your review.</small></div>
-         <a class="btn btn-primary worksheet-download-btn" id="downloadSheetBtn" href="assets/worksheet-logical-reasoning.pdf" download="Logical-Reasoning-Worksheet-with-Answer-Key.pdf">Download PDF <span data-icon="download" data-icon-size="17"></span></a>
+         <div class="worksheet-download-copy"><b>Download the complete worksheet + answer key</b><small id="worksheetDescription"></small></div>
+         <a class="btn btn-primary worksheet-download-btn" id="downloadSheetBtn" download>Download PDF <span data-icon="download" data-icon-size="17"></span></a>
        </div>
     </section>
   </div>
@@ -391,7 +405,7 @@
     <span class="time-gate-code" id="gateCode">404</span>
     <h2 id="gateTitle">Test window closed</h2>
     <p id="gateMessage">Sorry, the test time has run out. Contact the teacher.</p>
-    <p class="time-gate-note" id="gateNote">D3V3NDRA Classes &middot; IMO Test Series</p>
+    <p class="time-gate-note" id="gateNote">D3V3NDRA Classes &middot; Testing Portal</p>
   </div>
 </div>
 <div id="modalRoot" hidden></div>
@@ -406,6 +420,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="test_questions.js"></script>
+<script src="class2_questions.js"></script>
+<script src="js/papers.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

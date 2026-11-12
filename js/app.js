@@ -1,18 +1,10 @@
-/* D3V3NDRA Classes — IMO Test Series (Logical Reasoning Master Examination)
-   Browser-based Olympiad test. No backend: answers and credentials are in the page source. */
+/* D3V3NDRA Classes — Testing Portal
+   Login-to-paper routing; browser-side questions/scoring with an Apps Script email relay. */
 (() => {
   'use strict';
 
   const CONFIG = {
-    loginId: 'DSMG7@012',
-    password: '12345678',
-    totalMinutes: 60,
-    marksPerQ: 2,
     storageKey: 'd3v3ndra.student',
-    // One attempt per chapter per name/device. Changing the chapter name opens
-    // a fresh attempt registry, so the same student can attempt each chapter once.
-    chapter: 'logical-reasoning',
-    attemptsKey: 'd3v3ndra.attempts.logical-reasoning',
     // Paste the Google Apps Script Web app URL here to email each submission.
     // Leave blank to keep the test working without email delivery.
     submissionEndpoint: 'https://script.google.com/macros/s/AKfycbxspHEmrfJJStpXsr1aqWl5JyeGUtXnomYy8gHXjj_nbAEcC_7TWPt-Od7WYlhytgUFnA/exec',
@@ -62,6 +54,7 @@
   };
 
   const state = {
+    profile: null,
     studentId: '',
     studentName: '',
     signature: '',
@@ -70,7 +63,7 @@
     marked: new Set(),
     visited: new Set(),
     current: 0,
-    remaining: CONFIG.totalMinutes * 60,
+    remaining: 0,
     endsAt: 0,
     startedAt: 0,
     submittedAt: 0,
@@ -113,6 +106,8 @@
 
   function formatMath(text) {
     let out = escapeHtml(text);
+    // The Grade 2 source uses literal dollars for money, not TeX delimiters.
+    if (state.profile && state.profile.textFormat === 'plain') return `<span class="plain-text">${out}</span>`;
     const hasLatex = /[$\\]/.test(text) && /\$|\\\(|\\\[/.test(text);
     if (!hasLatex) {
       out = out.replace(/(^|[\s(])(\d+)\s+(\d+)\/(\d+)(?![\d/])/g, (match, prefix, whole, num, den) =>
@@ -123,6 +118,51 @@
       );
     }
     return out.replace(/m²/g, 'm<sup>2</sup>');
+  }
+
+  function optionMarkup(question, index) {
+    const image = question.optionImages && question.optionImages[index];
+    return `${formatMath(question.opts[index])}${image
+      ? `<img class="option-image" src="${escapeHtml(image)}" alt="Option ${'ABCD'[index]}, question ${question.id}" draggable="false">` : ''}`;
+  }
+
+  function optionText(question, index) {
+    const image = question.optionImages && question.optionImages[index];
+    return question.opts[index] || (image ? `Illustration: ${assetUrl(image)}` : '');
+  }
+
+  function assetUrl(path) {
+    return path ? new URL(path, window.location.href).href : '';
+  }
+
+  function questionMarks(question) {
+    return question.marks === undefined ? state.profile.defaultMarks : question.marks;
+  }
+
+  function marksLabel(marks) {
+    return `${marks} ${marks === 1 ? 'Mark' : 'Marks'}`;
+  }
+
+  function paperBank() {
+    const bank = state.profile && window[state.profile.bank];
+    return Array.isArray(bank) ? bank : [];
+  }
+
+  function configurePaperViews() {
+    const paper = state.profile;
+    document.body.dataset.grade = String(paper.grade);
+    document.title = `Class ${paper.grade} · ${paper.title} | D3V3NDRA Testing Portal`;
+    $$('[data-paper-title]').forEach(el => { el.textContent = paper.title; });
+    $$('[data-paper-grade]').forEach(el => { el.textContent = `Class ${paper.grade} · Grade ${paper.grade}`; });
+    $$('[data-paper-count]').forEach(el => { el.textContent = String(paper.questionCount); });
+    $$('[data-paper-marks]').forEach(el => { el.textContent = String(paper.totalMarks); });
+    $$('[data-paper-minutes]').forEach(el => { el.textContent = String(paper.totalMinutes); });
+    $('#paperSubtitle').textContent = paper.subtitle;
+    $('#paperMarking').textContent = paper.marking;
+    $('#bannerDuration').textContent = `${paper.totalMinutes} min`;
+    $('#worksheetDescription').textContent = `${paper.downloadName} · Questions, answer key and worked solutions.`;
+    $('#downloadSheetBtn').href = paper.worksheet;
+    $('#downloadSheetBtn').download = paper.downloadName;
   }
 
   function formatTime(totalSeconds) {
@@ -149,16 +189,16 @@
 
   function setHeader(mode) {
     const modes = {
-      instructions: { title: 'IMO Test Series', pill: 'Logical Reasoning', sep: false, timer: false, fs: false, student: true, logout: true },
-      exam: { title: 'IMO Test Series', pill: 'Logical Reasoning Master Examination', sep: true, timer: true, fs: false, student: false, logout: true },
-      feedback: { title: 'Test Review & Feedback', pill: 'IMO Test Series', sep: false, timer: false, fs: false, student: true, logout: false },
-      result: { title: 'Test Result', pill: 'Logical Reasoning', sep: false, timer: false, fs: false, student: true, logout: false }
+      instructions: { title: 'Testing Portal', sep: false, timer: false, fs: false, student: true, logout: true },
+      exam: { title: 'Testing Portal', sep: true, timer: true, fs: false, student: false, logout: true },
+      feedback: { title: 'Test Review & Feedback', sep: false, timer: false, fs: false, student: true, logout: false },
+      result: { title: 'Test Result', sep: false, timer: false, fs: false, student: true, logout: false }
     };
     const config = modes[mode];
     if (!config) return;
     $('#headerTitle').textContent = config.title;
     $('#headerSep').hidden = !config.sep;
-    $('#headerPill').textContent = config.pill;
+    $('#headerPill').textContent = `Class ${state.profile.grade} · ${state.profile.title}`;
     $('#timerPill').hidden = !config.timer;
     $('#fsBtn').hidden = !config.fs;
     $('#studentChip').hidden = !config.student;
@@ -183,7 +223,7 @@
 
   function readAttempts() {
     try {
-      const stored = safeStorageGet(CONFIG.attemptsKey);
+      const stored = safeStorageGet(`d3v3ndra.attempts.${state.profile.id}`);
       const parsed = stored ? JSON.parse(stored) : [];
       return Array.isArray(parsed) ? parsed : [];
     } catch (error) {
@@ -202,7 +242,7 @@
     const attempts = readAttempts();
     if (attempts.some(entry => normalizeName(entry) === normalizeName(cleaned))) return;
     attempts.push(cleaned);
-    safeStorageSet(CONFIG.attemptsKey, JSON.stringify(attempts));
+    safeStorageSet(`d3v3ndra.attempts.${state.profile.id}`, JSON.stringify(attempts));
   }
 
   function showSignatureError(message) {
@@ -249,12 +289,13 @@
     }
     url.searchParams.set('action', 'claim');
     url.searchParams.set('name', String(name || '').trim());
-    url.searchParams.set('chapter', String(CONFIG.chapter || '').trim());
+    url.searchParams.set('chapter', state.profile.id);
+    url.searchParams.set('paperId', state.profile.id);
     url.searchParams.set('token', CONFIG.submissionToken);
     const request = fetch(url.toString(), { method: 'GET', redirect: 'follow' })
       .then(response => response.json())
       .then(data => {
-        if (data && data.claimed === true) return { ok: !data.taken, checked: true, taken: !!data.taken };
+        if (data && data.claimed === true) return { ok: data.ok !== false && !data.taken, checked: true, taken: !!data.taken, error: data.error };
         return { ok: true, checked: false };
       })
       .catch(() => ({ ok: true, checked: false }));
@@ -345,15 +386,18 @@
       return;
     }
 
-    if (id.toUpperCase() !== CONFIG.loginId.toUpperCase() || password !== CONFIG.password) {
+    const profile = (window.TEST_PAPERS || []).find(paper => paper.loginId.toUpperCase() === id.toUpperCase() && paper.password === password);
+    if (!profile) {
       showLoginError('Incorrect student ID or password. Please check with your teacher and try again.');
       $('#loginPass').select();
       return;
     }
 
     hideLoginError();
-    state.studentId = id;
+    state.profile = profile;
+    state.studentId = profile.loginId;
     state.studentName = name;
+    configurePaperViews();
     safeStorageSet(CONFIG.storageKey, $('#rememberMe').checked ? id : '');
     $('#studentName').textContent = name;
     setHeader('instructions');
@@ -405,6 +449,9 @@
     const relayFrame = document.getElementById('submissionRelay');
     if (relayFrame) relayFrame.remove();
     state.studentId = '';
+    state.profile = null;
+    delete document.body.dataset.grade;
+    document.title = 'Testing Portal | D3V3NDRA Classes';
     state.studentName = '';
     state.signature = '';
     state.paper = [];
@@ -412,7 +459,7 @@
     state.marked.clear();
     state.visited.clear();
     state.current = 0;
-    state.remaining = CONFIG.totalMinutes * 60;
+    state.remaining = 0;
     state.endsAt = 0;
     state.startedAt = 0;
     state.submittedAt = 0;
@@ -427,6 +474,10 @@
     state.submitReason = '';
     state.feedback = null;
     state.result = null;
+    window.clearTimeout(leaveEpisodeTimer);
+    window.clearTimeout(toastTimer);
+    $('#toast').classList.remove('is-visible');
+    $('#startBtn').disabled = false;
 
     $('#feedbackForm').reset();
     $('#feedbackError').hidden = true;
@@ -585,16 +636,16 @@
   }
 
   function openQuestionPaperModal() {
-    const questions = Array.isArray(window.QUESTIONS) ? window.QUESTIONS : [];
+    const questions = paperBank();
     const paper = questions.map((question, index) => {
       const diagram = question.diagram
         ? `<img class="paper-preview-diagram" src="${escapeHtml(question.diagram)}" alt="Diagram for Question ${index + 1}">`
         : '';
       const options = question.opts.map((option, optionIndex) =>
-        `<span class="paper-preview-option"><b>${'ABCD'[optionIndex]}.</b> ${formatMath(option)}</span>`
+        `<span class="paper-preview-option"><b>${'ABCD'[optionIndex]}.</b> ${optionMarkup(question, optionIndex)}</span>`
       ).join('');
       return `<article class="paper-preview-item">
-        <div class="paper-preview-head"><b>Question ${index + 1}</b><span>2 Marks</span></div>
+        <div class="paper-preview-head"><b>Question ${index + 1}</b><span>${marksLabel(questionMarks(question))}</span></div>
         <div class="paper-preview-question">${formatMath(question.q)}</div>
         ${diagram}
         <div class="paper-preview-options">${options}</div>
@@ -602,7 +653,7 @@
     }).join('');
 
     openModal({
-      title: 'Complete Question Paper — Logical Reasoning',
+      title: `Class ${state.profile.grade} · ${state.profile.title} — Complete Paper`,
       size: 'lg',
       body: `<p class="paper-preview-intro">This is the complete paper in worksheet order. Review it first, then close this preview and press <b>Start Test</b> when ready.</p><div class="paper-preview-list">${paper}</div>`,
       actions: [{ label: 'Close Preview', variant: 'primary' }]
@@ -613,12 +664,13 @@
   }
 
   function buildPaper() {
-    const bank = Array.isArray(window.QUESTIONS) ? window.QUESTIONS.slice() : [];
+    const bank = paperBank();
     if (bank.length === 0) return [];
     // Keep the exact question and option order from the worksheet.
     return bank.map(question => {
       return {
         ...question,
+        marks: questionMarks(question),
         opts: question.opts.slice(),
         ans: question.ans
       };
@@ -630,7 +682,7 @@
   }
 
   function startTest() {
-    if (state.running || state.starting) return;
+    if (!state.profile || state.running || state.starting) return;
     if (!withinTestWindow() && !isPreviewMode()) {
       enforceTestWindow();
       return;
@@ -641,10 +693,15 @@
     state.signature = signature;
 
     const paper = buildPaper();
-    if (paper.length !== 50) {
+    const valid = paper.length === state.profile.questionCount
+      && new Set(paper.map(q => q.id)).size === paper.length
+      && paper.every(q => q.q && q.opts.length === 4 && Number.isInteger(q.ans) && q.ans >= 0 && q.ans < 4
+        && q.marks > 0 && q.opts.every((option, i) => option || (q.optionImages && q.optionImages[i])))
+      && paper.reduce((sum, q) => sum + q.marks, 0) === state.profile.totalMarks;
+    if (!valid) {
       openModal({
         title: 'Question bank unavailable',
-        body: '<p>The test could not load all 50 questions. Please refresh the page and try again.</p>',
+        body: `<p>The test could not load all ${state.profile.questionCount} questions correctly. Please refresh the page and try again.</p>`,
         actions: [{ label: 'Close', variant: 'primary' }]
       });
       return;
@@ -683,14 +740,24 @@
   }
 
   function verifyAndBegin(paper, lockEnabled) {
+    const profile = state.profile;
+    const signature = state.signature;
+    state.starting = true;
+    $('#startBtn').disabled = true;
     return claimAttempt(state.signature).then(result => {
+      if (state.profile !== profile || state.signature !== signature) return;
       if (!result.ok) {
         if (lockEnabled) exitFullscreen();
-        showSignatureError('This name has already been used to attempt this paper. Contact the teacher.');
+        showSignatureError(result.taken ? 'This name has already been used to attempt this paper. Contact the teacher.' : (result.error || 'Could not check your attempt. Please try again.'));
         return;
       }
       rememberAttempt(state.signature);
       beginTest(paper, lockEnabled);
+    }).finally(() => {
+      if (state.profile === profile) {
+        state.starting = false;
+        $('#startBtn').disabled = false;
+      }
     });
   }
 
@@ -702,9 +769,9 @@
     state.marked.clear();
     state.visited.clear();
     state.current = 0;
-    state.remaining = CONFIG.totalMinutes * 60;
+    state.remaining = state.profile.totalMinutes * 60;
     state.startedAt = Date.now();
-    state.endsAt = state.startedAt + CONFIG.totalMinutes * 60 * 1000;
+    state.endsAt = state.startedAt + state.profile.totalMinutes * 60 * 1000;
     state.submittedAt = 0;
     state.running = true;
     state.submitted = false;
@@ -731,7 +798,7 @@
     showView('Exam');
     addUnloadGuard();
     startTimer();
-    toast('Test started — 60 minutes remaining.');
+    toast(`Test started — ${state.profile.totalMinutes} minutes remaining.`);
   }
 
   function buildPalette() {
@@ -787,6 +854,7 @@
     const last = state.current === state.paper.length - 1;
 
     $('#qNo').textContent = String(state.current + 1);
+    $('#questionMarks').textContent = marksLabel(question.marks);
     $('#qText').innerHTML = formatMath(question.q);
     const diagram = $('#qDiagram');
     if (question.diagram) {
@@ -802,7 +870,7 @@
       return `<button type="button" class="option${active ? ' is-selected' : ''}" data-option="${index}" role="radio" aria-checked="${active ? 'true' : 'false'}">
         <span class="option-radio"></span>
         <span class="option-letter">${letter}.</span>
-        <span class="option-text">${formatMath(option)}</span>
+        <span class="option-text">${optionMarkup(question, index)}</span>
       </button>`;
     }).join('');
 
@@ -1089,18 +1157,18 @@
     setHeader('feedback');
     showView('Feedback');
 
-    const emailed = sendSubmissionEmail(result);
+    const sent = sendSubmissionEmail(result);
     if (reason === 'leaving') {
       toast('You left the test window six times. Your paper was submitted automatically.', 'error');
     } else if (reason === 'window') {
       toast('The test window has closed. Your paper was submitted automatically.', 'error');
     } else if (auto) {
-      toast(emailed
-        ? 'Time is up. Test auto-submitted and emailed to your teacher.'
+      toast(sent
+        ? 'Time is up. Test auto-submitted; report sent for email delivery.'
         : 'Time is up. Your test was submitted automatically.');
     } else {
-      toast(emailed
-        ? 'Test submitted. Your answers have been emailed to your teacher.'
+      toast(sent
+        ? 'Test submitted. Report sent for email delivery.'
         : 'Test submitted successfully.');
     }
   }
@@ -1146,20 +1214,27 @@
     });
     const correct = details.filter(item => item.ok).length;
     const attempted = details.filter(item => item.your !== undefined).length;
-    const totalMarks = state.paper.length * CONFIG.marksPerQ;
-    const score = correct * CONFIG.marksPerQ;
+    const totalMarks = state.paper.reduce((sum, question) => sum + question.marks, 0);
+    const score = details.reduce((sum, item) => sum + (item.ok ? item.question.marks : 0), 0);
     const percent = totalMarks ? Math.round((score / totalMarks) * 100) : 0;
     const timeUsed = Math.max(0, Math.min(
-      CONFIG.totalMinutes * 60,
+      state.profile.totalMinutes * 60,
       Math.round((state.submittedAt - state.startedAt) / 1000)
     ));
-    return { details, correct, attempted, total: state.paper.length, totalMarks, score, percent, timeUsed };
+    return { details, correct, attempted, incorrect: attempted - correct, unattempted: state.paper.length - attempted,
+      total: state.paper.length, totalMarks, score, percent, timeUsed };
   }
 
   function buildSubmissionPayload(result) {
     return {
       token: CONFIG.submissionToken,
-      chapter: CONFIG.chapter,
+      chapter: state.profile.id,
+      paperId: state.profile.id,
+      paperTitle: state.profile.title,
+      grade: state.profile.grade,
+      durationMinutes: state.profile.totalMinutes,
+      worksheetUrl: assetUrl(state.profile.worksheet),
+      worksheetName: state.profile.downloadName,
       studentId: state.studentId,
       studentName: state.studentName,
       signature: state.signature,
@@ -1169,6 +1244,8 @@
       totalMarks: result.totalMarks,
       percent: result.percent,
       correct: result.correct,
+      incorrect: result.incorrect,
+      unattempted: result.unattempted,
       attempted: result.attempted,
       total: result.total,
       timeUsed: result.timeUsed,
@@ -1180,6 +1257,10 @@
         no: item.index + 1,
         q: item.question.q,
         options: item.question.opts.slice(),
+        diagram: assetUrl(item.question.diagram),
+        optionImages: (item.question.optionImages || []).map(assetUrl),
+        marks: item.question.marks,
+        earnedMarks: item.ok ? item.question.marks : 0,
         selected: item.your === undefined ? null : item.your,
         correct: item.question.ans,
         ok: item.ok
@@ -1242,11 +1323,11 @@
   }
 
   function gradeFor(percent) {
-    if (percent >= 90) return { grade: 'Outstanding!', message: 'A superb result. You have a strong command of logical reasoning.' };
+    if (percent >= 90) return { grade: 'Outstanding!', message: 'A superb result. You have a strong command of this paper’s concepts.' };
     if (percent >= 75) return { grade: 'Excellent!', message: 'Great work. Review the few questions you missed to reach the top.' };
     if (percent >= 60) return { grade: 'Good work!', message: 'A solid result. A little more practice will make it excellent.' };
-    if (percent >= 40) return { grade: 'Keep going!', message: 'You are getting there. Review the worked answers and try again.' };
-    return { grade: 'Needs practice', message: 'Do not worry. Review the chapter and attempt the test again when ready.' };
+    if (percent >= 40) return { grade: 'Keep going!', message: 'You are getting there. Use the worked answers to practise.' };
+    return { grade: 'Keep practising', message: 'Every question is a chance to learn. Review the worked solutions with your teacher.' };
   }
 
   function renderResult() {
@@ -1263,8 +1344,8 @@
     $('#resultGrade').textContent = grading.grade;
     $('#resultMessage').textContent = `${grading.message} You answered ${result.correct} of ${result.total} correctly.`;
     $('#resultCorrect').textContent = `${result.correct} / ${result.total}`;
-    $('#resultIncorrect').textContent = String(result.attempted - result.correct);
-    $('#resultUnattempted').textContent = String(result.total - result.attempted);
+    $('#resultIncorrect').textContent = String(result.incorrect);
+    $('#resultUnattempted').textContent = String(result.unattempted);
     $('#resultTime').textContent = formatDuration(result.timeUsed);
     $('#resultMarked').textContent = String(state.marked.size);
   }
@@ -1286,21 +1367,23 @@
       const statusClass = item.ok ? 'ok' : answered ? 'bad' : 'skip';
       const statusText = item.ok ? 'Correct' : answered ? 'Incorrect' : 'Not answered';
       const yourText = answered
-        ? `${'ABCD'[item.your]}. ${formatMath(question.opts[item.your])}`
+        ? `${'ABCD'[item.your]}. ${optionMarkup(question, item.your)}`
         : 'Not answered';
-      const correctText = `${'ABCD'[question.ans]}. ${formatMath(question.opts[question.ans])}`;
+      const correctText = `${'ABCD'[question.ans]}. ${optionMarkup(question, question.ans)}`;
       return `<div class="review-item">
-        <div class="review-item-head"><span>Question ${item.index + 1}</span><span class="review-status ${statusClass}">${statusText}</span></div>
+        <div class="review-item-head"><span>Question ${item.index + 1} · ${item.ok ? question.marks : 0}/${question.marks} marks</span><span class="review-status ${statusClass}">${statusText}</span></div>
         <div class="review-q">${formatMath(question.q)}</div>
+        ${question.diagram ? `<img class="paper-preview-diagram" src="${escapeHtml(question.diagram)}" alt="Diagram for question ${item.index + 1}">` : ''}
         <div class="review-answers">
           <span>Your answer: <b>${yourText}</b></span>
           <span>Correct answer: <b class="answer-correct">${correctText}</b></span>
         </div>
+        ${question.sol ? `<div class="review-solution"><b>Solution</b> ${formatMath(question.sol)}</div>` : ''}
       </div>`;
     }).join('');
 
     openModal({
-      title: 'Review your answers',
+      title: `Class ${state.profile.grade} · ${state.profile.title} — Answer Review`,
       size: 'lg',
       body: `<div class="review-summary"><span><b>${result.correct}</b> correct</span><span><b>${incorrect}</b> incorrect</span><span><b>${skipped}</b> not answered</span></div><div class="review-list">${items}</div><div class="review-share-note"><b>After reviewing your answers, share your name and your rough work on WhatsApp.</b></div>`,
       actions: [{ label: 'Close', variant: 'primary' }]
@@ -1314,9 +1397,10 @@
     const result = state.result;
     if (!result) return;
     const grading = gradeFor(result.percent);
-    const date = new Date().toLocaleString();
+    const date = new Date(state.submittedAt).toLocaleString();
     const lines = [
-      'D3V3NDRA CLASSES — INTEGER OPERATIONS TEST SERIES',
+      'D3V3NDRA CLASSES — TESTING PORTAL',
+      `Class ${state.profile.grade} · ${state.profile.title}`,
       'Result report',
       '========================================',
       `Student name : ${state.studentName || 'Not provided'}`,
@@ -1324,9 +1408,14 @@
       `Submitted    : ${date}`,
       `Score        : ${result.score} / ${result.totalMarks} (${result.percent}%)`,
       `Correct      : ${result.correct} / ${result.total}`,
+      `Incorrect    : ${result.incorrect}`,
+      `Unattempted  : ${result.unattempted}`,
       `Attempted    : ${result.attempted} / ${result.total}`,
       `Time used    : ${formatDuration(result.timeUsed)}`,
       `Grade        : ${grading.grade.replace('!', '')}`,
+      `Exit warnings: ${state.focusLosses}`,
+      `Submission   : ${state.submitReason}`,
+      `Worksheet    : ${assetUrl(state.profile.worksheet)}`,
       '',
       'Feedback',
       '----------------------------------------',
@@ -1343,9 +1432,11 @@
       const question = item.question;
       const answered = item.your !== undefined;
       const status = item.ok ? 'CORRECT' : answered ? 'INCORRECT' : 'NOT ANSWERED';
-      lines.push(`${item.index + 1}. [${status}] ${question.q}`);
-      lines.push(`   Your answer   : ${answered ? `${'ABCD'[item.your]}. ${question.opts[item.your]}` : '—'}`);
-      if (!item.ok) lines.push(`   Correct answer: ${'ABCD'[question.ans]}. ${question.opts[question.ans]}`);
+      lines.push(`${item.index + 1}. [${status} · ${item.ok ? question.marks : 0}/${question.marks} marks] ${question.q}`);
+      if (question.diagram) lines.push(`   Diagram: ${assetUrl(question.diagram)}`);
+      lines.push(`   Your answer   : ${answered ? `${'ABCD'[item.your]}. ${optionText(question, item.your)}` : '—'}`);
+      lines.push(`   Correct answer: ${'ABCD'[question.ans]}. ${optionText(question, question.ans)}`);
+      if (question.sol) lines.push(`   Solution: ${question.sol}`);
       lines.push('');
     });
 
@@ -1354,7 +1445,7 @@
     const link = document.createElement('a');
     const safeId = state.studentId.replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'student';
     link.href = url;
-    link.download = `logical-reasoning-result-${safeId}.txt`;
+    link.download = `${state.profile.id}-result-${safeId}.txt`;
     document.body.appendChild(link);
     link.click();
     link.remove();

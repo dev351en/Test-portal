@@ -1,10 +1,15 @@
 {
   "name": "d3v3ndra-online-test",
-  "version": "1.0.0",
-  "description": "D3V3NDRA Classes - Logical Reasoning chapter test (static site)",
+  "version": "2.0.0",
+  "description": "D3V3NDRA Classes Testing Portal - login-assigned Grade 7 and Grade 2 papers",
   "private": true,
   "scripts": {
+    "test": "node tests/papers-and-reports.js",
+    "test:browser": "node tests/browser.js",
     "export:sheet": "node scripts/export-question-sheet.js",
     "export:sheet:shuffled": "node scripts/export-question-sheet.js --shuffle --seed=demo"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.55.0"
   }
 }

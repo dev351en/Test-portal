@@ -1,10 +1,9 @@
 /**
  * D3V3NDRA Classes — instant submission email endpoint
  *
- * This Google Apps Script receives a finished chapter test from the portal and
- * emails the teacher a formatted report with every option marked. The chapter
- * is read from the submission payload, so this script does not need chapter-
- * specific edits when the portal moves to a new chapter.
+ * Receives either assigned paper and emails a report with per-question marks,
+ * diagrams, picture options, grade, result counts and the correct worksheet.
+ * paperId scopes attempts; chapter remains supported for older portal clients.
  *
  * ONE-TIME SETUP
  * 1. Go to https://script.google.com and create a new project.
@@ -17,10 +16,8 @@
  * 5. Authorize the script, then copy the Web app URL.
  * 6. Open js/app.js, put that URL in CONFIG.submissionEndpoint, and redeploy the site.
  *
- * This script is chapter-generic. Future chapter changes send a different
- * `chapter` value in the portal payload; do not change SUBJECT_PREFIX or this
- * file for each chapter. Only redeploy Apps Script when this script itself is
- * changed, and keep the same deployment URL.
+ * UPDATE AN EXISTING WEB APP: replace Code.gs, then Deploy -> Manage deployments
+ * -> Edit -> Version: New version -> Deploy. Keep the existing deployment URL.
  *
  * The app and this script must share the same SUBMIT_TOKEN.
  */
@@ -38,6 +35,7 @@ function doGet(e) {
   return json_({
     ok: true,
     service: 'D3V3NDRA submission email',
+    version: 'testing-portal-v2',
     message: 'Endpoint is running. The test portal sends submissions by POST.'
   });
 }
@@ -89,7 +87,7 @@ function handleClaim_(params) {
     return json_({ ok: false, claimed: true, error: 'Invalid submission token.' });
   }
   const name = normalizeName_(params.name);
-  const chapter = sanitizeChapter_(params.chapter);
+  const chapter = sanitizeChapter_(params.paperId || params.chapter);
   if (!name) return json_({ ok: false, claimed: true, error: 'Missing name.' });
 
   const lock = LockService.getScriptLock();
@@ -135,6 +133,25 @@ function chapterLabel_(value) {
     .replace(/\b\w/g, letter => letter.toUpperCase());
 }
 
+function paperLabel_(data) {
+  const title = String(data.paperTitle || chapterLabel_(data.paperId || data.chapter)).trim();
+  return `${data.grade ? `Class ${number_(data.grade)} · ` : ''}${title}`;
+}
+
+function answerMarks_(answer) {
+  return answer.marks === undefined ? 2 : Math.max(0, number_(answer.marks));
+}
+
+function safeUrl_(value) {
+  const url = String(value || '').trim();
+  return /^https?:\/\//i.test(url) ? url : '';
+}
+
+function imageHtml_(url, alt, option) {
+  const safe = safeUrl_(url);
+  return safe ? `<img src="${escapeHtml_(safe)}" alt="${escapeHtml_(alt)}" style="display:block;max-width:100%;${option ? 'width:120px;' : 'width:auto;max-height:360px;'}height:auto;margin:10px 0;background:#fff;border:1px solid #e2e8f0;border-radius:8px;">` : '';
+}
+
 function doPost(e) {
   try {
     const raw = e && e.parameter ? e.parameter.payload : '';
@@ -162,7 +179,7 @@ function doPost(e) {
       name: 'D3V3NDRA Classes'
     });
 
-    registerAttempt_(sanitizeChapter_(data.chapter), String(data.signature || data.studentName || ''));
+    registerAttempt_(sanitizeChapter_(data.paperId || data.chapter), String(data.signature || data.studentName || ''));
 
     return json_({ ok: true, emailedTo: recipient });
   } catch (error) {
@@ -195,23 +212,33 @@ function buildReport_(data) {
   const studentName = String(data.studentName || '').trim();
   const signature = String(data.signature || '').trim();
   const answers = Array.isArray(data.answers) ? data.answers : [];
+  // Recompute from the actual answers, including mixed one/two-mark papers.
+  const graded = answers.map(answer => {
+    const length = Array.isArray(answer.options) ? answer.options.length : 0;
+    const selected = validIndex_(answer.selected, length);
+    return { attempted: selected !== null,
+      correct: selected !== null && selected === validIndex_(answer.correct, length),
+      marks: answerMarks_(answer) };
+  });
   const totals = {
-    score: number_(data.score),
-    totalMarks: number_(data.totalMarks),
-    percent: number_(data.percent),
-    correct: number_(data.correct),
-    attempted: number_(data.attempted),
-    total: number_(data.total) || answers.length,
+    score: graded.reduce((sum, answer) => sum + (answer.correct ? answer.marks : 0), 0),
+    totalMarks: graded.reduce((sum, answer) => sum + answer.marks, 0),
+    correct: graded.filter(answer => answer.correct).length,
+    attempted: graded.filter(answer => answer.attempted).length,
+    total: answers.length,
     marked: number_(data.marked),
     leaves: number_(data.focusLosses),
-    reason: String(data.submitReason || '')
+    reason: String(data.submitReason || ''),
+    paper: paperLabel_(data),
+    duration: number_(data.durationMinutes) || 60
   };
+  totals.percent = totals.totalMarks ? Math.round(totals.score / totals.totalMarks * 100) : 0;
+  totals.incorrect = totals.attempted - totals.correct;
+  totals.unattempted = totals.total - totals.attempted;
   const submittedAt = formatDate_(data.submittedAt);
   const timeUsed = formatDuration_(data.timeUsed);
   const identity = studentName ? `${studentName} — ${studentId}` : studentId;
-  const chapter = sanitizeChapter_(data.chapter);
-  const chapterLabel = chapterLabel_(chapter);
-  const subjectPrefix = `IMO ${chapterLabel} test submitted`;
+  const subjectPrefix = `${totals.paper} test submitted`;
   const subject = `${subjectPrefix} — ${identity} — ${totals.score}/${totals.totalMarks} (${totals.percent}%)`;
   const questionBlocks = answers.map((answer, index) => buildQuestionHtml_(answer, index)).join('');
 
@@ -257,11 +284,13 @@ function buildReport_(data) {
   <div class="wrap">
     <div class="hero">
       <p class="eyebrow">D3V3NDRA Classes</p>
-      <h1>IMO ${escapeHtml_(chapterLabel)} test submission</h1>
+      <h1>${escapeHtml_(totals.paper)}</h1>
+      <p>Testing Portal · Test submission</p>
       <p>${escapeHtml_(identity)} · ${escapeHtml_(submittedAt)}</p>
     </div>
     <div class="card">
       ${summaryHtml_(studentName, studentId, signature, totals, submittedAt, timeUsed)}
+      ${safeUrl_(data.worksheetUrl) ? `<p style="padding:16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;"><a href="${escapeHtml_(safeUrl_(data.worksheetUrl))}" style="color:#1d4ed8;font-weight:bold;">Download worksheet + answer key</a><br><small>${escapeHtml_(data.worksheetName || totals.paper)}</small></p>` : ''}
       <div class="legend">
         <b>How to read this report:</b> every option is listed in the order the student saw it.
         <span class="green">Green</span> marks the correct option.
@@ -269,7 +298,7 @@ function buildReport_(data) {
         A green <b>&ldquo;Student answer · Correct&rdquo;</b> badge means the student chose the right option.
       </div>
       ${questionBlocks}
-      <p class="footer">This report was generated automatically by the D3V3NDRA IMO test portal when the paper was submitted.</p>
+      <p class="footer">Generated automatically by the D3V3NDRA Testing Portal when the paper was submitted.</p>
     </div>
   </div>
 </body>
@@ -289,17 +318,23 @@ function summaryHtml_(studentName, studentId, signature, totals, submittedAt, ti
   </tr>`;
 
   return `<table role="presentation" class="summary">
+    ${row('Paper', totals.paper)}
     ${studentName ? row('Student name', studentName) : ''}
     ${signature ? row('Signature', signature) : ''}
     ${row('Student ID', studentId)}
     ${row('Submitted', submittedAt)}
     ${row('Score', `${totals.score} / ${totals.totalMarks} (${totals.percent}%)`, 'score')}
     ${row('Correct answers', `${totals.correct} / ${totals.total}`)}
+    ${row('Incorrect answers', String(totals.incorrect))}
+    ${row('Unattempted', String(totals.unattempted))}
     ${row('Attempted', `${totals.attempted} / ${totals.total}`)}
     ${row('Time used', timeUsed)}
+    ${row('Test duration', `${totals.duration} minutes`)}
     ${row('Marked for review', String(totals.marked))}
     ${row('Window left', `${totals.leaves} time${totals.leaves === 1 ? '' : 's'}`)}
     ${totals.reason === 'leaving' ? row('Auto-submitted', 'Left the test window more than five times') : ''}
+    ${totals.reason === 'time' ? row('Auto-submitted', 'Timer reached 00:00') : ''}
+    ${totals.reason === 'window' ? row('Auto-submitted', 'Scheduled test window closed') : ''}
   </table>`;
 }
 
@@ -312,7 +347,8 @@ function buildQuestionHtml_(answer, index) {
   const isCorrect = hasSelection && selected === correct;
   const status = !hasSelection ? 'Not answered' : isCorrect ? 'Correct' : 'Incorrect';
   const statusClass = !hasSelection ? '' : isCorrect ? ' ok' : ' bad';
-  const points = isCorrect ? '+2' : '0';
+  const marks = answerMarks_(answer);
+  const points = isCorrect ? `+${marks}` : '0';
 
   const optionRows = options.map((option, optionIndex) => {
     const isSelected = selected === optionIndex;
@@ -334,6 +370,7 @@ function buildQuestionHtml_(answer, index) {
     return `<div class="${className}">
       <span class="letter">${String.fromCharCode(65 + optionIndex)}.</span>
       <span>${escapeHtml_(option)}</span>
+      ${imageHtml_((answer.optionImages || [])[optionIndex], `Option ${String.fromCharCode(65 + optionIndex)}, question ${no}`, true)}
       ${badge}
     </div>`;
   }).join('');
@@ -341,9 +378,10 @@ function buildQuestionHtml_(answer, index) {
   return `<div class="q">
     <div class="q-head">
       <span class="q-no">Q${no}</span>
-      <span class="q-status${statusClass}">${status} · ${points} marks</span>
+      <span class="q-status${statusClass}">${status} · ${points} / ${marks} marks</span>
     </div>
     <p class="q-text">${escapeHtml_(answer.q)}</p>
+    ${imageHtml_(answer.diagram, `Diagram for question ${no}`, false)}
     ${optionRows}
   </div>`;
 }
@@ -357,20 +395,24 @@ function buildTextReport_(data, totals, submittedAt, timeUsed) {
   const studentName = String(data.studentName || '').trim();
   const signature = String(data.signature || '').trim();
   const answers = Array.isArray(data.answers) ? data.answers : [];
-  const chapterLabel = chapterLabel_(data.chapter);
+  const title = `D3V3NDRA CLASSES — ${paperLabel_(data).toUpperCase()} TEST SUBMISSION`;
   const lines = [
-    `D3V3NDRA CLASSES — IMO ${chapterLabel.toUpperCase()} TEST SUBMISSION`,
-    '='.repeat(`D3V3NDRA CLASSES — IMO ${chapterLabel.toUpperCase()} TEST SUBMISSION`.length),
+    title,
+    '='.repeat(title.length),
     `Student name : ${studentName || 'Not provided'}`,
     `Signature    : ${signature || 'Not provided'}`,
     `Student ID   : ${studentId}`,
     `Submitted    : ${submittedAt}`,
     `Score        : ${totals.score} / ${totals.totalMarks} (${totals.percent}%)`,
     `Correct      : ${totals.correct} / ${totals.total}`,
+    `Incorrect    : ${totals.incorrect}`,
+    `Unattempted  : ${totals.unattempted}`,
     `Attempted    : ${totals.attempted} / ${totals.total}`,
     `Time used    : ${timeUsed}`,
     `Marked       : ${totals.marked}`,
     `Window left  : ${totals.leaves} time(s)`,
+    `Submission   : ${totals.reason}`,
+    `Worksheet    : ${safeUrl_(data.worksheetUrl) || 'Not provided'}`,
     ...(totals.reason === 'leaving' ? ['Auto-submit  : Left the test window more than five times'] : []),
     '',
     'OPTIONS: [STUDENT ANSWER] = chosen by the student; [CORRECT ANSWER] = right option.',
@@ -384,20 +426,23 @@ function buildTextReport_(data, totals, submittedAt, timeUsed) {
     const correct = validIndex_(answer.correct, options.length);
     const hasSelection = selected !== null;
     const isCorrect = hasSelection && selected === correct;
-    const status = !hasSelection ? 'NOT ANSWERED' : isCorrect ? 'CORRECT (+2)' : 'INCORRECT (0)';
+    const marks = answerMarks_(answer);
+    const status = !hasSelection ? 'NOT ANSWERED (0)' : isCorrect ? `CORRECT (+${marks})` : 'INCORRECT (0)';
 
     lines.push(`Q${no}. ${String(answer.q || '')}`);
+    if (safeUrl_(answer.diagram)) lines.push(`   Diagram: ${safeUrl_(answer.diagram)}`);
     options.forEach((option, optionIndex) => {
       const tags = [];
       if (selected === optionIndex) tags.push('STUDENT ANSWER');
       if (correct === optionIndex) tags.push('CORRECT ANSWER');
-      lines.push(`   ${String.fromCharCode(65 + optionIndex)}) ${option}${tags.length ? `  [${tags.join(' | ')}]` : ''}`);
+      const image = safeUrl_((answer.optionImages || [])[optionIndex]);
+      lines.push(`   ${String.fromCharCode(65 + optionIndex)}) ${option}${image ? ` [Illustration: ${image}]` : ''}${tags.length ? `  [${tags.join(' | ')}]` : ''}`);
     });
-    lines.push(`   Result: ${status}`);
+    lines.push(`   Result: ${status} / ${marks} marks available`);
     lines.push('');
   });
 
-  lines.push('Generated automatically by the D3V3NDRA IMO test portal.');
+  lines.push('Generated automatically by the D3V3NDRA Testing Portal.');
   return lines.join('\n');
 }
 
