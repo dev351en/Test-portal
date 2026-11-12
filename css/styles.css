@@ -270,6 +270,8 @@ a{color:var(--blue);text-decoration:none}
 .banner-time span{display:block;font-size:.58rem;letter-spacing:.13em;text-transform:uppercase;color:#a98b4f;font-weight:700;margin-bottom:1px}
 .banner-time strong{font-size:1.55rem;font-weight:800;color:var(--navy);letter-spacing:.045em;font-variant-numeric:tabular-nums}
 .start-banner .btn{height:48px;padding:0 22px;flex-shrink:0}
+.btn-view-paper{background:#fff7e6;border-color:#f2c15c;color:#7a4d00;font-weight:800;box-shadow:0 6px 16px rgba(194,126,17,.12)}
+.btn-view-paper:hover{background:#fff0c9;border-color:#e5a92f;color:#613b00}
 .integrity-note{display:flex;align-items:flex-start;gap:8px;margin-top:15px;font-size:.73rem;line-height:1.55;color:#7b8ba8}
 .integrity-note svg{flex-shrink:0;margin-top:1px;color:#8fa3bf}
 .integrity-note b{color:#5f7394}
@@ -344,6 +346,8 @@ a{color:var(--blue);text-decoration:none}
 .palette-toggle:hover{background:#f4f8ff;border-color:#c9dcfa;color:var(--blue)}
 .exam-body{padding:25px 34px 30px;flex:1;display:flex;flex-direction:column}
 .q-text{font-size:1.12rem;line-height:1.8;font-weight:500;color:#13294f;margin-bottom:25px;max-width:940px}
+.q-diagram{max-width:1000px;margin:-8px 0 22px;padding:10px;border:1px solid #e3ebf7;border-radius:14px;background:#fff;text-align:center;overflow:auto}
+.q-diagram img{display:block;width:100%;max-width:920px;height:auto;margin:0 auto}
 .options{display:grid;grid-template-columns:1fr 1fr;gap:13px;max-width:1000px}
 .option{
   display:flex;align-items:center;gap:13px;
@@ -495,6 +499,12 @@ body.exam-locked #viewExam{filter:blur(14px);pointer-events:none}
 .result-actions{display:flex;justify-content:center;gap:11px;flex-wrap:wrap}
 .result-download{display:inline-flex;align-items:center;gap:6px;margin-top:18px;font-size:.73rem;color:#6b7c9d}
 .result-download:hover{color:var(--blue)}
+.worksheet-download-card{display:flex;align-items:center;gap:14px;margin-top:22px;padding:17px 18px;text-align:left;border:2px solid #9cc3ff;border-radius:16px;background:linear-gradient(100deg,#eff6ff,#f8fbff);box-shadow:0 10px 24px rgba(37,99,235,.12)}
+.worksheet-download-icon{width:46px;height:46px;display:grid;place-items:center;flex-shrink:0;border-radius:12px;background:#1d4ed8;color:#fff}
+.worksheet-download-copy{min-width:0;flex:1}
+.worksheet-download-copy b{display:block;color:#17345e;font-size:.86rem;line-height:1.3}
+.worksheet-download-copy small{display:block;margin-top:4px;color:#63789b;font-size:.72rem;line-height:1.4}
+.worksheet-download-btn{min-height:46px;font-size:.8rem;padding:0 15px}
 
 /* ---------- fraction rendering ---------- */
 .frac{
@@ -549,6 +559,15 @@ sup{font-size:.68em;line-height:0}
 .review-answers{display:grid;gap:3px;margin-top:7px;font-size:.75rem;color:#607394;line-height:1.45}
 .review-answers b{font-weight:600;color:#334d78}
 .review-answers .answer-correct{color:#15803d}
+.paper-preview-intro{padding:11px 13px;border-radius:10px;background:#eff6ff;border:1px solid #d8e8ff;color:#466489}
+.paper-preview-list{display:grid;gap:12px;margin-top:14px}
+.paper-preview-item{padding:13px 14px;border:1px solid #e2ebf8;border-radius:12px;background:#fbfdff}
+.paper-preview-head{display:flex;justify-content:space-between;gap:10px;color:#24477d;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em}
+.paper-preview-head span{color:#7b8eac}
+.paper-preview-question{margin-top:6px;color:#1d3357;font-weight:600;line-height:1.55}
+.paper-preview-diagram{display:block;width:100%;height:auto;margin:10px auto 8px;border:1px solid #e5edf8;border-radius:8px;background:#fff}
+.paper-preview-options{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px;margin-top:8px;color:#536b91;font-size:.78rem;line-height:1.45}
+.paper-preview-option b{color:#24477d}
 
 /* ---------- toast ---------- */
 .toast{

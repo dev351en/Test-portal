@@ -29,7 +29,7 @@ const TEACHER_EMAIL = ''; // e.g. 'teacher@example.com'. Blank = the deploying a
 const SUBMIT_TOKEN = 'd3v3ndra-fractions-2026';
 const TIME_ZONE = 'Asia/Kolkata';
 const ATTEMPT_KEY = 'imo_attempt_names';
-const DEFAULT_CHAPTER = 'integers';
+const DEFAULT_CHAPTER = 'logical-reasoning';
 const LEGACY_CHAPTER = 'decimals';
 
 function doGet(e) {
@@ -299,7 +299,7 @@ function summaryHtml_(studentName, studentId, signature, totals, submittedAt, ti
     ${row('Time used', timeUsed)}
     ${row('Marked for review', String(totals.marked))}
     ${row('Window left', `${totals.leaves} time${totals.leaves === 1 ? '' : 's'}`)}
-    ${totals.reason === 'leaving' ? row('Auto-submitted', 'Left the test window more than three times') : ''}
+    ${totals.reason === 'leaving' ? row('Auto-submitted', 'Left the test window more than five times') : ''}
   </table>`;
 }
 
@@ -371,7 +371,7 @@ function buildTextReport_(data, totals, submittedAt, timeUsed) {
     `Time used    : ${timeUsed}`,
     `Marked       : ${totals.marked}`,
     `Window left  : ${totals.leaves} time(s)`,
-    ...(totals.reason === 'leaving' ? ['Auto-submit  : Left the test window more than three times'] : []),
+    ...(totals.reason === 'leaving' ? ['Auto-submit  : Left the test window more than five times'] : []),
     '',
     'OPTIONS: [STUDENT ANSWER] = chosen by the student; [CORRECT ANSWER] = right option.',
     ''

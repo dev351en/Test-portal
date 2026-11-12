@@ -1,4 +1,4 @@
-/* D3V3NDRA Classes — IMO Test Series (Chapter 10: Operations with Integers)
+/* D3V3NDRA Classes — IMO Test Series (Logical Reasoning Master Examination)
    Browser-based Olympiad test. No backend: answers and credentials are in the page source. */
 (() => {
   'use strict';
@@ -11,17 +11,17 @@
     storageKey: 'd3v3ndra.student',
     // One attempt per chapter per name/device. Changing the chapter name opens
     // a fresh attempt registry, so the same student can attempt each chapter once.
-    chapter: 'integers',
-    attemptsKey: 'd3v3ndra.attempts.integers',
+    chapter: 'logical-reasoning',
+    attemptsKey: 'd3v3ndra.attempts.logical-reasoning',
     // Paste the Google Apps Script Web app URL here to email each submission.
     // Leave blank to keep the test working without email delivery.
     submissionEndpoint: 'https://script.google.com/macros/s/AKfycbxspHEmrfJJStpXsr1aqWl5JyeGUtXnomYy8gHXjj_nbAEcC_7TWPt-Od7WYlhytgUFnA/exec',
     // Must match SUBMIT_TOKEN in scripts/google-apps-script-submission-email.gs.
     submissionToken: 'd3v3ndra-fractions-2026',
-    // Test window: 12 November 2026, 9:00 AM to 5:00 PM IST (UTC+05:30).
+    // Test window: 13 November 2026, 9:00 AM to 5:00 PM IST (UTC+05:30).
     testWindow: {
-      start: '2026-11-12T03:30:00.000Z',
-      end: '2026-11-12T11:30:00.000Z'
+      start: '2026-11-13T03:30:00.000Z',
+      end: '2026-11-13T11:30:00.000Z'
     },
     // Teacher-only preview bypass for the time gate: open the site with
     // ?preview=teacher-imo-2026 to check the portal before/after the window.
@@ -149,10 +149,10 @@
 
   function setHeader(mode) {
     const modes = {
-      instructions: { title: 'IMO Test Series', pill: 'Chapter 10 · Integers', sep: false, timer: false, fs: false, student: true, logout: true },
-      exam: { title: 'IMO Test Series', pill: 'Operations with Integers', sep: true, timer: true, fs: false, student: false, logout: true },
+      instructions: { title: 'IMO Test Series', pill: 'Logical Reasoning', sep: false, timer: false, fs: false, student: true, logout: true },
+      exam: { title: 'IMO Test Series', pill: 'Logical Reasoning Master Examination', sep: true, timer: true, fs: false, student: false, logout: true },
       feedback: { title: 'Test Review & Feedback', pill: 'IMO Test Series', sep: false, timer: false, fs: false, student: true, logout: false },
-      result: { title: 'Test Result', pill: 'Integers', sep: false, timer: false, fs: false, student: true, logout: false }
+      result: { title: 'Test Result', pill: 'Logical Reasoning', sep: false, timer: false, fs: false, student: true, logout: false }
     };
     const config = modes[mode];
     if (!config) return;
@@ -285,7 +285,7 @@
     $('#gateTitle').textContent = expired ? 'Test window closed' : 'Test not open yet';
     $('#gateMessage').textContent = expired
       ? 'Sorry, the test time has run out. Contact the teacher.'
-      : 'The test has not started yet. It opens at 9:00 AM IST on 12 November 2026 and closes at 5:00 PM IST.';
+      : 'The test has not started yet. It opens at 9:00 AM IST on 13 November 2026 and closes at 5:00 PM IST.';
     gate.hidden = false;
     $('#appHeader').hidden = true;
     $$('.view').forEach(view => view.classList.remove('is-active'));
@@ -530,7 +530,7 @@
     }
     noteFocusLoss();
     if (!state.submitted) {
-      showExamLock(`You left full screen. Warning ${state.focusLosses} of 3 — the fourth exit will auto-submit your paper.`);
+      showExamLock(`You left full screen. Warning ${state.focusLosses} of 5 — the sixth exit will auto-submit your paper.`);
     }
   }
 
@@ -580,7 +580,36 @@
 
   function initInstructions() {
     $('#startBtn').addEventListener('click', startTest);
+    $('#viewPaperBtn').addEventListener('click', openQuestionPaperModal);
     $('#signatureInput').addEventListener('input', hideSignatureError);
+  }
+
+  function openQuestionPaperModal() {
+    const questions = Array.isArray(window.QUESTIONS) ? window.QUESTIONS : [];
+    const paper = questions.map((question, index) => {
+      const diagram = question.diagram
+        ? `<img class="paper-preview-diagram" src="${escapeHtml(question.diagram)}" alt="Diagram for Question ${index + 1}">`
+        : '';
+      const options = question.opts.map((option, optionIndex) =>
+        `<span class="paper-preview-option"><b>${'ABCD'[optionIndex]}.</b> ${formatMath(option)}</span>`
+      ).join('');
+      return `<article class="paper-preview-item">
+        <div class="paper-preview-head"><b>Question ${index + 1}</b><span>2 Marks</span></div>
+        <div class="paper-preview-question">${formatMath(question.q)}</div>
+        ${diagram}
+        <div class="paper-preview-options">${options}</div>
+      </article>`;
+    }).join('');
+
+    openModal({
+      title: 'Complete Question Paper — Logical Reasoning',
+      size: 'lg',
+      body: `<p class="paper-preview-intro">This is the complete paper in worksheet order. Review it first, then close this preview and press <b>Start Test</b> when ready.</p><div class="paper-preview-list">${paper}</div>`,
+      actions: [{ label: 'Close Preview', variant: 'primary' }]
+    });
+    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+      MathJax.typesetPromise([document.getElementById('modalRoot')]).catch(() => { });
+    }
   }
 
   function buildPaper() {
@@ -759,6 +788,14 @@
 
     $('#qNo').textContent = String(state.current + 1);
     $('#qText').innerHTML = formatMath(question.q);
+    const diagram = $('#qDiagram');
+    if (question.diagram) {
+      diagram.innerHTML = `<img src="${escapeHtml(question.diagram)}" alt="Diagram for Question ${state.current + 1}">`;
+      diagram.hidden = false;
+    } else {
+      diagram.innerHTML = '';
+      diagram.hidden = true;
+    }
     $('#qOptions').innerHTML = question.opts.map((option, index) => {
       const letter = 'ABCD'[index];
       const active = selected === index;
@@ -1054,7 +1091,7 @@
 
     const emailed = sendSubmissionEmail(result);
     if (reason === 'leaving') {
-      toast('You left the test window twice. Your paper was submitted automatically.', 'error');
+      toast('You left the test window six times. Your paper was submitted automatically.', 'error');
     } else if (reason === 'window') {
       toast('The test window has closed. Your paper was submitted automatically.', 'error');
     } else if (auto) {
@@ -1205,7 +1242,7 @@
   }
 
   function gradeFor(percent) {
-    if (percent >= 90) return { grade: 'Outstanding!', message: 'A superb result. You have a strong command of integers.' };
+    if (percent >= 90) return { grade: 'Outstanding!', message: 'A superb result. You have a strong command of logical reasoning.' };
     if (percent >= 75) return { grade: 'Excellent!', message: 'Great work. Review the few questions you missed to reach the top.' };
     if (percent >= 60) return { grade: 'Good work!', message: 'A solid result. A little more practice will make it excellent.' };
     if (percent >= 40) return { grade: 'Keep going!', message: 'You are getting there. Review the worked answers and try again.' };
@@ -1226,6 +1263,8 @@
     $('#resultGrade').textContent = grading.grade;
     $('#resultMessage').textContent = `${grading.message} You answered ${result.correct} of ${result.total} correctly.`;
     $('#resultCorrect').textContent = `${result.correct} / ${result.total}`;
+    $('#resultIncorrect').textContent = String(result.attempted - result.correct);
+    $('#resultUnattempted').textContent = String(result.total - result.attempted);
     $('#resultTime').textContent = formatDuration(result.timeUsed);
     $('#resultMarked').textContent = String(state.marked.size);
   }
@@ -1315,7 +1354,7 @@
     const link = document.createElement('a');
     const safeId = state.studentId.replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'student';
     link.href = url;
-    link.download = `integers-result-${safeId}.txt`;
+    link.download = `logical-reasoning-result-${safeId}.txt`;
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -1337,7 +1376,7 @@
     state.leaveEpisode = true;
     state.focusLosses += 1;
     state.focusWarning = true;
-    if (state.focusLosses > 3) autoSubmitForLeaving();
+    if (state.focusLosses > 5) autoSubmitForLeaving();
   }
 
   function autoSubmitForLeaving() {
@@ -1364,7 +1403,7 @@
     if (!$('#modalRoot').hidden) return;
     openModal({
       title: 'Test window left',
-      body: `<p>You switched away from the test window. This is exit ${state.focusLosses} of 3 — you may leave up to three times, and the timer keeps running.</p><div class="modal-note warn">A fourth exit will auto-submit your paper immediately.</div>`,
+      body: `<p>You switched away from the test window. This is exit ${state.focusLosses} of 5 — you may leave up to five times, and the timer keeps running.</p><div class="modal-note warn">A sixth exit will auto-submit your paper immediately.</div>`,
       actions: [{ label: 'Continue test', variant: 'primary' }]
     });
   }
@@ -1383,7 +1422,7 @@
       }
       resetLeaveEpisodeSoon();
       if (state.lockEnabled && !getFullscreenElement()) {
-        showExamLock(`You left the test window. Exit ${state.focusLosses} of 3 — the fourth exit will auto-submit your paper.`);
+        showExamLock(`You left the test window. Exit ${state.focusLosses} of 5 — the sixth exit will auto-submit your paper.`);
       } else {
         showFocusWarning();
       }

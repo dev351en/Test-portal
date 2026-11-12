@@ -1,6 +1,6 @@
-# D3V3NDRA Classes — IMO Test Series (Chapter 10: Operations with Integers)
+# D3V3NDRA Classes — IMO Logical Reasoning Master Examination
 
-A browser-based **International Math Olympiad (IMO)** test for **Operations with Integers** (NCERT advanced syllabus), built from Worksheet Chapter Number 10 and rebuilt around a clean blue edtech interface. Questions and options are written in LaTeX and typeset with MathJax.
+A browser-based **International Math Olympiad (IMO)** test for **Logical Reasoning**, built from the Logical Reasoning Master Worksheet and rebuilt around a clean blue edtech interface. Diagram questions use the worksheet images and all questions/options remain in worksheet order.
 
 **Live site:** https://mest-porutal.vercel.app/
 
@@ -10,8 +10,8 @@ A browser-based **International Math Olympiad (IMO)** test for **Operations with
 - **Instructions screen** with a visible honesty note
 - **50 multiple-choice questions**, 4 options each
 - **Full-screen exam lockdown** with copy, selection, and right-click blocking
-- **Three-exit window rule** — three window exits are allowed; the fourth exit auto-submits the paper
-- **Scheduled test window** — the hosted page only opens on 12 November 2026, 9:00 AM to 5:00 PM IST
+- **Five-exit window rule** — five window exits are allowed; the sixth exit auto-submits the paper
+- **Scheduled test window** — the hosted page only opens on 13 November 2026, 9:00 AM to 5:00 PM IST
 - **Signature and unique-name check** — a name can attempt the paper only once
 - **Colour-coded question palette** with a matching legend on the instructions page
 - **60-minute timer** with automatic submission at `00:00`
@@ -24,7 +24,7 @@ A browser-based **International Math Olympiad (IMO)** test for **Operations with
 - **Result screen** with score, percentage, time used, and grade
 - **Answer review** with the student's answer and the correct answer for every question
 - **Downloadable text report** that a student can share with the teacher
-- **Worksheet PDF download** on the result screen — the full Worksheet Chapter 10 with its answer key (`assets/worksheet-chapter-10-integers.pdf`)
+- **Large worksheet PDF + answer-key download card** on the result screen (`assets/worksheet-logical-reasoning.pdf`)
 - **Optional instant email report** to the teacher with every option and the student's choice marked
 
 Question order and answer-option order are preserved exactly as printed in the worksheet; the portal does not jumble the paper.
@@ -40,13 +40,13 @@ Question order and answer-option order are preserved exactly as printed in the w
 | Duration | 60 minutes |
 | Auto-submit | Yes, at `00:00` |
 
-The answer key is in `test_questions.js`. Difficulty tags (10 Easy, 25 Medium, 15 Tough) are metadata only and are not shown to students.
+The answer key is in `test_questions.js`. Worksheet section tags are metadata only and are not shown to students.
 
 ## Test window and hosting gate
 
 The hosted site is gated by `middleware.js` (Vercel Edge Middleware) and by a client-side check in `js/app.js`:
 
-- **12 November 2026, 9:00 AM – 5:00 PM IST** — the portal opens normally.
+- **13 November 2026, 9:00 AM – 5:00 PM IST** — the portal opens normally.
 - **Before 9:00 AM IST** — visitors see a **403 / Test not open yet** screen.
 - **After 5:00 PM IST** — visitors see a **404 / Test window closed** screen with “Sorry, the test time has run out. Contact the teacher.”
 - If a paper is in progress when the window closes, it is auto-submitted immediately.
@@ -56,9 +56,9 @@ The hosted site is gated by `middleware.js` (Vercel Edge Middleware) and by a cl
 
 The instructions page includes a **Signature** field. The student must type their full name, and it must match the name entered at login. A name can attempt **each chapter once**:
 
-- Locally, completed sign-in names are stored per chapter in `localStorage` (`d3v3ndra.attempts.integers`) and blocked from a second attempt on the same browser. `CONFIG.chapter` in `js/app.js` scopes the rule — changing it opens a fresh local registry.
-- Globally, the portal claims the name through the Apps Script endpoint (`?action=claim&chapter=integers`). The script keeps one name registry per chapter (`imo_attempt_names_<chapter>`). If the name is already claimed for that chapter, the student is stopped before the paper opens; the same name can attempt a different chapter once the portal chapter is switched.
-- Legacy untagged registry entries are honoured as `decimals` attempts; they do not block the new Integers chapter.
+- Locally, completed sign-in names are stored per chapter in `localStorage` (`d3v3ndra.attempts.logical-reasoning`) and blocked from a second attempt on the same browser. `CONFIG.chapter` in `js/app.js` scopes the rule — changing it opens a fresh local registry.
+- Globally, the portal claims the name through the Apps Script endpoint (`?action=claim&chapter=logical-reasoning`). The script keeps one name registry per chapter (`imo_attempt_names_<chapter>`). If the name is already claimed for that chapter, the student is stopped before the paper opens; the same name can attempt a different chapter once the portal chapter is switched.
+- Legacy untagged registry entries are honoured as `decimals` attempts; they do not block the new Logical Reasoning chapter.
 - If the Apps Script does not yet support `claim`, the portal falls back to the local check and still records the signature in the report.
 
 ## Full-screen exam lockdown
@@ -66,7 +66,7 @@ The instructions page includes a **Signature** field. The student must type thei
 Pressing **Start Test** requests full screen before the paper opens. While the exam is active:
 
 - Leaving full screen, minimizing, or switching windows triggers a blocking **Full screen required** screen. The timer keeps running, and the paper stays locked until the student returns to full screen.
-- The first three leaves are warnings. **On the fourth leave, the paper is submitted automatically** and the email is sent immediately, even if the window is still minimized.
+- The first five leaves are warnings. **On the sixth leave, the paper is submitted automatically** and the email is sent immediately, even if the window is still minimized.
 - The instructions page carries a strict invigilation notice: any anomaly, rule violation, or attempt to bypass the security measures is reported to parents/guardians and the higher authorities.
 - Copy, cut, text selection, dragging, and right-click are disabled.
 - Common copy, save, print, and developer-tools shortcuts are blocked, including `Ctrl+C`, `Ctrl+X`, `Ctrl+A`, `Ctrl+P`, `Ctrl+S`, `Ctrl+U`, `F12`, and `Ctrl+Shift+I/J/C`.
@@ -244,7 +244,7 @@ The app and the Apps Script must use the same `SUBMIT_TOKEN`. The default is `d3
 The report is sent as soon as the paper is submitted, before the optional feedback form.
 
 - Student name/roll number, student ID, submission time, score, percentage, correct/attempted counts, time used, and marked count
-- Window-leave count, plus an auto-submit note if the student left twice
+- Window-leave count, plus an auto-submit note if the student left more than five times
 - All 50 questions in the order the student saw them
 - All four options for each question, with the student's choice and the correct answer clearly marked
 - Correct options highlighted green; wrong selections highlighted red
