@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 150 140" width="115" height="110" xmlns="http://www.w3.org/2000/svg">
+      <!-- 2 Ear Triangles -->
+      <polygon points="42,24 32,6 52,14" fill="#F59E0B" stroke="#D97706" stroke-width="1.2"/>
+      <polygon points="108,24 118,6 98,14" fill="#F59E0B" stroke="#D97706" stroke-width="1.2"/>
+      <!-- Head -->
+      <rect x="38" y="20" width="74" height="38" rx="6" fill="#60A5FA" stroke="#2563EB" stroke-width="1.8"/>
+      <!-- Eyes -->
+      <circle cx="58" cy="36" r="6" fill="#FFFFFF" stroke="#1E40AF" stroke-width="1.2"/>
+      <circle cx="58" cy="36" r="2.5" fill="#1E293B"/>
+      <circle cx="92" cy="36" r="6" fill="#FFFFFF" stroke="#1E40AF" stroke-width="1.2"/>
+      <circle cx="92" cy="36" r="2.5" fill="#1E293B"/>
+      <!-- 1 Nose Triangle -->
+      <polygon points="75,41 69,50 81,50" fill="#EF4444" stroke="#B91C1C" stroke-width="1.2"/>
+      <!-- Body -->
+      <rect x="44" y="62" width="62" height="46" rx="5" fill="#3B82F6" stroke="#1D4ED8" stroke-width="1.8"/>
+      <circle cx="75" cy="85" r="12" fill="#DBEAFE" stroke="#1E40AF" stroke-width="1"/>
+      <!-- Arms -->
+      <rect x="22" y="65" width="18" height="9" rx="2" fill="#93C5FD" stroke="#2563EB" stroke-width="1.2"/>
+      <rect x="110" y="65" width="18" height="9" rx="2" fill="#93C5FD" stroke="#2563EB" stroke-width="1.2"/>
+      <!-- Legs -->
+      <rect x="52" y="110" width="12" height="14" fill="#2563EB"/>
+      <rect x="86" y="110" width="12" height="14" fill="#2563EB"/>
+      <!-- 2 Shoe Triangles -->
+      <polygon points="64,124 38,131 64,131" fill="#EC4899" stroke="#BE185D" stroke-width="1.2"/>
+      <polygon points="86,124 112,131 86,131" fill="#EC4899" stroke="#BE185D" stroke-width="1.2"/>
+    </svg>

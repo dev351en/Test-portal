@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* Export both assigned papers to CSV, JSON, answer keys and Google Sheets.
- * node scripts/export-question-sheet.js [--paper=class2-test-paper-1]
+ * node scripts/export-question-sheet.js [--paper=class2-olympiad-35]
  * --shuffle --seed=demo creates separate practice exports. Illustrated
  * questions retain option order because their diagrams can contain letters.
  */

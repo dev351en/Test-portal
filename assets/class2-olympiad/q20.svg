@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 460 76" width="410" height="70" xmlns="http://www.w3.org/2000/svg">
+      <rect width="460" height="76" rx="6" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+      <text x="18" y="17" font-size="11">🍎</text>
+      <text x="38" y="17" font-family="'Segoe UI', Arial, sans-serif" font-size="8" font-weight="bold" fill="#334155">Apple</text>
+      <rect x="75" y="8" width="110" height="11" rx="3" fill="#EF4444"/>
+      <text x="195" y="17" font-family="'Segoe UI', Arial, sans-serif" font-size="8" font-weight="bold" fill="#991B1B">8</text>
+      
+      <text x="18" y="34" font-size="11">🥭</text>
+      <text x="38" y="34" font-family="'Segoe UI', Arial, sans-serif" font-size="8" font-weight="bold" fill="#334155">Mango</text>
+      <rect x="75" y="25" width="165" height="11" rx="3" fill="#F59E0B"/>
+      <text x="250" y="34" font-family="'Segoe UI', Arial, sans-serif" font-size="8" font-weight="bold" fill="#B45309">12 (MOST! ★)</text>
+      
+      <text x="18" y="51" font-size="11">🍌</text>
+      <text x="38" y="51" font-family="'Segoe UI', Arial, sans-serif" font-size="8" font-weight="bold" fill="#334155">Banana</text>
+      <rect x="75" y="42" width="70" height="11" rx="3" fill="#EAB308"/>
+      <text x="155" y="51" font-family="'Segoe UI', Arial, sans-serif" font-size="8" font-weight="bold" fill="#713F12">5</text>
+      
+      <text x="18" y="68" font-size="11">🍊</text>
+      <text x="38" y="68" font-family="'Segoe UI', Arial, sans-serif" font-size="8" font-weight="bold" fill="#334155">Orange</text>
+      <rect x="75" y="59" width="85" height="11" rx="3" fill="#F97316"/>
+      <text x="170" y="68" font-family="'Segoe UI', Arial, sans-serif" font-size="8" font-weight="bold" fill="#9A3412">6</text>
+    </svg>

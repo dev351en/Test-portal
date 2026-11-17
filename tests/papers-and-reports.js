@@ -17,9 +17,14 @@ const grade2 = papers.find(p => p.loginId === 'DSMG2@001');
 assert.equal(grade7.id, 'class7-full-syllabus');
 assert.equal(grade7.questionCount, 50);
 assert.equal(grade7.totalMarks, 100);
-assert.equal(grade2.id, 'class2-test-paper-1');
+assert.equal(grade2.id, 'class2-olympiad-35');
 assert.equal(grade2.questionCount, 35);
-assert.equal(grade2.totalMarks, 45);
+assert.equal(grade2.totalMarks, 70);
+assert.equal(grade2.defaultMarks, 2);
+assert.equal(grade2.totalMinutes, 45);
+assert.equal(grade2.paperPages, 7);
+assert.equal(grade2.worksheet, 'assets/worksheet-class2-olympiad.pdf');
+assert.equal(grade2.paperPdf, 'assets/worksheet-class2-olympiad-questions-only.pdf');
 assert.deepEqual(Array.from(context.window.QUESTIONS.slice(0, 3), q => q.opts[0]), ['39', '24', '24']);
 assert.equal(context.window.QUESTIONS[0].ans, 3);
 assert.deepEqual(['Logical Reasoning', 'Mathematical Reasoning', 'Everyday Mathematics', 'HOTS']
@@ -27,7 +32,7 @@ assert.deepEqual(['Logical Reasoning', 'Mathematical Reasoning', 'Everyday Mathe
 
 function payload(paper, choose) {
   return { paperId: paper.id, chapter: paper.id, paperTitle: paper.title, grade: paper.grade,
-    studentId: paper.loginId, studentName: 'Test <Student>', durationMinutes: 60,
+    studentId: paper.loginId, studentName: 'Test <Student>', durationMinutes: paper.totalMinutes,
     // Deliberately incorrect aggregate: reports must derive marks from answers.
     score: 999, totalMarks: 999, correct: 999, percent: 999,
     worksheetUrl: `https://mest-porutal.vercel.app/${paper.worksheet}`,
@@ -67,20 +72,27 @@ assert.ok(fs.readFileSync(path.join(root, 'middleware.js'), 'utf8').includes("20
 assert.ok(fs.readFileSync(path.join(root, 'index.html'), 'utf8').includes('18 Nov 2026'));
 
 const bank2 = context.window.CLASS2_QUESTIONS;
-assert.equal(bank2.filter(q => q.marks === 1).length, 25);
-assert.equal(bank2.filter(q => q.marks === 2).length, 10);
+assert.equal(bank2.length, 35);
+assert.equal(bank2.filter(q => q.marks === 2).length, 35);
 assert.equal(bank2.filter(q => q.diagram).length, 15);
-assert.equal(bank2.reduce((sum, q) => sum + (q.optionImages || []).length, 0), 12);
+assert.equal(bank2.reduce((sum, q) => sum + (q.optionImages || []).length, 0), 0);
+assert.equal(bank2.map(q => 'ABCD'[q.ans]).join(''), 'ABCDBACDBACDABCDABCDABCDABCDABCABCD');
+assert.equal(bank2[0].q, 'Look at the colorful shape pattern below: Which shape will come next in the box with the question mark (?)?');
+assert.ok(bank2[0].sol.includes('Red Circle → Blue Square → Green Triangle'));
+assert.ok(bank2[32].q.includes('▲'));
+for (const q of bank2) {
+  assert.ok(!q.q.includes('<') && !q.q.includes('{SVG_'), `Q${q.id}: raw HTML/placeholder in question`);
+  if (q.diagram) assert.ok(fs.readFileSync(path.join(root, q.diagram), 'utf8').trimStart().startsWith('<?xml'), q.diagram);
+}
 const mixed = payload(grade2, (q, i) => i === 0 || i === 25 ? q.ans : i === 1 ? (q.ans + 1) % 4 : null);
 const report = context.buildReport_(mixed);
-assert.ok(report.subject.includes('3/45 (7%)'));
+assert.ok(report.subject.includes('4/70 (6%)'));
 assert.ok(report.text.includes('Correct      : 2 / 35'));
 assert.ok(report.text.includes('Incorrect    : 1'));
 assert.ok(report.text.includes('Unattempted  : 32'));
-assert.ok(report.text.includes('CORRECT (+1) / 1 marks available'));
-assert.ok(report.text.includes('CORRECT (+2) / 2 marks available'));
-assert.ok(report.text.includes('$100'));
-assert.equal((report.html.match(/<img /g) || []).length, 27);
+assert.equal((report.text.match(/CORRECT \(\+2\) \/ 2 marks available/g) || []).length, 2);
+assert.ok(report.text.includes('₹15'));
+assert.equal((report.html.match(/<img /g) || []).length, 15);
 assert.ok(report.html.includes(grade2.worksheet));
 assert.equal(context.imageHtml_('javascript:alert(1)', 'bad', true), '');
 const legacy = payload(papers[0], q => q.ans);
@@ -101,11 +113,12 @@ function claim(paperId) {
   return context.handleClaim_({ paperId, name: 'Same Student', token: 'd3v3ndra-fractions-2026' });
 }
 assert.equal(claim('class7-full-syllabus').taken, false);
-assert.equal(claim('class2-test-paper-1').taken, false);
+assert.equal(claim('class2-olympiad-35').taken, false);
 assert.equal(claim('class7-full-syllabus').taken, true);
-assert.equal(claim('class2-test-paper-1').taken, true);
+assert.equal(claim('class2-olympiad-35').taken, true);
+assert.equal(claim('class2-test-paper-1').taken, false);
 assert.equal(claim('logical-reasoning').taken, false);
 assert.ok(properties.has('imo_attempt_names_class7-full-syllabus'));
-assert.ok(properties.has('imo_attempt_names_class2-test-paper-1'));
+assert.ok(properties.has('imo_attempt_names_class2-olympiad-35'));
 assert.equal(context.doGet({}).version, 'testing-portal-v2');
-console.log('PASS: ordered banks/assets, weighted/legacy reports, picture options, currency and isolated attempts.');
+console.log('PASS: ordered banks/assets, weighted/legacy reports, currency and isolated attempts.');

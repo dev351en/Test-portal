@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 460 50" width="410" height="46" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(10, 2)">
+        <ellipse cx="42" cy="22" rx="38" ry="16" fill="#E0F2FE" stroke="#38BDF8" stroke-width="1.2"/>
+        <circle cx="32" cy="20" r="7" fill="#F59E0B" stroke="#D97706" stroke-width="0.8"/>
+        <circle cx="52" cy="20" r="7" fill="#F59E0B" stroke="#D97706" stroke-width="0.8"/>
+        <circle cx="42" cy="14" r="7" fill="#FBBF24" stroke="#D97706" stroke-width="0.8"/>
+        <text x="42" y="45" font-family="'Segoe UI', Arial, sans-serif" font-size="8" font-weight="bold" fill="#0369A1" text-anchor="middle">Plate 1 (3)</text>
+      </g>
+      <text x="100" y="26" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="bold" fill="#64748B">+</text>
+      <g transform="translate(120, 2)">
+        <ellipse cx="42" cy="22" rx="38" ry="16" fill="#E0F2FE" stroke="#38BDF8" stroke-width="1.2"/>
+        <circle cx="32" cy="20" r="7" fill="#F59E0B" stroke="#D97706" stroke-width="0.8"/>
+        <circle cx="52" cy="20" r="7" fill="#F59E0B" stroke="#D97706" stroke-width="0.8"/>
+        <circle cx="42" cy="14" r="7" fill="#FBBF24" stroke="#D97706" stroke-width="0.8"/>
+        <text x="42" y="45" font-family="'Segoe UI', Arial, sans-serif" font-size="8" font-weight="bold" fill="#0369A1" text-anchor="middle">Plate 2 (3)</text>
+      </g>
+      <text x="210" y="26" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="bold" fill="#64748B">+</text>
+      <g transform="translate(230, 2)">
+        <ellipse cx="42" cy="22" rx="38" ry="16" fill="#E0F2FE" stroke="#38BDF8" stroke-width="1.2"/>
+        <circle cx="32" cy="20" r="7" fill="#F59E0B" stroke="#D97706" stroke-width="0.8"/>
+        <circle cx="52" cy="20" r="7" fill="#F59E0B" stroke="#D97706" stroke-width="0.8"/>
+        <circle cx="42" cy="14" r="7" fill="#FBBF24" stroke="#D97706" stroke-width="0.8"/>
+        <text x="42" y="45" font-family="'Segoe UI', Arial, sans-serif" font-size="8" font-weight="bold" fill="#0369A1" text-anchor="middle">Plate 3 (3)</text>
+      </g>
+      <text x="320" y="26" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="bold" fill="#64748B">+</text>
+      <g transform="translate(340, 2)">
+        <ellipse cx="42" cy="22" rx="38" ry="16" fill="#E0F2FE" stroke="#38BDF8" stroke-width="1.2"/>
+        <circle cx="32" cy="20" r="7" fill="#F59E0B" stroke="#D97706" stroke-width="0.8"/>
+        <circle cx="52" cy="20" r="7" fill="#F59E0B" stroke="#D97706" stroke-width="0.8"/>
+        <circle cx="42" cy="14" r="7" fill="#FBBF24" stroke="#D97706" stroke-width="0.8"/>
+        <text x="42" y="45" font-family="'Segoe UI', Arial, sans-serif" font-size="8" font-weight="bold" fill="#0369A1" text-anchor="middle">Plate 4 (3)</text>
+      </g>
+    </svg>

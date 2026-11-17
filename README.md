@@ -9,7 +9,7 @@ options, diagrams and keys follow the source worksheet order exactly.
 | Login ID | Paper | Questions | Marks | Duration |
 |---|---|---:|---:|---|
 | `DSMG7@012` | Class 7 / Grade 7 — Full Syllabus Comprehensive Olympiad | 50 | 100 | 60 minutes |
-| `DSMG2@001` | Class 2 / Grade 2 — Mathematics, Test Paper 1 | 35 | 45 | 60 minutes |
+| `DSMG2@001` | Class 2 / Grade 2 — Joyful Mathematics Olympiad Benchmark | 35 | 70 | 45 minutes |
 
 Both logins currently use password `12345678`. Each student also enters their
 full name/roll number and repeats it as their signature before starting.
@@ -17,7 +17,7 @@ full name/roll number and repeats it as their signature before starting.
 ## Paper-specific behaviour
 
 - Profiles in `js/papers.js` control login, titles, grade, bank, duration, marks and PDF.
-- Grade 7: 2 marks per correct answer. Grade 2: Q1–25 earn 1 each; Q26–35 earn 2 each.
+- Both papers award 2 marks per correct answer (Grade 7: 100 marks; Grade 2: 70 marks).
 - Incorrect and unattempted answers earn zero; no negative marking.
 - Exact worksheet order for questions, options, diagrams and picture choices.
 - The **View Paper** tab sits below the question number inside the running exam.
@@ -28,7 +28,7 @@ full name/roll number and repeats it as their signature before starting.
 - Automatic submission when the timer reaches zero or the test window closes.
 - Feedback, weighted result, correct/incorrect/unattempted counts and worked review.
 - Paper-specific result text and prominent worksheet + answer-key PDF downloads.
-- Class 2 download filename: **Worksheet Class 2 Test Paper 1.pdf**.
+- Class 2 download filename: **Worksheet Class 2 Mathematics Olympiad.pdf**.
 - Grade 7 download filename: **Worksheet Full Syllabus Comprehensive Olympiad.pdf**.
 - Literal currency in Class 2 is excluded from MathJax processing.
 
@@ -43,9 +43,10 @@ Each name can attempt each paper once. Local registries are
 `d3v3ndra.attempts.<paper-id>`. The Apps Script uses
 `imo_attempt_names_<paper-id>`. The new Grade 7 paper uses the fresh
 `class7-full-syllabus` ID, so attempts from the earlier Logical Reasoning paper
-remain in the old `logical-reasoning` registry and do not block the new paper;
-`class2-test-paper-1` has its own registry. The legacy `chapter` payload field is
-retained for endpoint compatibility. If the remote check is unavailable, the
+remain in the old `logical-reasoning` registry and do not block the new paper.
+The new Class 2 paper uses the fresh `class2-olympiad-35` ID, so the superseded
+`class2-test-paper-1` registry cannot block it. The legacy `chapter` payload field
+is retained for endpoint compatibility. If the remote check is unavailable, the
 existing local-attempt fallback applies.
 
 ## Files
@@ -58,14 +59,13 @@ existing local-attempt fallback applies.
 | `test_questions.js` | Ordered Grade 7 Full Syllabus bank (official key application-side) |
 | `class2_questions.js` | Approved ordered Grade 2 bank |
 | `js/paper_pages.js` | In-exam page images rendered from the questions-only PDFs |
-| `assets/class2-test1/` | 15 question diagrams and 12 option illustrations |
-| `assets/worksheet-class2-test-paper-1.pdf` | Approved redesigned Class 2 worksheet |
+| `assets/class2-olympiad/` | 15 standalone SVG question diagrams |
+| `assets/worksheet-class2-olympiad.pdf` | Approved Class 2 Olympiad worksheet |
 | `assets/worksheet-full-syllabus-comprehensive.pdf` | Grade 7 worksheet (result download) |
 | `assets/*-questions-only.pdf` | Questions-only viewer PDFs for both papers |
 | `scripts/google-apps-script-submission-email.gs` | Both-paper teacher email relay |
 | `scripts/export-question-sheet.js` | Both-paper spreadsheet exports |
-| `scripts/build-class2-bank.py` | Reproducible import from the worksheet project |
-| `scripts/build-full-syllabus-paper.py` | Grade 7 bank, viewer PDFs and page images |
+| `scripts/build-full-syllabus-paper.py` | Both banks, diagrams, viewer PDFs and page images |
 | `tests/` | Bank/report and browser workflow checks |
 
 ## Run and verify
@@ -116,7 +116,7 @@ check the teacher inbox or Apps Script executions to confirm receipt.
 
 ```sh
 npm run export:sheet
-npm run export:sheet -- --paper=class2-test-paper-1
+npm run export:sheet -- --paper=class2-olympiad-35
 npm run export:sheet:shuffled
 ```
 
@@ -130,26 +130,19 @@ retain their original order. The live test always uses worksheet order.
 
 ## Rebuild paper assets
 
-Grade 7 bank, result worksheet, questions-only viewer PDFs and page images:
+Both banks, diagram assets, result worksheets, questions-only viewer PDFs and
+page images (run with the worksheet project's PyMuPDF environment):
 
 ```sh
 python scripts/build-full-syllabus-paper.py --source-dir "../DASS/D3V3NDRA Classes"
 ```
 
-The script checks all 50 questions, rebuilds `test_questions.js`, asserts that
-the viewer PDF contains no answer-key material, then renders the page images used
-by **View Paper**. The result-stage worksheet still includes the official key and
+The script checks the Grade 7 set, then verifies all 35 Class 2 questions, the
+printed answer-key matrix, the 5/15/10/5 section split, 70 marks and 15 SVG
+diagrams. It rebuilds `test_questions.js` and `class2_questions.js`, asserts that
+each viewer PDF contains no answer-key material, then renders the page images used
+by **View Paper**. The result-stage worksheets still include the official keys and
 worked solutions; the in-exam viewer never does.
-
-Class 2, with PyMuPDF installed in the worksheet project's Python environment:
-
-```sh
-python scripts/build-class2-bank.py --source-dir "../DASS/D3V3NDRA Classes"
-```
-
-This validates against the original PDF and approved dataset, renders source
-diagrams with transparency applied, exports picture choices, and copies the
-approved redesigned PDF. It does not regenerate or rewrite the approved paper.
 
 ## Hosting
 

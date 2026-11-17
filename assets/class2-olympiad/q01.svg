@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 480 50" width="410" height="46" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(10, 4)">
+        <rect width="38" height="38" rx="6" fill="#FEE2E2" stroke="#EF4444" stroke-width="1.5"/>
+        <circle cx="19" cy="19" r="12" fill="#EF4444"/>
+      </g>
+      <g transform="translate(56, 4)">
+        <rect width="38" height="38" rx="6" fill="#DBEAFE" stroke="#3B82F6" stroke-width="1.5"/>
+        <rect x="9" y="9" width="20" height="20" rx="3" fill="#3B82F6"/>
+      </g>
+      <g transform="translate(102, 4)">
+        <rect width="38" height="38" rx="6" fill="#DCFCE7" stroke="#10B981" stroke-width="1.5"/>
+        <polygon points="19,7 8,30 30,30" fill="#10B981"/>
+      </g>
+      <circle cx="150" cy="23" r="2" fill="#94A3B8"/>
+      <g transform="translate(160, 4)">
+        <rect width="38" height="38" rx="6" fill="#FEE2E2" stroke="#EF4444" stroke-width="1.5"/>
+        <circle cx="19" cy="19" r="12" fill="#EF4444"/>
+      </g>
+      <g transform="translate(206, 4)">
+        <rect width="38" height="38" rx="6" fill="#DBEAFE" stroke="#3B82F6" stroke-width="1.5"/>
+        <rect x="9" y="9" width="20" height="20" rx="3" fill="#3B82F6"/>
+      </g>
+      <g transform="translate(252, 4)">
+        <rect width="38" height="38" rx="6" fill="#DCFCE7" stroke="#10B981" stroke-width="1.5"/>
+        <polygon points="19,7 8,30 30,30" fill="#10B981"/>
+      </g>
+      <circle cx="300" cy="23" r="2" fill="#94A3B8"/>
+      <g transform="translate(310, 4)">
+        <rect width="38" height="38" rx="6" fill="#FEE2E2" stroke="#EF4444" stroke-width="1.5"/>
+        <circle cx="19" cy="19" r="12" fill="#EF4444"/>
+      </g>
+      <g transform="translate(356, 4)">
+        <rect width="38" height="38" rx="6" fill="#DBEAFE" stroke="#3B82F6" stroke-width="1.5"/>
+        <rect x="9" y="9" width="20" height="20" rx="3" fill="#3B82F6"/>
+      </g>
+      <!-- Arrow to question mark -->
+      <path d="M 404 23 L 418 23" stroke="#7C3AED" stroke-width="2" stroke-linecap="round"/>
+      <g transform="translate(424, 4)">
+        <rect width="38" height="38" rx="6" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2" stroke-dasharray="3,2"/>
+        <text x="19" y="26" font-family="'Segoe UI', Arial, sans-serif" font-size="16" font-weight="bold" fill="#B45309" text-anchor="middle">?</text>
+      </g>
+    </svg>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 460 55" width="410" height="50" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(10, 3)">
+        <rect width="95" height="48" rx="6" fill="#FEF3C7" stroke="#D97706" stroke-width="1.2"/>
+        <polygon points="25,30 25,16 45,12 65,16 65,30 45,34" fill="#FDE68A" stroke="#B45309" stroke-width="1"/>
+        <polygon points="45,12 65,16 45,20 25,16" fill="#FCD34D" stroke="#B45309" stroke-width="0.8"/>
+        <text x="47" y="44" font-family="'Segoe UI', Arial, sans-serif" font-size="8.5" font-weight="bold" fill="#78350F" text-anchor="middle">(A) Block</text>
+      </g>
+      <g transform="translate(125, 3)">
+        <rect width="95" height="48" rx="6" fill="#FEE2E2" stroke="#EF4444" stroke-width="2"/>
+        <circle cx="47" cy="20" r="13" fill="#DC2626"/>
+        <path d="M 36 20 Q 47 14 58 20" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-dasharray="2,2"/>
+        <text x="47" y="44" font-family="'Segoe UI', Arial, sans-serif" font-size="8.5" font-weight="bold" fill="#991B1B" text-anchor="middle">(B) Ball ★</text>
+      </g>
+      <g transform="translate(240, 3)">
+        <rect width="95" height="48" rx="6" fill="#E0E7FF" stroke="#6366F1" stroke-width="1.2"/>
+        <rect x="22" y="12" width="50" height="15" rx="3" fill="#818CF8" stroke="#4338CA" stroke-width="1"/>
+        <line x1="26" y1="20" x2="68" y2="20" stroke="#C7D2FE" stroke-width="1"/>
+        <text x="47" y="44" font-family="'Segoe UI', Arial, sans-serif" font-size="8.5" font-weight="bold" fill="#312E81" text-anchor="middle">(C) Pencil Box</text>
+      </g>
+      <g transform="translate(355, 3)">
+        <rect width="95" height="48" rx="6" fill="#F3F4F6" stroke="#9CA3AF" stroke-width="1.2"/>
+        <rect x="27" y="13" width="40" height="14" rx="2" fill="#E11D48" stroke="#9F1239" stroke-width="1"/>
+        <text x="47" y="44" font-family="'Segoe UI', Arial, sans-serif" font-size="8.5" font-weight="bold" fill="#374151" text-anchor="middle">(D) Brick</text>
+      </g>
+    </svg>

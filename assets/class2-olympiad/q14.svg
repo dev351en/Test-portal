@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 90 90" width="75" height="75" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="45" cy="45" r="41" fill="#F8FAFC" stroke="#0284C7" stroke-width="3.5"/>
+      <circle cx="45" cy="45" r="37" fill="#FFFFFF"/>
+      <text x="45" y="17" font-family="'Segoe UI', Arial, sans-serif" font-size="8.5" font-weight="bold" fill="#0F172A" text-anchor="middle">12</text>
+      <text x="73" y="48" font-family="'Segoe UI', Arial, sans-serif" font-size="8.5" font-weight="bold" fill="#0F172A" text-anchor="middle">3</text>
+      <text x="45" y="79" font-family="'Segoe UI', Arial, sans-serif" font-size="8.5" font-weight="bold" fill="#0F172A" text-anchor="middle">6</text>
+      <text x="17" y="48" font-family="'Segoe UI', Arial, sans-serif" font-size="8.5" font-weight="bold" fill="#0F172A" text-anchor="middle">9</text>
+      <line x1="45" y1="45" x2="45" y2="20" stroke="#1D4ED8" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="45" y1="45" x2="62" y2="56" stroke="#DC2626" stroke-width="3.2" stroke-linecap="round"/>
+      <circle cx="45" cy="45" r="3" fill="#D97706"/>
+    </svg>

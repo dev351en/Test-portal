@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 460 55" width="410" height="50" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(10, 3)">
+        <rect width="68" height="46" rx="6" fill="#FFF7ED" stroke="#EA580C" stroke-width="1.2"/>
+        <text x="34" y="20" font-size="15" text-anchor="middle">🥕🥕</text>
+        <rect x="10" y="27" width="48" height="14" rx="3" fill="#EA580C"/>
+        <text x="34" y="38" font-family="'Segoe UI', Arial, sans-serif" font-size="7.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">10 Carrots</text>
+      </g>
+      <g transform="translate(86, 3)">
+        <rect width="68" height="46" rx="6" fill="#FFF7ED" stroke="#EA580C" stroke-width="1.2"/>
+        <text x="34" y="20" font-size="15" text-anchor="middle">🥕🥕</text>
+        <rect x="10" y="27" width="48" height="14" rx="3" fill="#EA580C"/>
+        <text x="34" y="38" font-family="'Segoe UI', Arial, sans-serif" font-size="7.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">10 Carrots</text>
+      </g>
+      <g transform="translate(162, 3)">
+        <rect width="68" height="46" rx="6" fill="#FFF7ED" stroke="#EA580C" stroke-width="1.2"/>
+        <text x="34" y="20" font-size="15" text-anchor="middle">🥕🥕</text>
+        <rect x="10" y="27" width="48" height="14" rx="3" fill="#EA580C"/>
+        <text x="34" y="38" font-family="'Segoe UI', Arial, sans-serif" font-size="7.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">10 Carrots</text>
+      </g>
+      <g transform="translate(238, 3)">
+        <rect width="68" height="46" rx="6" fill="#FFF7ED" stroke="#EA580C" stroke-width="1.2"/>
+        <text x="34" y="20" font-size="15" text-anchor="middle">🥕🥕</text>
+        <rect x="10" y="27" width="48" height="14" rx="3" fill="#EA580C"/>
+        <text x="34" y="38" font-family="'Segoe UI', Arial, sans-serif" font-size="7.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">10 Carrots</text>
+      </g>
+      <text x="317" y="30" font-family="'Segoe UI', Arial, sans-serif" font-size="16" font-weight="bold" fill="#64748B">+</text>
+      <g transform="translate(330, 3)">
+        <rect width="120" height="46" rx="6" fill="#FEF3C7" stroke="#D97706" stroke-width="1.2"/>
+        <text x="60" y="20" font-size="13" text-anchor="middle">🥕🥕🥕🥕</text>
+        <text x="60" y="38" font-family="'Segoe UI', Arial, sans-serif" font-size="8" font-weight="bold" fill="#92400E" text-anchor="middle">+ 7 loose carrots</text>
+      </g>
+    </svg>

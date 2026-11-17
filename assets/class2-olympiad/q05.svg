@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 260 52" width="240" height="48" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(20, 4)">
+        <rect x="10" y="2" width="10" height="40" rx="2" fill="#2563EB"/>
+        <rect x="20" y="2" width="30" height="9" rx="1.5" fill="#F59E0B" stroke="#D97706" stroke-width="0.8"/>
+        <rect x="20" y="17" width="24" height="9" rx="1.5" fill="#F59E0B" stroke="#D97706" stroke-width="0.8"/>
+        <rect x="20" y="33" width="30" height="9" rx="1.5" fill="#F59E0B" stroke="#D97706" stroke-width="0.8"/>
+      </g>
+      <g transform="translate(85, 4)">
+        <text x="0" y="11" font-family="'Segoe UI', Arial, sans-serif" font-size="8.5" font-weight="bold" fill="#B45309">← 1st sleeping line (Top)</text>
+        <text x="0" y="26" font-family="'Segoe UI', Arial, sans-serif" font-size="8.5" font-weight="bold" fill="#B45309">← 2nd sleeping line (Middle)</text>
+        <text x="0" y="42" font-family="'Segoe UI', Arial, sans-serif" font-size="8.5" font-weight="bold" fill="#B45309">← 3rd sleeping line (Bottom)</text>
+      </g>
+    </svg>

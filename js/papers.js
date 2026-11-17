@@ -21,22 +21,22 @@ window.TEST_PAPERS = [
     paperPages: 2
   },
   {
-    id: 'class2-test-paper-1',
+    id: 'class2-olympiad-35',
     loginId: 'DSMG2@001',
     password: '12345678',
     grade: 2,
-    title: 'Mathematics · Test Paper 1',
-    subtitle: 'Class 2 Mathematics — Test Number 1',
+    title: 'Joyful Mathematics Olympiad Benchmark',
+    subtitle: 'Class 2 Mathematics — Full Syllabus Olympiad (35 MCQs)',
     bank: 'CLASS2_QUESTIONS',
     questionCount: 35,
-    totalMarks: 45,
-    defaultMarks: 1,
-    totalMinutes: 60,
-    marking: 'Q1–25: +1 each · Q26–35: +2 each',
+    totalMarks: 70,
+    defaultMarks: 2,
+    totalMinutes: 45,
+    marking: '+2 for every correct answer',
     textFormat: 'plain',
-    worksheet: 'assets/worksheet-class2-test-paper-1.pdf',
-    downloadName: 'Worksheet Class 2 Test Paper 1.pdf',
-    paperPdf: 'assets/worksheet-class2-test-paper-1-questions-only.pdf',
-    paperPages: 5
+    worksheet: 'assets/worksheet-class2-olympiad.pdf',
+    downloadName: 'Worksheet Class 2 Mathematics Olympiad.pdf',
+    paperPdf: 'assets/worksheet-class2-olympiad-questions-only.pdf',
+    paperPages: 7
   }
 ];
