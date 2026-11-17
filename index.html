@@ -175,7 +175,7 @@
           <div class="fact fact-window">
             <span class="fact-icon" data-icon="calendar" data-icon-size="18"></span>
             <span>Test Window</span>
-            <b>: 13 Nov 2026<br><small>9:00 AM &ndash; 5:00 PM IST</small></b>
+            <b>: 18 Nov 2026<br><small>9:00 AM &ndash; 5:00 PM IST</small></b>
           </div>
         </div>
 
@@ -184,11 +184,12 @@
           <ul>
             <li>Read each question carefully before answering. All questions are compulsory and each has exactly one correct option.</li>
             <li>Use the question palette to move between questions. Use <b>Mark for Review</b> to flag a question and revisit it later.</li>
+            <li>During the test, use the small <b>View Paper</b> tab below the question number to read the complete question paper. The paper shown there contains questions only &mdash; never the answer key.</li>
             <li>You may change an answer until you submit the test.</li>
             <li>The test runs in <b>full screen</b>. <b>Exiting full screen is not allowed</b> &mdash; the paper locks until you return to full screen.</li>
             <li><b>Closing the test screen, minimizing the tab, or leaving the browser window is strictly not allowed.</b> You are allowed <b>five exits</b> &mdash; each one records a warning and the timer keeps running. A <b>sixth exit auto-submits your paper immediately</b>.</li>
             <li><b>Copying and right-click are disabled.</b> Text cannot be selected, and shortcuts such as Ctrl+C, Ctrl+A, Ctrl+P, Ctrl+S, Ctrl+U and F12 are blocked during the test.</li>
-            <li>The test auto-submits when the timer reaches 00:00, and also when the test window closes at 5:00 PM IST on 13 November 2026.</li>
+            <li>The test auto-submits when the timer reaches 00:00, and also when the test window closes at 5:00 PM IST on 18 November 2026.</li>
             <li>Keep this tab open. Refreshing or closing it will lose your answers.</li>
             <li>Do all rough work on paper. Calculators, phones, and outside help are not permitted.</li>
             <li>After reviewing your result, share your name and your rough work on WhatsApp.</li>
@@ -236,7 +237,6 @@
           <span>The <span class="inline-value" data-paper-minutes></span>-minute timer starts when you begin.</span>
         </div>
         <div class="banner-time"><span>Duration</span><strong id="bannerDuration"></strong></div>
-         <button type="button" class="btn btn-view-paper" id="viewPaperBtn"><span data-icon="bookOpen" data-icon-size="18"></span>View Question Paper First</button>
          <button type="button" class="btn btn-primary" id="startBtn">Start Test <span data-icon="play" data-icon-size="18"></span></button>
       </div>
 
@@ -277,7 +277,13 @@
     <section class="card exam-card">
       <div class="exam-paper-label"><span data-paper-grade></span><strong data-paper-title></strong></div>
       <div class="exam-top">
-        <span class="q-chip">Question <b id="qNo">1</b> of <span data-paper-count></span></span>
+        <div class="q-meta">
+          <span class="q-chip">Question <b id="qNo">1</b> of <span data-paper-count></span></span>
+          <button type="button" class="paper-view-tab" id="viewPaperBtn">
+            <span data-icon="bookOpen" data-icon-size="13"></span>
+            <span class="paper-view-label">View Paper</span>
+          </button>
+        </div>
         <span class="mark-badge" id="markBadge" hidden><span data-icon="flag" data-icon-size="13"></span> Marked</span>
         <span class="marks-chip" id="questionMarks"></span>
         <button type="button" class="palette-toggle" id="paletteToggle"><span data-icon="grid" data-icon-size="16"></span>Questions</button>

@@ -8,7 +8,7 @@ options, diagrams and keys follow the source worksheet order exactly.
 
 | Login ID | Paper | Questions | Marks | Duration |
 |---|---|---:|---:|---|
-| `DSMG7@012` | Class 7 / Grade 7 — Logical Reasoning | 50 | 100 | 60 minutes |
+| `DSMG7@012` | Class 7 / Grade 7 — Full Syllabus Comprehensive Olympiad | 50 | 100 | 60 minutes |
 | `DSMG2@001` | Class 2 / Grade 2 — Mathematics, Test Paper 1 | 35 | 45 | 60 minutes |
 
 Both logins currently use password `12345678`. Each student also enters their
@@ -19,28 +19,34 @@ full name/roll number and repeats it as their signature before starting.
 - Profiles in `js/papers.js` control login, titles, grade, bank, duration, marks and PDF.
 - Grade 7: 2 marks per correct answer. Grade 2: Q1–25 earn 1 each; Q26–35 earn 2 each.
 - Incorrect and unattempted answers earn zero; no negative marking.
-- Complete question preview before starting, including picture options.
+- Exact worksheet order for questions, options, diagrams and picture choices.
+- The **View Paper** tab sits below the question number inside the running exam.
+  It opens a page-by-page view of the questions-only PDF; the answer key is never
+  included in that viewer and nothing can be read before **Start Test**.
 - Colour-coded palette, answer clearing, mark-for-review, Previous and Next.
 - Fullscreen/copy restrictions; five exit warnings, automatic submission on the sixth.
 - Automatic submission when the timer reaches zero or the test window closes.
 - Feedback, weighted result, correct/incorrect/unattempted counts and worked review.
 - Paper-specific result text and prominent worksheet + answer-key PDF downloads.
 - Class 2 download filename: **Worksheet Class 2 Test Paper 1.pdf**.
+- Grade 7 download filename: **Worksheet Full Syllabus Comprehensive Olympiad.pdf**.
 - Literal currency in Class 2 is excluded from MathJax processing.
 
 ## Attempts and test window
 
-The scheduled window is **13 November 2026, 9 AM–5 PM IST**, enforced in
+The scheduled window is **18 November 2026, 9 AM–5 PM IST**, enforced in
 `middleware.js` and `js/app.js`. The teacher preview URL bypasses the time gate;
 attempt checks and submission behaviour still apply. Use a distinct test name
 when checking a real preview attempt.
 
 Each name can attempt each paper once. Local registries are
 `d3v3ndra.attempts.<paper-id>`. The Apps Script uses
-`imo_attempt_names_<paper-id>`. The existing `logical-reasoning` ID preserves
-Grade 7 attempt history; `class2-test-paper-1` has a separate registry. The
-legacy `chapter` payload field is retained for endpoint compatibility. If the
-remote check is unavailable, the existing local-attempt fallback applies.
+`imo_attempt_names_<paper-id>`. The new Grade 7 paper uses the fresh
+`class7-full-syllabus` ID, so attempts from the earlier Logical Reasoning paper
+remain in the old `logical-reasoning` registry and do not block the new paper;
+`class2-test-paper-1` has its own registry. The legacy `chapter` payload field is
+retained for endpoint compatibility. If the remote check is unavailable, the
+existing local-attempt fallback applies.
 
 ## Files
 
@@ -48,15 +54,18 @@ remote check is unavailable, the existing local-attempt fallback applies.
 |---|---|
 | `index.html`, `css/styles.css` | Responsive login, instructions, exam and results |
 | `js/papers.js` | Credential-to-paper profiles |
-| `js/app.js` | Routing, state, scoring, timer, previews, review and submission |
-| `test_questions.js` | Original ordered Grade 7 bank |
+| `js/app.js` | Routing, state, scoring, timer, paper viewer, review and submission |
+| `test_questions.js` | Ordered Grade 7 Full Syllabus bank (official key application-side) |
 | `class2_questions.js` | Approved ordered Grade 2 bank |
+| `js/paper_pages.js` | In-exam page images rendered from the questions-only PDFs |
 | `assets/class2-test1/` | 15 question diagrams and 12 option illustrations |
 | `assets/worksheet-class2-test-paper-1.pdf` | Approved redesigned Class 2 worksheet |
-| `assets/worksheet-logical-reasoning.pdf` | Grade 7 worksheet |
+| `assets/worksheet-full-syllabus-comprehensive.pdf` | Grade 7 worksheet (result download) |
+| `assets/*-questions-only.pdf` | Questions-only viewer PDFs for both papers |
 | `scripts/google-apps-script-submission-email.gs` | Both-paper teacher email relay |
 | `scripts/export-question-sheet.js` | Both-paper spreadsheet exports |
 | `scripts/build-class2-bank.py` | Reproducible import from the worksheet project |
+| `scripts/build-full-syllabus-paper.py` | Grade 7 bank, viewer PDFs and page images |
 | `tests/` | Bank/report and browser workflow checks |
 
 ## Run and verify
@@ -96,7 +105,9 @@ The report includes class/paper identity, weighted marks, all three answer
 counts, duration, exit count, every option, diagrams/picture choices and the
 matching worksheet link. HTML and plain-text reports use the same scoring.
 The script accepts legacy submissions with a default of 2 marks per question.
-`SUBMIT_TOKEN` must match `CONFIG.submissionToken` in `js/app.js`.
+`SUBMIT_TOKEN` must match `CONFIG.submissionToken` in `js/app.js`. The active
+endpoint reports `"version":"testing-portal-v2"`; the portal points at it in
+`CONFIG.submissionEndpoint`.
 
 Form submission to the cross-origin relay confirms dispatch, not email delivery;
 check the teacher inbox or Apps Script executions to confirm receipt.
@@ -117,9 +128,20 @@ Google Sheet's **Extensions → Apps Script**, save/reload, and choose
 Explicit shuffled exports are separate practice materials; illustrated options
 retain their original order. The live test always uses worksheet order.
 
-## Rebuild Class 2 assets
+## Rebuild paper assets
 
-With PyMuPDF installed in the worksheet project's Python environment:
+Grade 7 bank, result worksheet, questions-only viewer PDFs and page images:
+
+```sh
+python scripts/build-full-syllabus-paper.py --source-dir "../DASS/D3V3NDRA Classes"
+```
+
+The script checks all 50 questions, rebuilds `test_questions.js`, asserts that
+the viewer PDF contains no answer-key material, then renders the page images used
+by **View Paper**. The result-stage worksheet still includes the official key and
+worked solutions; the in-exam viewer never does.
+
+Class 2, with PyMuPDF installed in the worksheet project's Python environment:
 
 ```sh
 python scripts/build-class2-bank.py --source-dir "../DASS/D3V3NDRA Classes"

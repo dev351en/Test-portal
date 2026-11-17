@@ -10,10 +10,10 @@
     submissionEndpoint: 'https://script.google.com/macros/s/AKfycbzK4Sc5yqHtiGPbbO-h3h9ZGuColY8fqnKlbJbdQji26vyzwvpTLtGGUSd16qVfPG-IGw/exec',
     // Must match SUBMIT_TOKEN in scripts/google-apps-script-submission-email.gs.
     submissionToken: 'd3v3ndra-fractions-2026',
-    // Test window: 13 November 2026, 9:00 AM to 5:00 PM IST (UTC+05:30).
+    // Test window: 18 November 2026, 9:00 AM to 5:00 PM IST (UTC+05:30).
     testWindow: {
-      start: '2026-11-13T03:30:00.000Z',
-      end: '2026-11-13T11:30:00.000Z'
+      start: '2026-11-18T03:30:00.000Z',
+      end: '2026-11-18T11:30:00.000Z'
     },
     // Teacher-only preview bypass for the time gate: open the site with
     // ?preview=teacher-imo-2026 to check the portal before/after the window.
@@ -70,6 +70,7 @@
     timerId: null,
     running: false,
     starting: false,
+    paperLoading: false,
     submitted: false,
     lockVisible: false,
     lockEnabled: true,
@@ -318,6 +319,16 @@
     return stamp >= Date.parse(CONFIG.testWindow.start) && stamp <= Date.parse(CONFIG.testWindow.end);
   }
 
+  function windowDateLabel() {
+    try {
+      return new Date(CONFIG.testWindow.start).toLocaleDateString('en-IN', {
+        timeZone: 'Asia/Kolkata', day: 'numeric', month: 'long', year: 'numeric'
+      });
+    } catch (error) {
+      return '18 November 2026';
+    }
+  }
+
   function showTimeGate(mode) {
     const gate = $('#timeGate');
     if (!gate) return;
@@ -326,7 +337,7 @@
     $('#gateTitle').textContent = expired ? 'Test window closed' : 'Test not open yet';
     $('#gateMessage').textContent = expired
       ? 'Sorry, the test time has run out. Contact the teacher.'
-      : 'The test has not started yet. It opens at 9:00 AM IST on 13 November 2026 and closes at 5:00 PM IST.';
+      : `The test has not started yet. It opens at 9:00 AM IST on ${windowDateLabel()} and closes at 5:00 PM IST.`;
     gate.hidden = false;
     $('#appHeader').hidden = true;
     $$('.view').forEach(view => view.classList.remove('is-active'));
@@ -631,36 +642,60 @@
 
   function initInstructions() {
     $('#startBtn').addEventListener('click', startTest);
-    $('#viewPaperBtn').addEventListener('click', openQuestionPaperModal);
     $('#signatureInput').addEventListener('input', hideSignatureError);
   }
 
-  function openQuestionPaperModal() {
-    const questions = paperBank();
-    const paper = questions.map((question, index) => {
-      const diagram = question.diagram
-        ? `<img class="paper-preview-diagram" src="${escapeHtml(question.diagram)}" alt="Diagram for Question ${index + 1}">`
-        : '';
-      const options = question.opts.map((option, optionIndex) =>
-        `<span class="paper-preview-option"><b>${'ABCD'[optionIndex]}.</b> ${optionMarkup(question, optionIndex)}</span>`
-      ).join('');
-      return `<article class="paper-preview-item">
-        <div class="paper-preview-head"><b>Question ${index + 1}</b><span>${marksLabel(questionMarks(question))}</span></div>
-        <div class="paper-preview-question">${formatMath(question.q)}</div>
-        ${diagram}
-        <div class="paper-preview-options">${options}</div>
-      </article>`;
-    }).join('');
-
-    openModal({
-      title: `Class ${state.profile.grade} · ${state.profile.title} — Complete Paper`,
-      size: 'lg',
-      body: `<p class="paper-preview-intro">This is the complete paper in worksheet order. Review it first, then close this preview and press <b>Start Test</b> when ready.</p><div class="paper-preview-list">${paper}</div>`,
-      actions: [{ label: 'Close Preview', variant: 'primary' }]
+  function loadPaperPages() {
+    if (window.PAPER_PAGES) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'js/paper_pages.js';
+      script.onload = resolve;
+      script.onerror = () => reject(new Error('paper pages failed to load'));
+      document.head.appendChild(script);
     });
-    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
-      MathJax.typesetPromise([document.getElementById('modalRoot')]).catch(() => { });
+  }
+
+  // The full paper is only viewable inside the running exam: page images of the
+  // questions-only PDF (no answer key), so nothing can be read before Start.
+  function openQuestionPaperModal() {
+    const profile = state.profile;
+    if (!profile || !state.running || state.paperLoading) return;
+    const button = $('#viewPaperBtn');
+    const restingLabel = button ? button.innerHTML : '';
+    state.paperLoading = true;
+    if (button) {
+      button.disabled = true;
+      button.innerHTML = `${icon('bookOpen', 13)}<span class="paper-view-label">Loading paper…</span>`;
     }
+    loadPaperPages().then(() => {
+      if (state.profile !== profile) return;
+      const pages = (window.PAPER_PAGES || {})[profile.id] || [];
+      if (!pages.length) throw new Error('no pages');
+      const download = profile.paperPdf
+        ? `<a class="btn btn-ghost paper-pages-download" href="${escapeHtml(profile.paperPdf)}" download="${escapeHtml(profile.downloadName.replace(/\.pdf$/, ' - Questions Only.pdf'))}">${icon('download', 15)}Download questions-only PDF</a>`
+        : '';
+      const body = `<p class="paper-pages-note">The complete question paper — ${pages.length} page${pages.length === 1 ? '' : 's'}, questions only. The answer key is not part of this paper.</p>${download}<div class="paper-pages">${pages.map((src, index) =>
+        `<img class="paper-page" src="${escapeHtml(src)}" alt="Question paper page ${index + 1}" decoding="async" draggable="false">`).join('')}</div>`;
+      openModal({
+        title: `Question Paper — ${profile.title}`,
+        size: 'lg',
+        body,
+        actions: [{ label: 'Close Paper', variant: 'primary' }]
+      });
+    }).catch(() => {
+      openModal({
+        title: 'Question paper unavailable',
+        body: '<p>The question paper could not be loaded right now. Your test is unaffected — refresh the page after submitting if you need the paper.</p>',
+        actions: [{ label: 'Close', variant: 'primary' }]
+      });
+    }).finally(() => {
+      state.paperLoading = false;
+      if (button) {
+        button.disabled = false;
+        button.innerHTML = restingLabel;
+      }
+    });
   }
 
   function buildPaper() {
@@ -979,6 +1014,7 @@
       $('#examShell').classList.remove('palette-open');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
+    $('#viewPaperBtn').addEventListener('click', openQuestionPaperModal);
   }
 
   function startTimer() {

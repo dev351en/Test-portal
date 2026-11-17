@@ -20,9 +20,21 @@
       ]
     },
     {
-      "source": "/assets/worksheet-logical-reasoning.pdf",
+      "source": "/assets/worksheet-full-syllabus-comprehensive.pdf",
       "headers": [
-        { "key": "Content-Disposition", "value": "attachment; filename=\"Worksheet Logical Reasoning.pdf\"" }
+        { "key": "Content-Disposition", "value": "attachment; filename=\"Worksheet Full Syllabus Comprehensive Olympiad.pdf\"" }
+      ]
+    },
+    {
+      "source": "/assets/worksheet-full-syllabus-questions-only.pdf",
+      "headers": [
+        { "key": "Content-Disposition", "value": "attachment; filename=\"Worksheet Full Syllabus Comprehensive Olympiad - Questions Only.pdf\"" }
+      ]
+    },
+    {
+      "source": "/assets/worksheet-class2-test-paper-1-questions-only.pdf",
+      "headers": [
+        { "key": "Content-Disposition", "value": "attachment; filename=\"Worksheet Class 2 Test Paper 1 - Questions Only.pdf\"" }
       ]
     }
   ]

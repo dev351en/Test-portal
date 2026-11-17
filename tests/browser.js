@@ -106,14 +106,8 @@ async function main() {
     await active(page, 'Instructions');
     assert.equal(await page.locator('#viewInstructions [data-paper-count]').textContent(), '35');
     assert.equal(await page.locator('#viewInstructions [data-paper-marks]').textContent(), '45');
+    assert.equal(await page.locator('#viewInstructions #viewPaperBtn').count(), 0);
     await page.screenshot({ path: path.join(output, 'class2-instructions.png'), fullPage: true });
-    await page.click('#viewPaperBtn');
-    assert.equal(await page.locator('.paper-preview-item').count(), 35);
-    assert.equal(await page.locator('.paper-preview-item img').count(), 27);
-    await images(page, '.paper-preview-item img');
-    assert.ok((await page.locator('.paper-preview-item').first().innerText()).includes('$100'));
-    assert.equal(await page.locator('.paper-preview-item').first().locator('mjx-container').count(), 0);
-    await page.getByRole('button', { name: 'Close Preview', exact: true }).click();
     await page.fill('#signatureInput', 'Wrong name');
     await page.click('#startBtn');
     assert.ok(await page.locator('#signatureError').isVisible());
@@ -121,6 +115,15 @@ async function main() {
     assert.equal(await page.locator('#paletteGrid button').count(), 35);
     assert.equal(await page.locator('#questionMarks').innerText(), '1 Mark');
     assert.ok((await page.locator('#qText').innerText()).includes('$100'));
+    await page.click('#viewPaperBtn');
+    await page.locator('.paper-page').first().waitFor();
+    assert.equal(await page.locator('.paper-page').count(), 5);
+    assert.equal(await page.evaluate(() => window.PAPER_PAGES['class2-test-paper-1'].length), 5);
+    assert.ok((await page.locator('.paper-pages-note').innerText()).includes('questions only'));
+    assert.ok((await page.locator('.paper-pages-download').getAttribute('href')).includes('worksheet-class2-test-paper-1-questions-only.pdf'));
+    await images(page, '.paper-page');
+    await page.screenshot({ path: path.join(output, 'class2-paper-viewer.png'), fullPage: true });
+    await page.getByRole('button', { name: 'Close Paper', exact: true }).click();
     await page.locator('[data-option="3"]').click();
     await page.click('#clearBtn');
     assert.equal(await page.locator('#statAttempted').innerText(), '0');
@@ -161,11 +164,21 @@ async function main() {
 
     // Same name, different paper: starts successfully and gets its own report.
     await login(page, 'DSMG7@012');
-    await page.click('#viewPaperBtn');
-    assert.equal(await page.locator('.paper-preview-item').count(), 50);
-    await images(page, '.paper-preview-item img');
-    await page.getByRole('button', { name: 'Close Preview', exact: true }).click();
+    await active(page, 'Instructions');
+    assert.equal(await page.locator('#viewInstructions [data-paper-count]').textContent(), '50');
+    assert.equal(await page.locator('#viewInstructions [data-paper-marks]').textContent(), '100');
+    assert.ok((await page.locator('#viewInstructions [data-paper-title]').first().innerText()).includes('Full Syllabus'));
+    assert.equal(await page.locator('#viewInstructions #viewPaperBtn').count(), 0);
     await start(page);
+    await page.click('#viewPaperBtn');
+    await page.locator('.paper-page').first().waitFor();
+    assert.equal(await page.locator('.paper-page').count(), 2);
+    assert.equal(await page.evaluate(() => window.PAPER_PAGES['class7-full-syllabus'].length), 2);
+    assert.ok((await page.locator('.paper-pages-note').innerText()).includes('The answer key is not part of this paper'));
+    assert.ok((await page.locator('.paper-pages-download').getAttribute('href')).includes('worksheet-full-syllabus-questions-only.pdf'));
+    await images(page, '.paper-page');
+    await page.screenshot({ path: path.join(output, 'class7-paper-viewer.png'), fullPage: true });
+    await page.getByRole('button', { name: 'Close Paper', exact: true }).click();
     const answers7 = await page.evaluate(() => window.QUESTIONS.map(q => q.ans));
     for (let i = 0; i < answers7.length; i++) {
       await question(page, i);
@@ -175,7 +188,10 @@ async function main() {
     await feedback(page);
     assert.equal(await page.locator('#resultScore').innerText(), '100 / 100');
     assert.equal(await page.locator('#resultCorrect').innerText(), '50 / 50');
-    assert.ok((await page.locator('#downloadSheetBtn').getAttribute('href')).includes('worksheet-logical-reasoning.pdf'));
+    assert.ok((await page.locator('#downloadSheetBtn').getAttribute('href')).includes('worksheet-full-syllabus-comprehensive.pdf'));
+    const [grade7Pdf] = await Promise.all([page.waitForEvent('download'), page.click('#downloadSheetBtn')]);
+    assert.equal(grade7Pdf.suggestedFilename(), 'Worksheet Full Syllabus Comprehensive Olympiad.pdf');
+    assert.deepEqual(fs.readFileSync(await grade7Pdf.path()), fs.readFileSync(path.join(root, 'assets/worksheet-full-syllabus-comprehensive.pdf')));
     await page.click('#finishBtn');
     await login(page, 'DSMG2@001');
     await page.fill('#signatureInput', 'Portal Validation Student');
@@ -209,11 +225,14 @@ async function main() {
     await mobile.screenshot({ path: path.join(output, 'login-mobile.png'), fullPage: true });
     await login(mobile, 'DSMG2@001', 'Mobile Check');
     await layout(mobile);
-    await mobile.click('#viewPaperBtn');
-    await images(mobile, '.paper-preview-item img');
-    await layout(mobile);
-    await mobile.getByRole('button', { name: 'Close Preview', exact: true }).click();
+    assert.equal(await mobile.locator('#viewInstructions #viewPaperBtn').count(), 0);
     await start(mobile, 'Mobile Check');
+    await mobile.click('#viewPaperBtn');
+    await mobile.locator('.paper-page').first().waitFor();
+    assert.equal(await mobile.locator('.paper-page').count(), 5);
+    await images(mobile, '.paper-page');
+    await layout(mobile);
+    await mobile.getByRole('button', { name: 'Close Paper', exact: true }).click();
     await question(mobile, 1);
     await layout(mobile);
     await images(mobile, '#viewExam img');
@@ -224,13 +243,17 @@ async function main() {
     assert.equal(await mobile.locator('#resultScore').innerText(), '0 / 45');
     await mobile.screenshot({ path: path.join(output, 'result-mobile.png'), fullPage: true });
 
-    assert.ok(claims.some(p => p.chapter === 'logical-reasoning'));
+    assert.ok(claims.some(p => p.chapter === 'class7-full-syllabus'));
     assert.ok(claims.some(p => p.chapter === 'class2-test-paper-1'));
     const grade2Payload = payloads.find(p => p.studentName === 'Portal Validation Student' && p.grade === 2);
     assert.equal(grade2Payload.score, 3);
     assert.equal(grade2Payload.answers[0].marks, 1);
     assert.equal(grade2Payload.answers[25].marks, 2);
     assert.equal(grade2Payload.answers[1].optionImages.length, 4);
+    const grade7Payload = payloads.find(p => p.studentName === 'Portal Validation Student' && p.grade === 7);
+    assert.equal(grade7Payload.paperId, 'class7-full-syllabus');
+    assert.equal(grade7Payload.score, 100);
+    assert.ok(grade7Payload.worksheetUrl.includes('worksheet-full-syllabus-comprehensive.pdf'));
     const exitPayload = payloads.find(p => p.studentName === 'Exit Rule Check');
     assert.equal(exitPayload.focusLosses, 6);
     assert.equal(exitPayload.submitReason, 'leaving');

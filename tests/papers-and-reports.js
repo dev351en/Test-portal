@@ -12,6 +12,18 @@ for (const file of ['test_questions.js', 'class2_questions.js', 'js/papers.js', 
 const papers = context.window.TEST_PAPERS;
 assert.equal(papers.length, 2);
 assert.equal(new Set(papers.map(p => p.loginId)).size, 2);
+const grade7 = papers.find(p => p.loginId === 'DSMG7@012');
+const grade2 = papers.find(p => p.loginId === 'DSMG2@001');
+assert.equal(grade7.id, 'class7-full-syllabus');
+assert.equal(grade7.questionCount, 50);
+assert.equal(grade7.totalMarks, 100);
+assert.equal(grade2.id, 'class2-test-paper-1');
+assert.equal(grade2.questionCount, 35);
+assert.equal(grade2.totalMarks, 45);
+assert.deepEqual(Array.from(context.window.QUESTIONS.slice(0, 3), q => q.opts[0]), ['39', '24', '24']);
+assert.equal(context.window.QUESTIONS[0].ans, 3);
+assert.deepEqual(['Logical Reasoning', 'Mathematical Reasoning', 'Everyday Mathematics', 'HOTS']
+  .map(cat => context.window.QUESTIONS.filter(q => q.cat === cat).length), [15, 20, 10, 5]);
 
 function payload(paper, choose) {
   return { paperId: paper.id, chapter: paper.id, paperTitle: paper.title, grade: paper.grade,
@@ -36,6 +48,9 @@ for (const paper of papers) {
     for (const file of [q.diagram, ...(q.optionImages || [])].filter(Boolean)) assert.ok(fs.existsSync(path.join(root, file)), file);
   }
   assert.equal(fs.readFileSync(path.join(root, paper.worksheet)).subarray(0, 4).toString(), '%PDF');
+  assert.equal(fs.readFileSync(path.join(root, paper.paperPdf)).subarray(0, 4).toString(), '%PDF');
+  assert.ok(fs.statSync(path.join(root, paper.paperPdf)).size < fs.statSync(path.join(root, paper.worksheet)).size,
+    `${paper.id}: questions-only PDF should be smaller than the full worksheet`);
   const full = context.buildReport_(payload(paper, q => q.ans));
   assert.ok(full.subject.includes(`${paper.totalMarks}/${paper.totalMarks} (100%)`));
   assert.ok(full.subject.includes(`Class ${paper.grade}`));
@@ -45,7 +60,12 @@ for (const paper of papers) {
   assert.ok(empty.text.includes(`Unattempted  : ${paper.questionCount}`));
 }
 
-const grade2 = papers.find(p => p.grade === 2);
+const appSource = fs.readFileSync(path.join(root, 'js/app.js'), 'utf8');
+assert.ok(appSource.includes("start: '2026-11-18T03:30:00.000Z'"));
+assert.ok(!appSource.includes("2026-11-13T03:30:00.000Z"));
+assert.ok(fs.readFileSync(path.join(root, 'middleware.js'), 'utf8').includes("2026-11-18T03:30:00.000Z"));
+assert.ok(fs.readFileSync(path.join(root, 'index.html'), 'utf8').includes('18 Nov 2026'));
+
 const bank2 = context.window.CLASS2_QUESTIONS;
 assert.equal(bank2.filter(q => q.marks === 1).length, 25);
 assert.equal(bank2.filter(q => q.marks === 2).length, 10);
@@ -69,7 +89,8 @@ delete legacy.paperTitle;
 delete legacy.grade;
 assert.ok(context.buildReport_(legacy).subject.includes('100/100'));
 
-// Attempt registries must stay independent and keep existing Grade 7 history.
+// Attempt registries must stay independent; the old logical-reasoning registry
+// remains untouched while the new paper opens a fresh registry.
 const properties = new Map();
 context.PropertiesService = { getScriptProperties: () => ({
   getProperty: key => properties.get(key), setProperty: (key, value) => properties.set(key, value)
@@ -79,10 +100,12 @@ context.ContentService = { MimeType: { JSON: 'application/json' }, createTextOut
 function claim(paperId) {
   return context.handleClaim_({ paperId, name: 'Same Student', token: 'd3v3ndra-fractions-2026' });
 }
-assert.equal(claim('logical-reasoning').taken, false);
+assert.equal(claim('class7-full-syllabus').taken, false);
 assert.equal(claim('class2-test-paper-1').taken, false);
-assert.equal(claim('logical-reasoning').taken, true);
+assert.equal(claim('class7-full-syllabus').taken, true);
 assert.equal(claim('class2-test-paper-1').taken, true);
-assert.ok(properties.has('imo_attempt_names_logical-reasoning'));
+assert.equal(claim('logical-reasoning').taken, false);
+assert.ok(properties.has('imo_attempt_names_class7-full-syllabus'));
+assert.ok(properties.has('imo_attempt_names_class2-test-paper-1'));
 assert.equal(context.doGet({}).version, 'testing-portal-v2');
 console.log('PASS: ordered banks/assets, weighted/legacy reports, picture options, currency and isolated attempts.');
