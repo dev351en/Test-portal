@@ -10,10 +10,10 @@
     submissionEndpoint: 'https://script.google.com/macros/s/AKfycbzK4Sc5yqHtiGPbbO-h3h9ZGuColY8fqnKlbJbdQji26vyzwvpTLtGGUSd16qVfPG-IGw/exec',
     // Must match SUBMIT_TOKEN in scripts/google-apps-script-submission-email.gs.
     submissionToken: 'd3v3ndra-fractions-2026',
-    // Test window: 18 November 2026, 9:00 AM to 5:00 PM IST (UTC+05:30).
+    // Test window: 19 November 2026, 9:00 AM to 5:00 PM IST (UTC+05:30).
     testWindow: {
-      start: '2026-11-18T03:30:00.000Z',
-      end: '2026-11-18T11:30:00.000Z'
+      start: '2026-11-19T03:30:00.000Z',
+      end: '2026-11-19T11:30:00.000Z'
     },
     // Teacher-only preview bypass for the time gate: open the site with
     // ?preview=teacher-imo-2026 to check the portal before/after the window.
@@ -325,7 +325,7 @@
         timeZone: 'Asia/Kolkata', day: 'numeric', month: 'long', year: 'numeric'
       });
     } catch (error) {
-      return '18 November 2026';
+      return '19 November 2026';
     }
   }
 
@@ -400,6 +400,11 @@
     const profile = (window.TEST_PAPERS || []).find(paper => paper.loginId.toUpperCase() === id.toUpperCase() && paper.password === password);
     if (!profile) {
       showLoginError('Incorrect student ID or password. Please check with your teacher and try again.');
+      $('#loginPass').select();
+      return;
+    }
+    if (profile.enabled === false) {
+      showLoginError(`The Class ${profile.grade} paper is closed today. Only the Class 7 paper is open.`);
       $('#loginPass').select();
       return;
     }

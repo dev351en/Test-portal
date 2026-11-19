@@ -11,8 +11,10 @@ options, diagrams and keys follow the source worksheet order exactly.
 | `DSMG7@012` | Class 7 / Grade 7 — Full Syllabus Comprehensive Olympiad | 50 | 100 | 60 minutes |
 | `DSMG2@001` | Class 2 / Grade 2 — Joyful Mathematics Olympiad Benchmark | 35 | 70 | 45 minutes |
 
-Both logins currently use password `12345678`. Each student also enters their
-full name/roll number and repeats it as their signature before starting.
+Both profiles use password `12345678`. For the **19 November 2026 reopening only
+the Class 7 login is enabled**; the Class 2 profile is retained but closed. Each
+student also enters their full name/roll number and repeats it as their signature
+before starting.
 
 ## Paper-specific behaviour
 
@@ -34,7 +36,7 @@ full name/roll number and repeats it as their signature before starting.
 
 ## Attempts and test window
 
-The scheduled window is **18 November 2026, 9 AM–5 PM IST**, enforced in
+The scheduled window is **19 November 2026, 9 AM–5 PM IST**, enforced in
 `middleware.js` and `js/app.js`. The teacher preview URL bypasses the time gate;
 attempt checks and submission behaviour still apply. Use a distinct test name
 when checking a real preview attempt.

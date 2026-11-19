@@ -15,9 +15,11 @@ assert.equal(new Set(papers.map(p => p.loginId)).size, 2);
 const grade7 = papers.find(p => p.loginId === 'DSMG7@012');
 const grade2 = papers.find(p => p.loginId === 'DSMG2@001');
 assert.equal(grade7.id, 'class7-full-syllabus');
+assert.equal(grade7.enabled, true);
 assert.equal(grade7.questionCount, 50);
 assert.equal(grade7.totalMarks, 100);
 assert.equal(grade2.id, 'class2-olympiad-35');
+assert.equal(grade2.enabled, false);
 assert.equal(grade2.questionCount, 35);
 assert.equal(grade2.totalMarks, 70);
 assert.equal(grade2.defaultMarks, 2);
@@ -66,10 +68,12 @@ for (const paper of papers) {
 }
 
 const appSource = fs.readFileSync(path.join(root, 'js/app.js'), 'utf8');
-assert.ok(appSource.includes("start: '2026-11-18T03:30:00.000Z'"));
-assert.ok(!appSource.includes("2026-11-13T03:30:00.000Z"));
-assert.ok(fs.readFileSync(path.join(root, 'middleware.js'), 'utf8').includes("2026-11-18T03:30:00.000Z"));
-assert.ok(fs.readFileSync(path.join(root, 'index.html'), 'utf8').includes('18 Nov 2026'));
+assert.ok(appSource.includes("start: '2026-11-19T03:30:00.000Z'"));
+assert.ok(appSource.includes("end: '2026-11-19T11:30:00.000Z'"));
+assert.ok(!appSource.includes("2026-11-18T03:30:00.000Z"));
+assert.ok(appSource.includes('paper is closed today'));
+assert.ok(fs.readFileSync(path.join(root, 'middleware.js'), 'utf8').includes("2026-11-19T03:30:00.000Z"));
+assert.ok(fs.readFileSync(path.join(root, 'index.html'), 'utf8').includes('19 Nov 2026'));
 
 const bank2 = context.window.CLASS2_QUESTIONS;
 assert.equal(bank2.length, 35);
