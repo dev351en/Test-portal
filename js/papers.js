@@ -19,7 +19,7 @@ window.TEST_PAPERS = [
     worksheet: 'assets/worksheet-full-syllabus-comprehensive.pdf',
     downloadName: 'Worksheet Full Syllabus Comprehensive Olympiad.pdf',
     paperPdf: 'assets/worksheet-full-syllabus-questions-only.pdf',
-    paperPages: 2
+    paperPages: 3
   },
   {
     id: 'class2-olympiad-35',

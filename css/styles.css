@@ -393,6 +393,9 @@ body[data-grade="2"] .q-text{font-size:1.2rem;line-height:1.8}
 body[data-grade="2"] .option-text{font-size:1.1rem}
 body[data-grade="2"] .q-diagram img{width:auto;max-width:100%;max-height:360px;object-fit:contain}
 body[data-grade="2"] .q-diagram{align-self:flex-start;width:100%;max-width:650px}
+body[data-grade="7"] .q-diagram{align-self:flex-start;width:fit-content;max-width:100%}
+body[data-grade="7"] .q-diagram img{width:auto;height:clamp(220px,34vh,360px);max-width:100%;object-fit:contain}
+body[data-grade="7"] .paper-preview-diagram{width:auto;height:clamp(140px,22vh,240px);max-width:100%;object-fit:contain;margin:10px auto 8px}
 .exam-footer{
   margin-top:auto;display:flex;align-items:center;gap:9px;flex-wrap:wrap;
   padding:16px 28px;border-top:1px solid var(--line-soft);background:#fcfdff;

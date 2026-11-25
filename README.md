@@ -11,7 +11,7 @@ options, diagrams and keys follow the source worksheet order exactly.
 | `DSMG7@012` | Class 7 / Grade 7 — Full Syllabus Comprehensive Olympiad | 50 | 100 | 60 minutes |
 | `DSMG2@001` | Class 2 / Grade 2 — Joyful Mathematics Olympiad Benchmark | 35 | 70 | 45 minutes |
 
-Both profiles use password `12345678`. For the **19 November 2026 reopening only
+Both profiles use password `12345678`. For the **25 November 2026 reopening only
 the Class 7 login is enabled**; the Class 2 profile is retained but closed. Each
 student also enters their full name/roll number and repeats it as their signature
 before starting.
@@ -36,7 +36,7 @@ before starting.
 
 ## Attempts and test window
 
-The scheduled window is **19 November 2026, 9 AM–5 PM IST**, enforced in
+The scheduled window is **25 November 2026, 11 AM–3 PM IST**, enforced in
 `middleware.js` and `js/app.js`. The teacher preview URL bypasses the time gate;
 attempt checks and submission behaviour still apply. Use a distinct test name
 when checking a real preview attempt.
@@ -58,9 +58,10 @@ existing local-attempt fallback applies.
 | `index.html`, `css/styles.css` | Responsive login, instructions, exam and results |
 | `js/papers.js` | Credential-to-paper profiles |
 | `js/app.js` | Routing, state, scoring, timer, paper viewer, review and submission |
-| `test_questions.js` | Ordered Grade 7 Full Syllabus bank (official key application-side) |
+| `test_questions.js` | Ordered Grade 7 Full Syllabus bank (Worksheet 3, key application-side) |
 | `class2_questions.js` | Approved ordered Grade 2 bank |
 | `js/paper_pages.js` | In-exam page images rendered from the questions-only PDFs |
+| `assets/class7-worksheet3/` | 9 standalone SVG Grade 7 question diagrams |
 | `assets/class2-olympiad/` | 15 standalone SVG question diagrams |
 | `assets/worksheet-class2-olympiad.pdf` | Approved Class 2 Olympiad worksheet |
 | `assets/worksheet-full-syllabus-comprehensive.pdf` | Grade 7 worksheet (result download) |
@@ -139,12 +140,13 @@ page images (run with the worksheet project's PyMuPDF environment):
 python scripts/build-full-syllabus-paper.py --source-dir "../DASS/D3V3NDRA Classes"
 ```
 
-The script checks the Grade 7 set, then verifies all 35 Class 2 questions, the
-printed answer-key matrix, the 5/15/10/5 section split, 70 marks and 15 SVG
-diagrams. It rebuilds `test_questions.js` and `class2_questions.js`, asserts that
-each viewer PDF contains no answer-key material, then renders the page images used
-by **View Paper**. The result-stage worksheets still include the official keys and
-worked solutions; the in-exam viewer never does.
+The script checks the Grade 7 Worksheet 3 set, then verifies all 35 Class 2
+questions, both printed answer-key matrices, the 15/20/10/5 Grade 7 split,
+100 marks and 9 Grade 7 figures. It rebuilds `test_questions.js` and
+`class2_questions.js`, asserts that each viewer PDF contains no answer-key
+material, then renders the page images used by **View Paper**. The result-stage
+worksheets still include the official keys and worked solutions; the in-exam
+viewer never does.
 
 ## Hosting
 

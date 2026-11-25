@@ -18,6 +18,7 @@ assert.equal(grade7.id, 'class7-full-syllabus');
 assert.equal(grade7.enabled, true);
 assert.equal(grade7.questionCount, 50);
 assert.equal(grade7.totalMarks, 100);
+assert.equal(grade7.paperPages, 3);
 assert.equal(grade2.id, 'class2-olympiad-35');
 assert.equal(grade2.enabled, false);
 assert.equal(grade2.questionCount, 35);
@@ -27,10 +28,17 @@ assert.equal(grade2.totalMinutes, 45);
 assert.equal(grade2.paperPages, 7);
 assert.equal(grade2.worksheet, 'assets/worksheet-class2-olympiad.pdf');
 assert.equal(grade2.paperPdf, 'assets/worksheet-class2-olympiad-questions-only.pdf');
-assert.deepEqual(Array.from(context.window.QUESTIONS.slice(0, 3), q => q.opts[0]), ['39', '24', '24']);
-assert.equal(context.window.QUESTIONS[0].ans, 3);
+assert.deepEqual(Array.from(context.window.QUESTIONS.slice(0, 3), q => q.opts[0]), ['28', 'Triangle', 'EPH']);
+assert.equal(context.window.QUESTIONS[0].ans, 1);
 assert.deepEqual(['Logical Reasoning', 'Mathematical Reasoning', 'Everyday Mathematics', 'HOTS']
   .map(cat => context.window.QUESTIONS.filter(q => q.cat === cat).length), [15, 20, 10, 5]);
+assert.equal(context.window.QUESTIONS.map(q => 'ABCD'[q.ans]).join(''),
+  'BDACBADCADCBDACACBDADBCABDCABDCABDCBADCABDCABDCABD');
+assert.deepEqual(Array.from(context.window.QUESTIONS.filter(q => q.diagram), q => q.id), [5, 14, 15, 20, 24, 31, 32, 46, 49]);
+for (const q of context.window.QUESTIONS) {
+  assert.ok(!q.q.includes('<') && !q.q.includes('>'), `Q${q.id}: raw HTML in question`);
+  if (q.diagram) assert.equal(fs.readFileSync(path.join(root, q.diagram), 'utf8').trimStart().slice(0, 5), '<?xml', q.diagram);
+}
 
 function payload(paper, choose) {
   return { paperId: paper.id, chapter: paper.id, paperTitle: paper.title, grade: paper.grade,
@@ -68,12 +76,12 @@ for (const paper of papers) {
 }
 
 const appSource = fs.readFileSync(path.join(root, 'js/app.js'), 'utf8');
-assert.ok(appSource.includes("start: '2026-11-19T03:30:00.000Z'"));
-assert.ok(appSource.includes("end: '2026-11-19T11:30:00.000Z'"));
-assert.ok(!appSource.includes("2026-11-18T03:30:00.000Z"));
+assert.ok(appSource.includes("start: '2026-11-25T05:30:00.000Z'"));
+assert.ok(appSource.includes("end: '2026-11-25T09:30:00.000Z'"));
+assert.ok(!appSource.includes("2026-11-19T03:30:00.000Z"));
 assert.ok(appSource.includes('paper is closed today'));
-assert.ok(fs.readFileSync(path.join(root, 'middleware.js'), 'utf8').includes("2026-11-19T03:30:00.000Z"));
-assert.ok(fs.readFileSync(path.join(root, 'index.html'), 'utf8').includes('19 Nov 2026'));
+assert.ok(fs.readFileSync(path.join(root, 'middleware.js'), 'utf8').includes("2026-11-25T05:30:00.000Z"));
+assert.ok(fs.readFileSync(path.join(root, 'index.html'), 'utf8').includes('25 Nov 2026'));
 
 const bank2 = context.window.CLASS2_QUESTIONS;
 assert.equal(bank2.length, 35);

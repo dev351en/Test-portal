@@ -10,10 +10,10 @@
     submissionEndpoint: 'https://script.google.com/macros/s/AKfycbzK4Sc5yqHtiGPbbO-h3h9ZGuColY8fqnKlbJbdQji26vyzwvpTLtGGUSd16qVfPG-IGw/exec',
     // Must match SUBMIT_TOKEN in scripts/google-apps-script-submission-email.gs.
     submissionToken: 'd3v3ndra-fractions-2026',
-    // Test window: 19 November 2026, 9:00 AM to 5:00 PM IST (UTC+05:30).
+    // Test window: 25 November 2026, 11:00 AM to 3:00 PM IST (UTC+05:30).
     testWindow: {
-      start: '2026-11-19T03:30:00.000Z',
-      end: '2026-11-19T11:30:00.000Z'
+      start: '2026-11-25T05:30:00.000Z',
+      end: '2026-11-25T09:30:00.000Z'
     },
     // Teacher-only preview bypass for the time gate: open the site with
     // ?preview=teacher-imo-2026 to check the portal before/after the window.
@@ -325,7 +325,7 @@
         timeZone: 'Asia/Kolkata', day: 'numeric', month: 'long', year: 'numeric'
       });
     } catch (error) {
-      return '19 November 2026';
+      return '25 November 2026';
     }
   }
 
@@ -337,7 +337,7 @@
     $('#gateTitle').textContent = expired ? 'Test window closed' : 'Test not open yet';
     $('#gateMessage').textContent = expired
       ? 'Sorry, the test time has run out. Contact the teacher.'
-      : `The test has not started yet. It opens at 9:00 AM IST on ${windowDateLabel()} and closes at 5:00 PM IST.`;
+      : `The test has not started yet. It opens at 11:00 AM IST on ${windowDateLabel()} and closes at 3:00 PM IST.`;
     gate.hidden = false;
     $('#appHeader').hidden = true;
     $$('.view').forEach(view => view.classList.remove('is-active'));
