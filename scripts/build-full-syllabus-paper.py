@@ -345,7 +345,7 @@ def main():
                    "Class 2 questions-only PDF")
 
     write_paper_pages([
-        ("class7-full-syllabus", GRADE7_QUESTIONS),
+        ("class7-combined-worksheet-3", GRADE7_QUESTIONS),
         ("class2-olympiad-35", GRADE2_QUESTIONS),
     ])
     print("Done.")

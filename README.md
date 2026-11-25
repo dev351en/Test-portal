@@ -43,10 +43,11 @@ when checking a real preview attempt.
 
 Each name can attempt each paper once. Local registries are
 `d3v3ndra.attempts.<paper-id>`. The Apps Script uses
-`imo_attempt_names_<paper-id>`. The new Grade 7 paper uses the fresh
-`class7-full-syllabus` ID, so attempts from the earlier Logical Reasoning paper
-remain in the old `logical-reasoning` registry and do not block the new paper.
-The new Class 2 paper uses the fresh `class2-olympiad-35` ID, so the superseded
+`imo_attempt_names_<paper-id>`. The Worksheet 3 Grade 7 paper uses the fresh
+`class7-combined-worksheet-3` ID, so attempts from the 19 November paper
+(`class7-full-syllabus`) and the earlier Logical Reasoning paper (`logical-reasoning`)
+remain in their old registries and do not block today's re-sit. The Class 2 paper
+keeps the fresh `class2-olympiad-35` ID, so the superseded
 `class2-test-paper-1` registry cannot block it. The legacy `chapter` payload field
 is retained for endpoint compatibility. If the remote check is unavailable, the
 existing local-attempt fallback applies.

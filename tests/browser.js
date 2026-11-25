@@ -128,7 +128,7 @@ async function main() {
     await page.click('#viewPaperBtn');
     await page.locator('.paper-page').first().waitFor();
     assert.equal(await page.locator('.paper-page').count(), 3);
-    assert.equal(await page.evaluate(() => window.PAPER_PAGES['class7-full-syllabus'].length), 3);
+    assert.equal(await page.evaluate(() => window.PAPER_PAGES['class7-combined-worksheet-3'].length), 3);
     assert.ok((await page.locator('.paper-pages-note').innerText()).includes('The answer key is not part of this paper'));
     assert.ok((await page.locator('.paper-pages-download').getAttribute('href')).includes('worksheet-full-syllabus-questions-only.pdf'));
     await images(page, '.paper-page');
@@ -178,9 +178,11 @@ async function main() {
       await page.evaluate(() => document.exitFullscreen());
       if (exit <= 5) {
         await page.locator('#examLock').waitFor({ state: 'visible' });
-        assert.ok((await page.locator('#examLockText').innerText()).includes(`${exit} of 5`));
+        const lockText = await page.locator('#examLockText').innerText();
+        assert.ok(lockText.includes(`${exit} of 5`), `exit ${exit}: ${lockText}`);
         await page.click('#examLockBtn');
         await page.locator('#examLock').waitFor({ state: 'hidden' });
+        await page.waitForFunction(() => !!document.fullscreenElement);
         await page.clock.runFor(1100);
       }
     }
@@ -218,10 +220,10 @@ async function main() {
     assert.equal(await mobile.locator('#resultScore').innerText(), '0 / 100');
     await mobile.screenshot({ path: path.join(output, 'result-mobile.png'), fullPage: true });
 
-    assert.ok(claims.some(p => p.chapter === 'class7-full-syllabus'));
+    assert.ok(claims.some(p => p.chapter === 'class7-combined-worksheet-3'));
     assert.ok(!claims.some(p => p.chapter === 'class2-olympiad-35'));
     const grade7Payload = payloads.find(p => p.studentName === 'Portal Validation Student' && p.grade === 7);
-    assert.equal(grade7Payload.paperId, 'class7-full-syllabus');
+    assert.equal(grade7Payload.paperId, 'class7-combined-worksheet-3');
     assert.equal(grade7Payload.score, 100);
     assert.ok(grade7Payload.worksheetUrl.includes('worksheet-full-syllabus-comprehensive.pdf'));
     const exitPayload = payloads.find(p => p.studentName === 'Exit Rule Check');

@@ -2,7 +2,7 @@
    A new test paper gets a fresh ID so earlier attempts cannot block re-sits. */
 window.TEST_PAPERS = [
   {
-    id: 'class7-full-syllabus',
+    id: 'class7-combined-worksheet-3',
     loginId: 'DSMG7@012',
     password: '12345678',
     grade: 7,

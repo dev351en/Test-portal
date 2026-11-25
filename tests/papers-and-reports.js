@@ -14,7 +14,7 @@ assert.equal(papers.length, 2);
 assert.equal(new Set(papers.map(p => p.loginId)).size, 2);
 const grade7 = papers.find(p => p.loginId === 'DSMG7@012');
 const grade2 = papers.find(p => p.loginId === 'DSMG2@001');
-assert.equal(grade7.id, 'class7-full-syllabus');
+assert.equal(grade7.id, 'class7-combined-worksheet-3');
 assert.equal(grade7.enabled, true);
 assert.equal(grade7.questionCount, 50);
 assert.equal(grade7.totalMarks, 100);
@@ -124,13 +124,13 @@ context.ContentService = { MimeType: { JSON: 'application/json' }, createTextOut
 function claim(paperId) {
   return context.handleClaim_({ paperId, name: 'Same Student', token: 'd3v3ndra-fractions-2026' });
 }
-assert.equal(claim('class7-full-syllabus').taken, false);
+assert.equal(claim('class7-combined-worksheet-3').taken, false);
 assert.equal(claim('class2-olympiad-35').taken, false);
-assert.equal(claim('class7-full-syllabus').taken, true);
+assert.equal(claim('class7-combined-worksheet-3').taken, true);
 assert.equal(claim('class2-olympiad-35').taken, true);
 assert.equal(claim('class2-test-paper-1').taken, false);
 assert.equal(claim('logical-reasoning').taken, false);
-assert.ok(properties.has('imo_attempt_names_class7-full-syllabus'));
+assert.ok(properties.has('imo_attempt_names_class7-combined-worksheet-3'));
 assert.ok(properties.has('imo_attempt_names_class2-olympiad-35'));
 assert.equal(context.doGet({}).version, 'testing-portal-v2');
 console.log('PASS: ordered banks/assets, weighted/legacy reports, currency and isolated attempts.');
