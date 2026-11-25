@@ -10,13 +10,12 @@
     submissionEndpoint: 'https://script.google.com/macros/s/AKfycbzK4Sc5yqHtiGPbbO-h3h9ZGuColY8fqnKlbJbdQji26vyzwvpTLtGGUSd16qVfPG-IGw/exec',
     // Must match SUBMIT_TOKEN in scripts/google-apps-script-submission-email.gs.
     submissionToken: 'd3v3ndra-fractions-2026',
-    // Test window: 25 November 2026, 11:00 AM to 3:00 PM IST (UTC+05:30).
-    testWindow: {
-      start: '2026-11-25T05:30:00.000Z',
-      end: '2026-11-25T09:30:00.000Z'
-    },
+    // Session windows live on each paper profile in js/papers.js:
+    // Worksheet 3 runs 11:00 AM-3:00 PM IST, Worksheet 4 runs 4:00 PM-9:00 PM IST
+    // on 25 November 2026. The portal selects the paper open at login time.
     // Teacher-only preview bypass for the time gate: open the site with
-    // ?preview=teacher-imo-2026 to check the portal before/after the window.
+    // ?preview=teacher-imo-2026 to check the portal before/after a window.
+    // Add &paper=<paper-id> to preview a specific session.
     previewKey: 'teacher-imo-2026'
   };
 
@@ -152,12 +151,22 @@
   function configurePaperViews() {
     const paper = state.profile;
     document.body.dataset.grade = String(paper.grade);
+    document.body.dataset.paperId = paper.id;
     document.title = `Class ${paper.grade} · ${paper.title} | D3V3NDRA Testing Portal`;
     $$('[data-paper-title]').forEach(el => { el.textContent = paper.title; });
     $$('[data-paper-grade]').forEach(el => { el.textContent = `Class ${paper.grade} · Grade ${paper.grade}`; });
     $$('[data-paper-count]').forEach(el => { el.textContent = String(paper.questionCount); });
     $$('[data-paper-marks]').forEach(el => { el.textContent = String(paper.totalMarks); });
     $$('[data-paper-minutes]').forEach(el => { el.textContent = String(paper.totalMinutes); });
+    const session = paperWindow(paper);
+    $$('[data-paper-date]').forEach(el => {
+      el.textContent = session ? formatWindowDate(session.start, false) : 'Contact teacher';
+    });
+    $$('[data-paper-window]').forEach(el => {
+      el.textContent = session
+        ? `${formatWindowTime(session.start)} – ${formatWindowTime(session.end)}`
+        : 'Not scheduled';
+    });
     $('#paperSubtitle').textContent = paper.subtitle;
     $('#paperMarking').textContent = paper.marking;
     $('#bannerDuration').textContent = `${paper.totalMinutes} min`;
@@ -314,30 +323,80 @@
     }
   }
 
-  function withinTestWindow(now) {
-    const stamp = now || Date.now();
-    return stamp >= Date.parse(CONFIG.testWindow.start) && stamp <= Date.parse(CONFIG.testWindow.end);
+  function paperWindow(paper) {
+    return paper && paper.window && paper.window.start && paper.window.end ? paper.window : null;
   }
 
-  function windowDateLabel() {
+  function paperOpenAt(paper, stamp) {
+    const window = paperWindow(paper);
+    return !!window && stamp >= Date.parse(window.start) && stamp <= Date.parse(window.end);
+  }
+
+  function scheduledPapers() {
+    return (window.TEST_PAPERS || []).filter(paper => paper.enabled !== false && paperWindow(paper));
+  }
+
+  function activePaper(now) {
+    const stamp = now || Date.now();
+    return scheduledPapers().find(paper => paperOpenAt(paper, stamp)) || null;
+  }
+
+  function upcomingPaper(now) {
+    const stamp = now || Date.now();
+    return scheduledPapers()
+      .filter(paper => Date.parse(paper.window.start) > stamp)
+      .sort((a, b) => Date.parse(a.window.start) - Date.parse(b.window.start))[0] || null;
+  }
+
+  function previousSessionEnded(now) {
+    const stamp = now || Date.now();
+    return scheduledPapers().some(paper => stamp > Date.parse(paper.window.end));
+  }
+
+  function withinTestWindow(now) {
+    return !!activePaper(now);
+  }
+
+  function formatWindowTime(value) {
     try {
-      return new Date(CONFIG.testWindow.start).toLocaleDateString('en-IN', {
-        timeZone: 'Asia/Kolkata', day: 'numeric', month: 'long', year: 'numeric'
-      });
+      return new Date(value).toLocaleTimeString('en-IN', {
+        timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit', hour12: true
+      }).replace(/[\u00a0\u202f]/g, ' ').toUpperCase();
     } catch (error) {
-      return '25 November 2026';
+      return '';
     }
   }
 
-  function showTimeGate(mode) {
+  function formatWindowDate(value, long) {
+    try {
+      return new Date(value).toLocaleDateString('en-IN', {
+        timeZone: 'Asia/Kolkata', day: 'numeric', month: long ? 'long' : 'short', year: 'numeric'
+      });
+    } catch (error) {
+      return long ? '25 November 2026' : '25 Nov 2026';
+    }
+  }
+
+  function showTimeGate(mode, paper) {
     const gate = $('#timeGate');
     if (!gate) return;
     const expired = mode === 'after';
+    const upcoming = paper && paperWindow(paper) ? paper : null;
+    let title = 'Test not open yet';
+    let message = 'The test has not started yet. Contact the teacher.';
+    if (expired) {
+      title = 'Test window closed';
+      message = 'Sorry, the test time has run out for today. Contact the teacher.';
+    } else if (upcoming && mode === 'between') {
+      title = 'Next session opens soon';
+      message = `The first session has closed. The next paper opens at ${formatWindowTime(upcoming.window.start)} IST and closes at ${formatWindowTime(upcoming.window.end)} IST on ${formatWindowDate(upcoming.window.start, true)}.`;
+    } else if (upcoming) {
+      message = `The test has not started yet. It opens at ${formatWindowTime(upcoming.window.start)} IST on ${formatWindowDate(upcoming.window.start, true)} and closes at ${formatWindowTime(upcoming.window.end)} IST.`;
+    }
     $('#gateCode').textContent = expired ? '404' : '403';
-    $('#gateTitle').textContent = expired ? 'Test window closed' : 'Test not open yet';
-    $('#gateMessage').textContent = expired
-      ? 'Sorry, the test time has run out. Contact the teacher.'
-      : `The test has not started yet. It opens at 11:00 AM IST on ${windowDateLabel()} and closes at 3:00 PM IST.`;
+    $('#gateTitle').textContent = title;
+    $('#gateMessage').textContent = message;
+    gate.dataset.mode = mode;
     gate.hidden = false;
     $('#appHeader').hidden = true;
     $$('.view').forEach(view => view.classList.remove('is-active'));
@@ -354,20 +413,25 @@
       return;
     }
     const now = Date.now();
-    const start = Date.parse(CONFIG.testWindow.start);
-    const end = Date.parse(CONFIG.testWindow.end);
-    if (now < start) {
-      showTimeGate('before');
+    const active = activePaper(now);
+    if (active) {
+      hideTimeGate();
+      if (state.profile && state.profile.id !== active.id) {
+        if (state.running && !state.submitted) submitTest(true, 'window');
+        resetToLogin();
+        return;
+      }
+      const hasActiveView = $$('.view').some(view => view.classList.contains('is-active'));
+      if (!hasActiveView) showView('Login');
       return;
     }
-    if (now > end) {
-      if (state.running && !state.submitted) submitTest(true, 'window');
-      showTimeGate('after');
+    if (state.running && !state.submitted) submitTest(true, 'window');
+    const next = upcomingPaper(now);
+    if (next) {
+      showTimeGate(previousSessionEnded(now) ? 'between' : 'before', next);
       return;
     }
-    hideTimeGate();
-    const hasActiveView = $$('.view').some(view => view.classList.contains('is-active'));
-    if (!hasActiveView) showView('Login');
+    showTimeGate('after');
   }
 
   function showLoginError(message) {
@@ -397,14 +461,38 @@
       return;
     }
 
-    const profile = (window.TEST_PAPERS || []).find(paper => paper.loginId.toUpperCase() === id.toUpperCase() && paper.password === password);
-    if (!profile) {
+    const matches = (window.TEST_PAPERS || []).filter(paper =>
+      paper.loginId.toUpperCase() === id.toUpperCase() && paper.password === password);
+    if (!matches.length) {
       showLoginError('Incorrect student ID or password. Please check with your teacher and try again.');
       $('#loginPass').select();
       return;
     }
-    if (profile.enabled === false) {
-      showLoginError(`The Class ${profile.grade} paper is closed today. Only the Class 7 paper is open.`);
+    const enabled = matches.filter(paper => paper.enabled !== false);
+    if (!enabled.length) {
+      showLoginError(`The Class ${matches[0].grade} paper is closed today. Only the Class 7 paper is open.`);
+      $('#loginPass').select();
+      return;
+    }
+
+    const now = Date.now();
+    let profile = null;
+    if (isPreviewMode()) {
+      const requested = new URLSearchParams(window.location.search).get('paper');
+      const scheduled = enabled.filter(paperWindow)
+        .sort((a, b) => Date.parse(a.window.start) - Date.parse(b.window.start));
+      profile = (requested && enabled.find(paper => paper.id === requested))
+        || enabled.find(paper => paperOpenAt(paper, now))
+        || scheduled[0]
+        || enabled[0];
+    } else profile = enabled.find(paper => paperOpenAt(paper, now)) || null;
+    if (!profile) {
+      const next = enabled.filter(paperWindow)
+        .filter(paper => Date.parse(paper.window.start) > now)
+        .sort((a, b) => Date.parse(a.window.start) - Date.parse(b.window.start))[0];
+      showLoginError(next
+        ? `This paper is not open yet. The next paper opens at ${formatWindowTime(next.window.start)} IST and closes at ${formatWindowTime(next.window.end)} IST.`
+        : 'The test window has closed for today. Contact your teacher.');
       $('#loginPass').select();
       return;
     }
@@ -467,6 +555,7 @@
     state.studentId = '';
     state.profile = null;
     delete document.body.dataset.grade;
+    delete document.body.dataset.paperId;
     document.title = 'Testing Portal | D3V3NDRA Classes';
     state.studentName = '';
     state.signature = '';

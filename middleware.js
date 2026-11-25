@@ -1,16 +1,18 @@
 /**
  * Testing Portal — hosting-level time gate for both assigned papers.
  *
- * The open paper is available only on 25 November 2026 between
- * 11:00 AM and 3:00 PM IST (UTC+05:30). Outside that window the
- * page is replaced by a 403 (not open yet) or 404 (window closed) screen.
+ * The portal is available on 25 November 2026 from 11:00 AM to 9:00 PM IST
+ * (UTC+05:30), so the client can switch from Worksheet 3 (11 AM-3 PM) to
+ * Worksheet 4 (4-9 PM). The client enforces the individual session windows
+ * and shows the between-session gate. Outside the overall schedule, the page
+ * is replaced by a 403 (not open yet) or 404 (window closed) screen.
  *
  * Teacher preview: open any page with ?preview=teacher-imo-2026,
  * which matches CONFIG.previewKey in js/app.js.
  */
 
 const WINDOW_START = Date.parse('2026-11-25T05:30:00.000Z'); // 11:00 AM IST
-const WINDOW_END = Date.parse('2026-11-25T09:30:00.000Z');   // 3:00 PM IST
+const WINDOW_END = Date.parse('2026-11-25T15:30:00.000Z');   // 9:00 PM IST
 const PREVIEW_KEY = 'teacher-imo-2026';
 
 export const config = {
@@ -22,8 +24,8 @@ function gateHtml(mode) {
   const code = expired ? '404' : '403';
   const title = expired ? 'Test window closed' : 'Test not open yet';
   const message = expired
-    ? 'Sorry, the test time has run out. Contact the teacher.'
-    : 'The test has not started yet. It opens at 11:00 AM IST on 25 November 2026 and closes at 3:00 PM IST.';
+    ? 'Sorry, today’s test sessions have ended. Contact the teacher.'
+    : 'The test has not started yet. Today’s sessions run from 11:00 AM to 9:00 PM IST on 25 November 2026.';
   return `<!DOCTYPE html>
 <html lang="en">
 <head>

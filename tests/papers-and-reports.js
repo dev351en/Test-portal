@@ -6,19 +6,37 @@ const vm = require('node:vm');
 const root = path.resolve(__dirname, '..');
 const context = vm.createContext({ window: {}, console,
   Utilities: { formatDate: value => value.toISOString() } });
-for (const file of ['test_questions.js', 'class2_questions.js', 'js/papers.js', 'scripts/google-apps-script-submission-email.gs']) {
+for (const file of ['test_questions.js', 'worksheet4_questions.js', 'class2_questions.js', 'js/papers.js', 'scripts/google-apps-script-submission-email.gs']) {
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, { filename: file });
 }
 const papers = context.window.TEST_PAPERS;
-assert.equal(papers.length, 2);
-assert.equal(new Set(papers.map(p => p.loginId)).size, 2);
-const grade7 = papers.find(p => p.loginId === 'DSMG7@012');
+assert.equal(papers.length, 3);
+assert.equal(new Set(papers.map(p => p.id)).size, 3);
+const grade7Sessions = papers.filter(p => p.loginId === 'DSMG7@012');
+assert.equal(grade7Sessions.length, 2);
+const grade7 = grade7Sessions.find(p => p.id === 'class7-combined-worksheet-3');
+const grade7Worksheet4 = grade7Sessions.find(p => p.id === 'class7-combined-worksheet-4');
 const grade2 = papers.find(p => p.loginId === 'DSMG2@001');
 assert.equal(grade7.id, 'class7-combined-worksheet-3');
 assert.equal(grade7.enabled, true);
 assert.equal(grade7.questionCount, 50);
 assert.equal(grade7.totalMarks, 100);
 assert.equal(grade7.paperPages, 3);
+assert.deepEqual({ start: grade7.window.start, end: grade7.window.end },
+  { start: '2026-11-25T05:30:00.000Z', end: '2026-11-25T09:30:00.000Z' });
+assert.equal(grade7Worksheet4.enabled, true);
+assert.equal(grade7Worksheet4.grade, 7);
+assert.equal(grade7Worksheet4.bank, 'QUESTIONS_WORKSHEET_4');
+assert.equal(grade7Worksheet4.questionCount, 50);
+assert.equal(grade7Worksheet4.totalMarks, 100);
+assert.equal(grade7Worksheet4.defaultMarks, 2);
+assert.equal(grade7Worksheet4.totalMinutes, 60);
+assert.equal(grade7Worksheet4.title, grade7.title);
+assert.equal(grade7Worksheet4.paperPages, 3);
+assert.equal(grade7Worksheet4.worksheet, 'assets/worksheet-combined-worksheet-4.pdf');
+assert.equal(grade7Worksheet4.paperPdf, 'assets/worksheet-combined-worksheet-4-questions-only.pdf');
+assert.equal(grade7Worksheet4.window.start, '2026-11-25T10:30:00.000Z');
+assert.equal(grade7Worksheet4.window.end, '2026-11-25T15:30:00.000Z');
 assert.equal(grade2.id, 'class2-olympiad-35');
 assert.equal(grade2.enabled, false);
 assert.equal(grade2.questionCount, 35);
@@ -37,6 +55,18 @@ assert.equal(context.window.QUESTIONS.map(q => 'ABCD'[q.ans]).join(''),
 assert.deepEqual(Array.from(context.window.QUESTIONS.filter(q => q.diagram), q => q.id), [5, 14, 15, 20, 24, 31, 32, 46, 49]);
 for (const q of context.window.QUESTIONS) {
   assert.ok(!q.q.includes('<') && !q.q.includes('>'), `Q${q.id}: raw HTML in question`);
+  if (q.diagram) assert.equal(fs.readFileSync(path.join(root, q.diagram), 'utf8').trimStart().slice(0, 5), '<?xml', q.diagram);
+}
+assert.equal(context.window.QUESTIONS_WORKSHEET_4.length, 50);
+assert.deepEqual(Array.from(context.window.QUESTIONS_WORKSHEET_4, q => q.id), Array.from({ length: 50 }, (_, i) => i + 1));
+assert.deepEqual(['Logical Reasoning', 'Mathematical Reasoning', 'Everyday Mathematics', 'HOTS']
+  .map(cat => context.window.QUESTIONS_WORKSHEET_4.filter(q => q.cat === cat).length), [15, 20, 10, 5]);
+assert.equal(context.window.QUESTIONS_WORKSHEET_4.map(q => 'ABCD'[q.ans]).join(''),
+  'CADBACBDCABDACBDBACDACBDACBDACBDACBADCBADCBADCBDAC');
+assert.deepEqual(Array.from(context.window.QUESTIONS_WORKSHEET_4.filter(q => q.diagram), q => q.id),
+  [5, 14, 15, 20, 22, 24, 33, 34, 46, 49]);
+for (const q of context.window.QUESTIONS_WORKSHEET_4) {
+  assert.ok(!q.q.includes('<') && !q.q.includes('>'), `Worksheet 4 Q${q.id}: raw HTML in question`);
   if (q.diagram) assert.equal(fs.readFileSync(path.join(root, q.diagram), 'utf8').trimStart().slice(0, 5), '<?xml', q.diagram);
 }
 
@@ -76,12 +106,16 @@ for (const paper of papers) {
 }
 
 const appSource = fs.readFileSync(path.join(root, 'js/app.js'), 'utf8');
-assert.ok(appSource.includes("start: '2026-11-25T05:30:00.000Z'"));
-assert.ok(appSource.includes("end: '2026-11-25T09:30:00.000Z'"));
+assert.ok(appSource.includes('function activePaper(now)'));
+assert.ok(appSource.includes('function upcomingPaper(now)'));
+assert.ok(appSource.includes('paperOpenAt(paper, now)'));
 assert.ok(!appSource.includes("2026-11-19T03:30:00.000Z"));
 assert.ok(appSource.includes('paper is closed today'));
-assert.ok(fs.readFileSync(path.join(root, 'middleware.js'), 'utf8').includes("2026-11-25T05:30:00.000Z"));
+const middleware = fs.readFileSync(path.join(root, 'middleware.js'), 'utf8');
+assert.ok(middleware.includes("2026-11-25T05:30:00.000Z"));
+assert.ok(middleware.includes("2026-11-25T15:30:00.000Z"));
 assert.ok(fs.readFileSync(path.join(root, 'index.html'), 'utf8').includes('25 Nov 2026'));
+assert.ok(fs.readFileSync(path.join(root, 'index.html'), 'utf8').includes('worksheet4_questions.js'));
 
 const bank2 = context.window.CLASS2_QUESTIONS;
 assert.equal(bank2.length, 35);
@@ -107,7 +141,7 @@ assert.ok(report.text.includes('₹15'));
 assert.equal((report.html.match(/<img /g) || []).length, 15);
 assert.ok(report.html.includes(grade2.worksheet));
 assert.equal(context.imageHtml_('javascript:alert(1)', 'bad', true), '');
-const legacy = payload(papers[0], q => q.ans);
+const legacy = payload(grade7, q => q.ans);
 legacy.answers.forEach(a => { delete a.marks; });
 delete legacy.paperTitle;
 delete legacy.grade;
@@ -125,12 +159,15 @@ function claim(paperId) {
   return context.handleClaim_({ paperId, name: 'Same Student', token: 'd3v3ndra-fractions-2026' });
 }
 assert.equal(claim('class7-combined-worksheet-3').taken, false);
+assert.equal(claim('class7-combined-worksheet-4').taken, false);
 assert.equal(claim('class2-olympiad-35').taken, false);
 assert.equal(claim('class7-combined-worksheet-3').taken, true);
+assert.equal(claim('class7-combined-worksheet-4').taken, true);
 assert.equal(claim('class2-olympiad-35').taken, true);
 assert.equal(claim('class2-test-paper-1').taken, false);
 assert.equal(claim('logical-reasoning').taken, false);
 assert.ok(properties.has('imo_attempt_names_class7-combined-worksheet-3'));
+assert.ok(properties.has('imo_attempt_names_class7-combined-worksheet-4'));
 assert.ok(properties.has('imo_attempt_names_class2-olympiad-35'));
 assert.equal(context.doGet({}).version, 'testing-portal-v2');
 console.log('PASS: ordered banks/assets, weighted/legacy reports, currency and isolated attempts.');

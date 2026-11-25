@@ -35,7 +35,7 @@ async function main() {
   url.searchParams.set('preview', 'teacher-imo-2026');
   const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', headless: true });
   try {
-    async function makePage(viewport) {
+    async function makePage(viewport, options = {}) {
       const context = await browser.newContext({ viewport, acceptDownloads: true });
       await context.route('https://script.google.com/**', async route => {
         const request = route.request();
@@ -49,8 +49,12 @@ async function main() {
       });
       const page = await context.newPage();
       page.on('pageerror', error => errors.push(error.message));
-      await page.clock.install();
-      await page.goto(url.href, { waitUntil: 'networkidle' });
+      if (options.time) await page.clock.install({ time: new Date(options.time) });
+      else await page.clock.install();
+      const pageUrl = new URL(url.href);
+      if (options.preview === false) pageUrl.searchParams.delete('preview');
+      if (options.paperId) pageUrl.searchParams.set('paper', options.paperId);
+      await page.goto(pageUrl.href, { waitUntil: 'networkidle' });
       return page;
     }
     async function active(page, name) { await page.locator(`#view${name}.is-active`).waitFor(); }
@@ -194,6 +198,65 @@ async function main() {
     await page.clock.fastForward(3601000);
     await active(page, 'Feedback');
 
+    // Worksheet 4 is independently assigned to the same Class 7 login.
+    const worksheet4 = await makePage({ width: 1440, height: 1000 }, {
+      paperId: 'class7-combined-worksheet-4'
+    });
+    await login(worksheet4, 'DSMG7@012', 'Worksheet 4 Check');
+    await active(worksheet4, 'Instructions');
+    assert.equal(await worksheet4.locator('body').getAttribute('data-paper-id'), 'class7-combined-worksheet-4');
+    assert.equal(await worksheet4.locator('[data-paper-window]').innerText(), '4:00 PM – 9:00 PM');
+    assert.equal(await worksheet4.locator('#viewInstructions [data-paper-count]').innerText(), '50');
+    await start(worksheet4, 'Worksheet 4 Check');
+    assert.equal(await worksheet4.locator('#paletteGrid button').count(), 50);
+    await question(worksheet4, 21);
+    await worksheet4.locator('#qDiagram img').waitFor();
+    assert.ok((await worksheet4.locator('#qDiagram img').getAttribute('src')).includes('class7-worksheet4/q22.svg'));
+    await worksheet4.click('#viewPaperBtn');
+    await worksheet4.locator('.paper-page').first().waitFor();
+    assert.equal(await worksheet4.locator('.paper-page').count(), 3);
+    assert.ok((await worksheet4.locator('.paper-pages-download').getAttribute('href'))
+      .includes('worksheet-combined-worksheet-4-questions-only.pdf'));
+    await images(worksheet4, '.paper-page');
+    await worksheet4.getByRole('button', { name: 'Close Paper', exact: true }).click();
+    await submit(worksheet4, 50);
+    await feedback(worksheet4);
+    assert.equal(await worksheet4.locator('#resultScore').innerText(), '0 / 100');
+    const worksheet4Payload = payloads.find(p => p.studentName === 'Worksheet 4 Check');
+    assert.equal(worksheet4Payload.paperId, 'class7-combined-worksheet-4');
+    assert.ok(worksheet4Payload.worksheetUrl.includes('worksheet-combined-worksheet-4.pdf'));
+
+    // A live Worksheet 3 attempt is submitted at 3 PM; the login switches to
+    // Worksheet 4 at 4 PM without changing the shared Class 7 credentials.
+    const handoff = await makePage({ width: 1280, height: 900 }, {
+      preview: false, time: '2026-11-25T09:20:00.000Z'
+    });
+    await login(handoff, 'DSMG7@012', 'Session Handoff Check');
+    assert.equal(await handoff.locator('body').getAttribute('data-paper-id'), 'class7-combined-worksheet-3');
+    await start(handoff, 'Session Handoff Check');
+    await handoff.clock.runFor(11 * 60 * 1000);
+    await handoff.locator('#timeGate').waitFor({ state: 'visible' });
+    assert.ok((await handoff.locator('#gateMessage').innerText()).includes('next paper opens at 4:00 PM IST'));
+    const handoffPayload = payloads.find(p => p.studentName === 'Session Handoff Check');
+    assert.equal(handoffPayload.paperId, 'class7-combined-worksheet-3');
+    assert.equal(handoffPayload.submitReason, 'window');
+    await handoff.clock.runFor(59 * 60 * 1000);
+    await active(handoff, 'Login');
+    await login(handoff, 'DSMG7@012', 'Session Handoff Check');
+    assert.equal(await handoff.locator('body').getAttribute('data-paper-id'), 'class7-combined-worksheet-4');
+    assert.equal(await handoff.locator('[data-paper-window]').innerText(), '4:00 PM – 9:00 PM');
+    await handoff.click('#logoutBtn');
+    await login(handoff, 'DSMG7@012', 'Worksheet 4 Closing Check');
+    assert.equal(await handoff.locator('body').getAttribute('data-paper-id'), 'class7-combined-worksheet-4');
+    await handoff.clock.runFor(4 * 60 * 60 * 1000 + 50 * 60 * 1000);
+    await start(handoff, 'Worksheet 4 Closing Check');
+    await handoff.clock.runFor(11 * 60 * 1000);
+    await handoff.locator('#timeGate').waitFor({ state: 'visible' });
+    assert.equal(await handoff.locator('#gateTitle').innerText(), 'Test window closed');
+    const closingPayload = payloads.find(p => p.studentName === 'Worksheet 4 Closing Check');
+    assert.equal(closingPayload.paperId, 'class7-combined-worksheet-4');
+    assert.equal(closingPayload.submitReason, 'window');
+
     const mobile = await makePage({ width: 390, height: 844 });
     await layout(mobile);
     await mobile.screenshot({ path: path.join(output, 'login-mobile.png'), fullPage: true });
@@ -221,6 +284,7 @@ async function main() {
     await mobile.screenshot({ path: path.join(output, 'result-mobile.png'), fullPage: true });
 
     assert.ok(claims.some(p => p.chapter === 'class7-combined-worksheet-3'));
+    assert.ok(claims.some(p => p.chapter === 'class7-combined-worksheet-4'));
     assert.ok(!claims.some(p => p.chapter === 'class2-olympiad-35'));
     const grade7Payload = payloads.find(p => p.studentName === 'Portal Validation Student' && p.grade === 7);
     assert.equal(grade7Payload.paperId, 'class7-combined-worksheet-3');
@@ -234,7 +298,7 @@ async function main() {
     assert.equal(timerPayload.timeUsed, 3600);
     assert.deepEqual(errors, []);
     fs.writeFileSync(path.join(output, 'captured-submissions.json'), JSON.stringify(payloads, null, 2));
-    console.log(`PASS: Class 7-only reopening, exact previews/assets, attempts, downloads, fullscreen exits, timer and mobile layout. Screenshots: ${output}`);
+    console.log(`PASS: Worksheet 3/4 scheduling and handoff, exact previews/assets, separate attempts, downloads, fullscreen exits, timer and mobile layout. Screenshots: ${output}`);
   } finally {
     await browser.close();
     if (server) await new Promise(resolve => server.close(resolve));

@@ -6,11 +6,15 @@ Run with the worksheet project's Python environment (PyMuPDF is required):
 Produces both ordered banks, the result-stage worksheets, the diagram assets
 and the in-exam page images. The viewer PDFs are questions-only; the answer
 key is never part of them:
-  - test_questions.js                                    ordered 50-question Grade 7 bank
+  - test_questions.js                                    Worksheet 3 Grade 7 bank (11 AM-3 PM)
+  - worksheet4_questions.js                              Worksheet 4 Grade 7 bank (4-9 PM)
   - class2_questions.js                                  ordered 35-question Class 2 bank
-  - assets/worksheet-full-syllabus-comprehensive.pdf     Grade 7 full worksheet (result download)
-  - assets/worksheet-full-syllabus-questions-only.pdf    Grade 7 questions pages 1-3 only
-  - assets/class7-worksheet3/qNN.svg                     Grade 7 figure assets
+  - assets/worksheet-full-syllabus-comprehensive.pdf     Worksheet 3 full worksheet (result download)
+  - assets/worksheet-full-syllabus-questions-only.pdf    Worksheet 3 questions pages 1-3 only
+  - assets/worksheet-combined-worksheet-4.pdf            Worksheet 4 full worksheet (result download)
+  - assets/worksheet-combined-worksheet-4-questions-only.pdf  Worksheet 4 questions pages 1-3 only
+  - assets/class7-worksheet3/qNN.svg                     Worksheet 3 figure assets
+  - assets/class7-worksheet4/qNN.svg                     Worksheet 4 figure assets
   - assets/worksheet-class2-olympiad.pdf                 Class 2 full worksheet (result download)
   - assets/worksheet-class2-olympiad-questions-only.pdf  Class 2 questions pages 1-7 only
   - assets/class2-olympiad/qNN.svg                       Class 2 diagram assets
@@ -19,6 +23,7 @@ key is never part of them:
 import argparse
 import base64
 import html
+import importlib
 import json
 from pathlib import Path
 import re
@@ -31,13 +36,37 @@ import xml.etree.ElementTree as ET
 import pymupdf
 
 ROOT = Path(__file__).resolve().parent.parent
-GRADE7_SOURCE = "output/Class_7_Combined_Worksheet_3.pdf"
-GRADE7_TEX = "output/Class_7_Combined_Worksheet_3.tex"
-GRADE7_FULL = ROOT / "assets/worksheet-full-syllabus-comprehensive.pdf"
-GRADE7_QUESTIONS = ROOT / "assets/worksheet-full-syllabus-questions-only.pdf"
-GRADE7_ASSETS = ROOT / "assets/class7-worksheet3"
+GRADE7_PAPERS = [
+    {
+        "id": "class7-combined-worksheet-3",
+        "label": "Worksheet 3",
+        "source": "output/Class_7_Combined_Worksheet_3.pdf",
+        "tex": "output/Class_7_Combined_Worksheet_3.tex",
+        "full": ROOT / "assets/worksheet-full-syllabus-comprehensive.pdf",
+        "questions": ROOT / "assets/worksheet-full-syllabus-questions-only.pdf",
+        "assets": ROOT / "assets/class7-worksheet3",
+        "asset_prefix": "assets/class7-worksheet3",
+        "data_module": "data_combined_worksheet_3",
+        "bank_file": "test_questions.js",
+        "bank_global": "QUESTIONS",
+        "diagram_questions": {5, 14, 15, 20, 24, 31, 32, 46, 49},
+    },
+    {
+        "id": "class7-combined-worksheet-4",
+        "label": "Worksheet 4",
+        "source": "output/Class_7_Combined_Worksheet_4.pdf",
+        "tex": "output/Class_7_Combined_Worksheet_4.tex",
+        "full": ROOT / "assets/worksheet-combined-worksheet-4.pdf",
+        "questions": ROOT / "assets/worksheet-combined-worksheet-4-questions-only.pdf",
+        "assets": ROOT / "assets/class7-worksheet4",
+        "asset_prefix": "assets/class7-worksheet4",
+        "data_module": "data_combined_worksheet_4",
+        "bank_file": "worksheet4_questions.js",
+        "bank_global": "QUESTIONS_WORKSHEET_4",
+        "diagram_questions": {5, 14, 15, 20, 22, 24, 33, 34, 46, 49},
+    },
+]
 GRADE7_QUESTION_PAGES = 3
-GRADE7_DIAGRAM_QUESTIONS = {5, 14, 15, 20, 24, 31, 32, 46, 49}
 GRADE7_DIAGRAM_SCALE = 1.8
 GRADE2_SOURCE = "output/Worksheet Class 2 Mathematics Olympiad.pdf"
 GRADE2_FULL = ROOT / "assets/worksheet-class2-olympiad.pdf"
@@ -57,6 +86,7 @@ GRADE7_CATEGORIES = {
     "Mathematical Reasoning": "Mathematical Reasoning",
     "Everyday Mathematics": "Everyday Mathematics",
     "Achievers (HOTS)": "HOTS",
+    "Achievers (Tough / HOTS)": "HOTS",
 }
 GRADE7_DIAGRAM_PREAMBLE = r"""
 \documentclass[border=3pt]{standalone}
@@ -116,7 +146,7 @@ def extract_grade7_bank(data):
     return bank
 
 
-def write_grade7_diagrams(tex_path, out_dir):
+def write_grade7_diagrams(tex_path, out_dir, expected_questions, asset_prefix, label):
     """Compile the source TikZ figures into standalone SVGs for the live exam."""
     text = tex_path.read_text(encoding="utf-8")
     markers = [(m.start(), int(m.group(1)))
@@ -131,7 +161,7 @@ def write_grade7_diagrams(tex_path, out_dir):
         work = Path(tmp)
         for position, block in blocks:
             number = [num for start, num in markers if start < position][-1]
-            assert number in GRADE7_DIAGRAM_QUESTIONS, f"unexpected diagram for Q{number}"
+            assert number in expected_questions, f"{label}: unexpected diagram for Q{number}"
             scaled = re.sub(
                 r"\[scale=([0-9.]+)",
                 lambda match: f"[scale={float(match.group(1)) * GRADE7_DIAGRAM_SCALE:.3f}",
@@ -142,33 +172,33 @@ def write_grade7_diagrams(tex_path, out_dir):
                 ["pdflatex", "-interaction=nonstopmode", "-halt-on-error", "diagram.tex"],
                 cwd=work, capture_output=True, text=True, timeout=120)
             if result.returncode != 0:
-                raise RuntimeError(f"Q{number}: pdflatex failed\n{result.stdout[-2000:]}")
+                raise RuntimeError(f"{label} Q{number}: pdflatex failed\n{result.stdout[-2000:]}")
             with pymupdf.open(work / "diagram.pdf") as doc:
                 svg = doc[0].get_svg_image(text_as_path=True)
             if not svg.lstrip().startswith("<?xml"):
                 svg = '<?xml version="1.0" encoding="UTF-8"?>\n' + svg.lstrip()
-            assert "<svg" in svg[:400].lower(), f"Q{number}: invalid SVG"
+            assert "<svg" in svg[:400].lower(), f"{label} Q{number}: invalid SVG"
             ET.fromstring(svg)
             target = out_dir / f"q{number:02}.svg"
             target.write_text(svg, encoding="utf-8")
-            found[number] = f"assets/class7-worksheet3/q{number:02}.svg"
-            print(f"Q{number}: figure written ({target.stat().st_size:,} bytes)")
-    assert set(found) == GRADE7_DIAGRAM_QUESTIONS, found.keys()
+            found[number] = f"{asset_prefix}/q{number:02}.svg"
+            print(f"{label} Q{number}: figure written ({target.stat().st_size:,} bytes)")
+    assert set(found) == expected_questions, found.keys()
     return found
 
 
-def assert_grade7_key_matches_pdf(pdf_path, bank):
+def assert_grade7_key_matches_pdf(pdf_path, bank, label):
     with pymupdf.open(pdf_path) as doc:
-        assert len(doc) == 7, f"Grade 7 PDF: expected 7 pages, got {len(doc)}"
+        assert len(doc) == 7, f"{label} PDF: expected 7 pages, got {len(doc)}"
         key_text = doc[3].get_text()
     section = key_text.split("Quick Evaluation Matrix", 1)[1].split("Easy:", 1)[0]
     pairs = re.findall(r"(?m)^\s*(\d{1,2})\s*\n\s*([A-D])\s*$", section)
-    assert len(pairs) == 50, f"Grade 7 answer key: found {len(pairs)} entries"
+    assert len(pairs) == 50, f"{label} answer key: found {len(pairs)} entries"
     keyed = {int(number): letter for number, letter in pairs}
     assert sorted(keyed) == list(range(1, 51))
     for item in bank:
-        assert keyed[item["id"]] == "ABCD"[item["ans"]], item["id"]
-    print("Grade 7 answer key: all 50 entries match the printed matrix.")
+        assert keyed[item["id"]] == "ABCD"[item["ans"]], f"{label} Q{item['id']}"
+    print(f"{label} answer key: all 50 entries match the printed matrix.")
 
 
 def extract_class2_bank(data, svg_module):
@@ -229,15 +259,17 @@ def assert_class2_key_matches_pdf(pdf_path, bank):
     print("Class 2 answer key: all 35 entries match the printed matrix.")
 
 
-def write_grade7_bank(bank):
+def write_grade7_bank(config, bank):
     header = (
-        "// D3V3NDRA Classes - Grade 7 Full Syllabus Comprehensive Olympiad (50 MCQs).\n"
-        "// Generated by scripts/build-full-syllabus-paper.py from Combined Worksheet 3.\n"
+        f"// D3V3NDRA Classes - Grade 7 Full Syllabus Comprehensive Olympiad (50 MCQs).\n"
+        f"// Generated by scripts/build-full-syllabus-paper.py from Combined {config['label']}.\n"
         "// Questions and options are in exact worksheet order; js/app.js does not shuffle them.\n"
         "// The answer key stays application-side; the in-exam paper viewer has questions only.\n"
     )
-    (ROOT / "test_questions.js").write_text(
-        header + "const QUESTIONS = " + json.dumps(bank, ensure_ascii=False, indent=2) + ";\n\nwindow.QUESTIONS = QUESTIONS;\n",
+    global_name = config["bank_global"]
+    (ROOT / config["bank_file"]).write_text(
+        header + f"const {global_name} = " + json.dumps(bank, ensure_ascii=False, indent=2)
+        + f";\n\nwindow.{global_name} = {global_name};\n",
         encoding="utf-8")
 
 
@@ -277,6 +309,21 @@ def questions_only(source_pdf, out_pdf, page_count, markers, banned, label):
         print(f"{label}: {page_count} pages, questions verified, no answer-key material.")
 
 
+def publish_grade7_paper(config, source, bank):
+    shutil.copyfile(source / config["source"], config["full"])
+    with pymupdf.open(config["full"]) as doc:
+        assert len(doc) == 7, f"{config['label']} full worksheet: expected 7 pages"
+        full_text = "\n".join(page.get_text() for page in doc)
+        for num in range(1, 51):
+            assert re.search(rf"Q{num}\.", full_text), f"{config['label']} full worksheet missing Q{num}"
+    print(f"{config['label']} full worksheet: {config['full'].stat().st_size:,} bytes (result download only).")
+
+    grade7_numbers = [f"Q{n}." for n in range(1, 51)]
+    questions_only(source / config["source"], config["questions"], GRADE7_QUESTION_PAGES, grade7_numbers,
+                   ["answer key", "quick evaluation", "solution", "correct option", "scorecard"],
+                   f"{config['label']} questions-only PDF")
+
+
 def write_paper_pages(papers):
     pages = {}
     total = 0
@@ -303,38 +350,30 @@ def main():
     source = parser.parse_args().source_dir.resolve()
     sys.path.insert(0, str(source / "data"))
     sys.path.insert(0, str(source / "scripts"))
-    from data_combined_worksheet_3 import QUESTIONS_DATA as GRADE7_DATA
     from data_class2_olympiad_35 import CLASS2_OLYMPIAD_DATA
     import class2_svg_assets
 
-    grade7_bank = extract_grade7_bank(GRADE7_DATA)
-    diagrams = write_grade7_diagrams(source / GRADE7_TEX, GRADE7_ASSETS)
-    for question in grade7_bank:
-        if question["id"] in diagrams:
-            question["diagram"] = diagrams[question["id"]]
-    assert sum(1 for q in grade7_bank if q.get("diagram")) == len(GRADE7_DIAGRAM_QUESTIONS)
-    assert_grade7_key_matches_pdf(source / GRADE7_SOURCE, grade7_bank)
-    write_grade7_bank(grade7_bank)
-    print(f"test_questions.js: {len(grade7_bank)} questions, {len(diagrams)} figures, key verified.")
-
-    GRADE7_FULL.write_bytes((source / GRADE7_SOURCE).read_bytes())
-    with pymupdf.open(GRADE7_FULL) as doc:
-        full_text = "\n".join(page.get_text() for page in doc)
-        for num in range(1, 51):
-            assert re.search(rf"Q{num}\.", full_text), f"full worksheet missing Q{num}"
-    print(f"Grade 7 full worksheet: {GRADE7_FULL.stat().st_size:,} bytes (result download only).")
-
-    grade7_numbers = [f"Q{n}." for n in range(1, 51)]
-    questions_only(source / GRADE7_SOURCE, GRADE7_QUESTIONS, GRADE7_QUESTION_PAGES, grade7_numbers,
-                   ["answer key", "quick evaluation", "solution", "correct option", "scorecard"],
-                   "Grade 7 questions-only PDF")
+    for config in GRADE7_PAPERS:
+        data = importlib.import_module(config["data_module"]).QUESTIONS_DATA
+        bank = extract_grade7_bank(data)
+        diagrams = write_grade7_diagrams(
+            source / config["tex"], config["assets"], config["diagram_questions"],
+            config["asset_prefix"], config["label"])
+        for question in bank:
+            if question["id"] in diagrams:
+                question["diagram"] = diagrams[question["id"]]
+        assert sum(1 for q in bank if q.get("diagram")) == len(config["diagram_questions"])
+        assert_grade7_key_matches_pdf(source / config["source"], bank, config["label"])
+        write_grade7_bank(config, bank)
+        print(f"{config['bank_file']}: {len(bank)} questions, {len(diagrams)} figures, key verified.")
+        publish_grade7_paper(config, source, bank)
 
     grade2_bank, diagrams = extract_class2_bank(CLASS2_OLYMPIAD_DATA, class2_svg_assets)
     assert_class2_key_matches_pdf(source / GRADE2_SOURCE, grade2_bank)
     write_class2_bank(grade2_bank, diagrams)
     print(f"class2_questions.js: {len(grade2_bank)} questions, 70 marks, 15 SVG diagrams.")
 
-    GRADE2_FULL.write_bytes((source / GRADE2_SOURCE).read_bytes())
+    shutil.copyfile(source / GRADE2_SOURCE, GRADE2_FULL)
     with pymupdf.open(GRADE2_FULL) as doc:
         assert len(doc) == 9
     print(f"Class 2 full worksheet: {GRADE2_FULL.stat().st_size:,} bytes (result download only).")
@@ -345,7 +384,7 @@ def main():
                    "Class 2 questions-only PDF")
 
     write_paper_pages([
-        ("class7-combined-worksheet-3", GRADE7_QUESTIONS),
+        *((config["id"], config["questions"]) for config in GRADE7_PAPERS),
         ("class2-olympiad-35", GRADE2_QUESTIONS),
     ])
     print("Done.")

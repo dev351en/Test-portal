@@ -3,22 +3,32 @@
 **Live:** https://mest-porutal.vercel.app/  
 **Teacher preview:** https://mest-porutal.vercel.app/?preview=teacher-imo-2026
 
-The neutral login page routes each student ID to its assigned paper. Questions,
-options, diagrams and keys follow the source worksheet order exactly.
+The neutral login page routes the Class 7 login to the scheduled paper.
+Worksheet 3 runs first; after that session closes, the portal switches to
+Worksheet 4 at 4 PM. Questions, options, diagrams and keys follow each source
+worksheet order exactly.
 
 | Login ID | Paper | Questions | Marks | Duration |
 |---|---|---:|---:|---|
-| `DSMG7@012` | Class 7 / Grade 7 — Full Syllabus Comprehensive Olympiad | 50 | 100 | 60 minutes |
+| `DSMG7@012` | Class 7 / Grade 7 — Worksheet 3 (11 AM–3 PM), then Worksheet 4 (4–9 PM) | 50 each | 100 each | 60 minutes each |
 | `DSMG2@001` | Class 2 / Grade 2 — Joyful Mathematics Olympiad Benchmark | 35 | 70 | 45 minutes |
 
-Both profiles use password `12345678`. For the **25 November 2026 reopening only
-the Class 7 login is enabled**; the Class 2 profile is retained but closed. Each
-student also enters their full name/roll number and repeats it as their signature
-before starting.
+Both Class 7 sessions use password `12345678` and the existing title,
+credentials, 50 MCQs, 100 marks and 60-minute duration. On **25 November 2026**,
+Worksheet 3 is available **11:00 AM–3:00 PM IST**, followed by Worksheet 4
+**4:00 PM–9:00 PM IST**. The same Class 7 login automatically selects the paper
+for the current session. The portal displays a between-session gate from 3–4 PM
+and auto-submits any Worksheet 3 test still running at 3 PM. The Class 2 profile
+is retained but closed. Each student enters their full name/roll number and
+repeats it as their signature before starting.
 
 ## Paper-specific behaviour
 
 - Profiles in `js/papers.js` control login, titles, grade, bank, duration, marks and PDF.
+- The two Class 7 sessions use separate question banks, diagrams, PDFs and
+  attempt registries. `?preview=teacher-imo-2026&paper=class7-combined-worksheet-4`
+  previews Worksheet 4; without `paper`, preview mode selects the active session
+  or defaults to Worksheet 3.
 - Both papers award 2 marks per correct answer (Grade 7: 100 marks; Grade 2: 70 marks).
 - Incorrect and unattempted answers earn zero; no negative marking.
 - Exact worksheet order for questions, options, diagrams and picture choices.
@@ -36,17 +46,22 @@ before starting.
 
 ## Attempts and test window
 
-The scheduled window is **25 November 2026, 11 AM–3 PM IST**, enforced in
-`middleware.js` and `js/app.js`. The teacher preview URL bypasses the time gate;
-attempt checks and submission behaviour still apply. Use a distinct test name
-when checking a real preview attempt.
+The session windows are **25 November 2026, 11 AM–3 PM IST** (Worksheet 3) and
+**4–9 PM IST** (Worksheet 4). `middleware.js` admits the overall 11 AM–9 PM
+portal period; `js/app.js` enforces each paper's session and automatically
+switches the login to the next paper. The teacher preview URL bypasses the time
+gate; attempt checks and submission behaviour still apply. Use a distinct test
+name when checking a real preview attempt.
 
 Each name can attempt each paper once. Local registries are
 `d3v3ndra.attempts.<paper-id>`. The Apps Script uses
-`imo_attempt_names_<paper-id>`. The Worksheet 3 Grade 7 paper uses the fresh
-`class7-combined-worksheet-3` ID, so attempts from the 19 November paper
-(`class7-full-syllabus`) and the earlier Logical Reasoning paper (`logical-reasoning`)
-remain in their old registries and do not block today's re-sit. The Class 2 paper
+`imo_attempt_names_<paper-id>`. Worksheet 3 and Worksheet 4 each use a separate
+fresh Class 7 registry (`class7-combined-worksheet-3` and
+`class7-combined-worksheet-4`), so a student's first-session attempt does not
+block their second-session test. Worksheet 3 keeps attempts from the 19 November
+paper (`class7-full-syllabus`) and the earlier Logical Reasoning paper
+(`logical-reasoning`) in their old registries, so they do not block today's
+re-sit. The Class 2 paper
 keeps the fresh `class2-olympiad-35` ID, so the superseded
 `class2-test-paper-1` registry cannot block it. The legacy `chapter` payload field
 is retained for endpoint compatibility. If the remote check is unavailable, the
@@ -59,13 +74,16 @@ existing local-attempt fallback applies.
 | `index.html`, `css/styles.css` | Responsive login, instructions, exam and results |
 | `js/papers.js` | Credential-to-paper profiles |
 | `js/app.js` | Routing, state, scoring, timer, paper viewer, review and submission |
-| `test_questions.js` | Ordered Grade 7 Full Syllabus bank (Worksheet 3, key application-side) |
+| `test_questions.js` | Ordered Worksheet 3 Grade 7 bank (key application-side) |
+| `worksheet4_questions.js` | Ordered Worksheet 4 Grade 7 bank (key application-side) |
 | `class2_questions.js` | Approved ordered Grade 2 bank |
 | `js/paper_pages.js` | In-exam page images rendered from the questions-only PDFs |
-| `assets/class7-worksheet3/` | 9 standalone SVG Grade 7 question diagrams |
+| `assets/class7-worksheet3/` | 9 standalone SVG Worksheet 3 diagrams |
+| `assets/class7-worksheet4/` | 10 standalone SVG Worksheet 4 diagrams |
 | `assets/class2-olympiad/` | 15 standalone SVG question diagrams |
 | `assets/worksheet-class2-olympiad.pdf` | Approved Class 2 Olympiad worksheet |
 | `assets/worksheet-full-syllabus-comprehensive.pdf` | Grade 7 worksheet (result download) |
+| `assets/worksheet-combined-worksheet-4.pdf` | Worksheet 4 (result download) |
 | `assets/*-questions-only.pdf` | Questions-only viewer PDFs for both papers |
 | `scripts/google-apps-script-submission-email.gs` | Both-paper teacher email relay |
 | `scripts/export-question-sheet.js` | Both-paper spreadsheet exports |
